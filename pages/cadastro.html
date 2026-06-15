@@ -84,6 +84,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
+        const SUPABASE_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MDUzODcsImV4cCI6MjA5NzA4MTM4N30.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
+
         const CURSOS_DISPONIVEIS = [
             { id: 'jump-fitness', titulo: 'Jump Fitness', preco: 49.90 },
             { id: 'danca-fitness', titulo: 'Dança Fitness', preco: 49.90 },
@@ -165,134 +168,48 @@
                 const plano = document.getElementById('plano').value;
                 const cursoId = document.getElementById('curso_id').value;
 
-                // 1. Criar usuário no Auth SEM confirmação de e-mail (evita rate limit)
-                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: senha,
-                    options: { 
-                        data: { nome: nome },
-                        emailRedirectTo: null  // Desabilita e-mail de confirmação
-                    }
+                // USAR EDGE FUNCTION (ignora rate limits e signups disabled)
+                console.log('[RITMUS] Chamando Edge Function de cadastro...');
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-cadastro`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        nome: nome,
+                        email: email,
+                        telefone: telefone,
+                        senha: senha,
+                        plano: plano,
+                        curso_id: cursoId
+                    })
                 });
 
-                if (authError) {
-                    // Se erro de rate limit, tentar fazer login direto (usuário já existe)
-                    if (authError.message && (authError.message.includes('rate limit') || authError.message.includes('security'))) {
-                        console.log('[RITMUS] Rate limit no signUp, tentando login...');
-                        const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
-                            email: email,
-                            password: senha
-                        });
+                const result = await response.json();
+                console.log('[RITMUS] Resposta Edge Function:', result);
 
-                        if (loginError) {
-                            hideLoading();
-                            btn.disabled = false;
-                            btn.textContent = 'Criar Conta e Pagar';
-                            showToast('Aguarde', 'Muitas tentativas. Aguarde 1 minuto ou use outro e-mail.', 'warning');
-                            return;
-                        }
-
-                        // Usuário já existe e logou, continuar fluxo
-                        authData = { user: loginData.user };
-                    } else {
-                        throw authError;
-                    }
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Erro ao criar conta');
                 }
 
-                console.log('[RITMUS] Usuário criado/logado:', authData.user.id);
-
-                // 2. Fazer login automaticamente para criar sessão (RLS)
+                // Login automático após cadastro
                 const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: senha
                 });
 
                 if (loginError) {
-                    console.error('[RITMUS] Erro login automático:', loginError);
-                } else {
-                    console.log('[RITMUS] Sessão ativa');
+                    console.error('[RITMUS] Erro login:', loginError);
+                    // Mesmo sem login, conta foi criada
                 }
 
-                // 3. Verificar se usuário já existe na tabela
-                let userData = null;
-                try {
-                    const { data: existingUser } = await supabaseClient
-                        .from('usuarios')
-                        .select('*')
-                        .eq('auth_id', authData.user.id)
-                        .maybeSingle();
+                hideLoading();
 
-                    if (existingUser) {
-                        userData = existingUser;
-                        console.log('[RITMUS] Usuário já existe na tabela:', userData);
-                    }
-                } catch (e) {}
+                // Redirecionar para pagamento
+                let valor = plano === 'individual' ? 49.90 : (plano === 'mensal' ? 79.90 : 599.90);
+                const descricao = plano === 'individual' ? 'Curso Individual' : (plano === 'mensal' ? 'Plano Mensal' : 'Plano Anual');
 
-                // 4. Se não existe, inserir na tabela usuarios
-                if (!userData) {
-                    const { data: newUser, error: userError } = await supabaseClient
-                        .from('usuarios')
-                        .insert({
-                            auth_id: authData.user.id,
-                            nome: nome,
-                            email: email,
-                            telefone: telefone,
-                            plano: plano,
-                            status: 'pendente'
-                        })
-                        .select()
-                        .single();
-
-                    if (userError) {
-                        console.error('[RITMUS] Erro ao inserir usuário:', userError);
-                        throw userError;
-                    }
-                    userData = newUser;
-                    console.log('[RITMUS] Usuário inserido:', userData);
-                }
-
-                // 5. Criar assinatura/compra
-                let valor = 0;
-                let descricao = '';
-
-                if (plano === 'individual') {
-                    const cursoHardcoded = CURSOS_DISPONIVEIS.find(c => c.id === cursoId);
-                    const precoCurso = cursoHardcoded ? cursoHardcoded.preco : 49.90;
-                    try {
-                        const { data: curso } = await supabaseClient
-                            .from('cursos')
-                            .select('preco, titulo')
-                            .eq('id', cursoId)
-                            .single();
-                        valor = curso?.preco || precoCurso;
-                        descricao = `Curso: ${curso?.titulo || cursoHardcoded?.titulo || 'Individual'}`;
-                    } catch (e) {
-                        valor = precoCurso;
-                        descricao = `Curso: ${cursoHardcoded?.titulo || 'Individual'}`;
-                    }
-
-                    await supabaseClient.from('compras_cursos').insert({
-                        usuario_id: userData.id,
-                        curso_id: cursoId,
-                        valor: valor,
-                        status: 'pendente'
-                    });
-                } else {
-                    valor = plano === 'mensal' ? 79.90 : 599.90;
-                    descricao = plano === 'mensal' ? 'Plano Mensal' : 'Plano Anual';
-                    const dataExp = new Date();
-                    dataExp.setMonth(dataExp.getMonth() + (plano === 'anual' ? 12 : 1));
-
-                    await supabaseClient.from('assinaturas').insert({
-                        usuario_id: userData.id,
-                        plano: plano,
-                        valor: valor,
-                        status: 'pendente',
-                        data_expiracao: dataExp.toISOString()
-                    });
-                }
-
-                // 6. Criar pagamento no Asaas
                 try {
                     const { data: paymentData, error: paymentError } = await supabaseClient.functions.invoke('asaas-criar-cobranca', {
                         body: {
@@ -301,24 +218,15 @@
                             telefone: telefone,
                             valor: valor,
                             descricao: descricao,
-                            usuario_id: userData.id,
+                            usuario_id: result.user_id,
                             plano: plano,
                             curso_id: cursoId || null
                         }
                     });
 
-                    hideLoading();
-
                     if (paymentError) throw paymentError;
 
                     if (paymentData && paymentData.success && paymentData.payment_url) {
-                        sessionStorage.setItem('ritmus_pagamento', JSON.stringify({
-                            usuario_id: userData.id,
-                            plano: plano,
-                            curso_id: cursoId,
-                            payment_id: paymentData.payment_id
-                        }));
-
                         showToast('Sucesso!', 'Redirecionando para o pagamento...', 'success');
                         setTimeout(() => {
                             window.location.href = paymentData.payment_url;
@@ -327,7 +235,6 @@
                         throw new Error('Erro ao gerar link de pagamento');
                     }
                 } catch (paymentErr) {
-                    hideLoading();
                     console.error('[RITMUS] Erro pagamento:', paymentErr);
                     showToast('Conta criada!', 'Sua conta foi criada! Faça login para continuar.', 'warning');
                     setTimeout(() => {
@@ -340,15 +247,7 @@
                 btn.disabled = false;
                 btn.textContent = 'Criar Conta e Pagar';
                 console.error('[RITMUS] Erro cadastro:', error);
-
-                let msg = error.message || 'Erro ao criar conta. Tente novamente.';
-                if (msg.includes('rate limit')) {
-                    msg = 'Limite de e-mails atingido. Aguarde alguns minutos ou use outro e-mail.';
-                }
-                if (msg.includes('security')) {
-                    msg = 'Muitas tentativas. Aguarde 1 minuto e tente novamente.';
-                }
-                showToast('Erro', msg, 'error');
+                showToast('Erro', error.message || 'Erro ao criar conta. Tente novamente.', 'error');
             }
         }
     </script>
