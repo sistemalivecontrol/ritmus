@@ -84,9 +84,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
-        const SUPABASE_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MDUzODcsImV4cCI6MjA5NzA4MTM4N30.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
-
+        // CURSOS HARDCODED (funciona sem Supabase)
         const CURSOS_DISPONIVEIS = [
             { id: 'jump-fitness', titulo: 'Jump Fitness', preco: 49.90 },
             { id: 'danca-fitness', titulo: 'Dança Fitness', preco: 49.90 },
@@ -201,7 +199,6 @@
 
                 if (loginError) {
                     console.error('[RITMUS] Erro login:', loginError);
-                    // Mesmo sem login, conta foi criada
                 }
 
                 hideLoading();
