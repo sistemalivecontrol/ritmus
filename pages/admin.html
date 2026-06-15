@@ -381,9 +381,15 @@
                     <label>Thumbnail (URL da imagem)</label>
                     <input type="url" id="curso-thumbnail" placeholder="https://...">
                 </div>
-                <div class="form-group" style="display:flex;align-items:center;gap:8px">
-                    <input type="checkbox" id="curso-ativo" checked style="width:auto">
-                    <label for="curso-ativo" style="margin-bottom:0">Curso ativo</label>
+                <div style="display:flex;gap:24px;margin-bottom:16px">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <input type="checkbox" id="curso-ativo" checked style="width:auto">
+                        <label for="curso-ativo" style="margin-bottom:0">Curso ativo</label>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <input type="checkbox" id="curso-gratuito" style="width:auto">
+                        <label for="curso-gratuito" style="margin-bottom:0;color:var(--success);font-weight:500">🎁 Curso Gratuito (Free)</label>
+                    </div>
                 </div>
                 <div style="display:flex;gap:12px;margin-top:24px">
                     <button type="submit" class="btn-submit">Salvar Curso</button>
@@ -480,9 +486,15 @@
                     <label>Thumbnail (URL)</label>
                     <input type="url" id="edit-curso-thumbnail">
                 </div>
-                <div class="form-group" style="display:flex;align-items:center;gap:8px">
-                    <input type="checkbox" id="edit-curso-ativo" style="width:auto">
-                    <label for="edit-curso-ativo" style="margin-bottom:0">Curso ativo</label>
+                <div style="display:flex;gap:24px;margin-bottom:16px">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <input type="checkbox" id="edit-curso-ativo" style="width:auto">
+                        <label for="edit-curso-ativo" style="margin-bottom:0">Curso ativo</label>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <input type="checkbox" id="edit-curso-gratuito" style="width:auto">
+                        <label for="edit-curso-gratuito" style="margin-bottom:0;color:var(--success);font-weight:500">🎁 Curso Gratuito</label>
+                    </div>
                 </div>
                 <div style="display:flex;gap:12px;margin-top:24px">
                     <button type="submit" class="btn-submit">Atualizar Curso</button>
@@ -669,7 +681,8 @@
                             duracao_total: document.getElementById('curso-duracao').value,
                             ordem: parseInt(document.getElementById('curso-ordem').value) || 0,
                             thumbnail: document.getElementById('curso-thumbnail').value,
-                            ativo: document.getElementById('curso-ativo').checked
+                            ativo: document.getElementById('curso-ativo').checked,
+                            gratuito: document.getElementById('curso-gratuito').checked
                         }
                     })
                 });
@@ -702,6 +715,7 @@
             document.getElementById('edit-curso-ordem').value = curso.ordem || 0;
             document.getElementById('edit-curso-thumbnail').value = curso.thumbnail || '';
             document.getElementById('edit-curso-ativo').checked = curso.ativo;
+            document.getElementById('edit-curso-gratuito').checked = curso.gratuito || false;
 
             openModal('editar-curso');
         }

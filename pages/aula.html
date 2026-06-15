@@ -68,9 +68,10 @@
                             <!-- YouTube iframe será inserido aqui -->
                         </div>
                         <div class="aula-info">
-                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
                                 <h2 id="aula-titulo">Carregando aula...</h2>
                                 <span id="aula-badge-free" style="display:none;background:linear-gradient(135deg,var(--success),#059669);color:white;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:600">🎁 GRATUITO</span>
+                                <span id="aula-badge-curso-free" style="display:none;background:linear-gradient(135deg,#F7C948,#D97706);color:white;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:600">🎁 CURSO GRATUITO</span>
                             </div>
                             <p id="aula-desc" style="color:var(--text-muted);font-size:14px;margin-top:8px"></p>
                             <div style="display:flex;gap:12px;margin-top:16px">
@@ -226,8 +227,10 @@
             currentAulaIndex = index;
             const aula = currentAulas[index];
 
-            // Verificar se aula é gratuita
-            const isFree = aula.gratuito;
+            // Verificar se aula é gratuita ou curso é gratuito
+            const isAulaFree = aula.gratuito;
+            const isCursoFree = currentCurso.gratuito;
+            const isFree = isAulaFree || isCursoFree;
 
             // Verificar acesso (se não for gratuita)
             temAcesso = isFree;
@@ -235,12 +238,20 @@
                 temAcesso = await checkCursoAccess(currentCurso.id);
             }
 
-            // Mostrar/ocultar badge de gratuito
+            // Mostrar/ocultar badges de gratuito
             const badgeFree = document.getElementById('aula-badge-free');
-            if (isFree) {
+            const badgeCursoFree = document.getElementById('aula-badge-curso-free');
+
+            if (isAulaFree) {
                 badgeFree.style.display = 'inline-flex';
             } else {
                 badgeFree.style.display = 'none';
+            }
+
+            if (isCursoFree) {
+                badgeCursoFree.style.display = 'inline-flex';
+            } else {
+                badgeCursoFree.style.display = 'none';
             }
 
             // Se não tem acesso e não é gratuita, mostrar bloqueio
