@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Ritmus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <style>
+        .admin-tabs { display:flex; gap:8px; margin-bottom:24px; border-bottom:1px solid var(--border); padding-bottom:16px; }
+        .admin-tab { padding:10px 20px; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-family:var(--font); font-size:14px; border-radius:var(--radius-sm); transition:var(--transition); }
+        .admin-tab.active { background:rgba(255,107,53,0.1); color:var(--primary); font-weight:600; }
+        .admin-tab:hover { color:var(--text); }
+        .admin-section { display:none; }
+        .admin-section.active { display:block; }
+        .admin-table { width:100%; border-collapse:collapse; }
+        .admin-table th { text-align:left; padding:12px 16px; font-size:13px; color:var(--text-muted); font-weight:500; border-bottom:1px solid var(--border); }
+        .admin-table td { padding:12px 16px; font-size:14px; border-bottom:1px solid var(--border); }
+        .admin-table tr:hover td { background:rgba(255,255,255,0.02); }
+        .btn-small { padding:6px 12px; font-size:12px; border-radius:var(--radius-sm); cursor:pointer; border:none; font-family:var(--font); }
+        .btn-edit { background:var(--info); color:white; }
+        .btn-delete { background:var(--danger); color:white; }
+        .btn-add { background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; padding:12px 24px; border:none; border-radius:var(--radius-sm); cursor:pointer; font-family:var(--font); font-weight:600; margin-bottom:20px; }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+        .modal-overlay.active { display:flex; }
+        .modal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:32px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; }
+        .modal h2 { font-size:20px; font-weight:700; margin-bottom:24px; }
+        .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        @media(max-width:768px){ .form-row { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html">Meu Painel</a>
+                <a href="admin.html" class="active">Admin</a>
+                <a href="" onclick="logout();return false">Sair</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>⚙️ Painel Administrativo</h1>
+                <p>Gerencie cursos, aulas e alunos</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <aside class="sidebar">
+                    <div class="sidebar-user">
+                        <div class="sidebar-avatar" id="user-avatar">👤</div>
+                        <div>
+                            <div class="sidebar-name" id="sidebar-name">Carregando...</div>
+                            <div class="sidebar-email" id="sidebar-email">...</div>
+                        </div>
+                    </div>
+                    <ul class="sidebar-menu">
+                        <li><a href="dashboard.html"><span class="menu-icon">📊</span> Meu Painel</a></li>
+                        <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
+                        <li><a href="admin.html" class="active"><span class="menu-icon">⚙️</span> Admin</a></li>
+                        <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
+                    </ul>
+                </aside>
+
+                <main class="main-content">
+                    <div class="admin-tabs">
+                        <button class="admin-tab active" onclick="showTab('cursos')">📚 Cursos</button>
+                        <button class="admin-tab" onclick="showTab('aulas')">🎬 Aulas</button>
+                        <button class="admin-tab" onclick="showTab('alunos')">👥 Alunos</button>
+                        <button class="admin-tab" onclick="showTab('assinaturas')">💳 Assinaturas</button>
+                    </div>
+
+                    <!-- TAB: CURSOS -->
+                    <div id="tab-cursos" class="admin-section active">
+                        <button class="btn-add" onclick="openModal('curso')">+ Novo Curso</button>
+                        <div id="cursos-lista">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>Título</th><th>Preço</th><th>Aulas</th><th>Status</th><th>Ações</th></tr>
+                                </thead>
+                                <tbody id="cursos-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB: AULAS -->
+                    <div id="tab-aulas" class="admin-section">
+                        <div class="form-group" style="margin-bottom:16px">
+                            <label>Curso</label>
+                            <select id="aula-curso-filter" onchange="loadAulasAdmin()">
+                                <option value="">Selecione um curso</option>
+                            </select>
+                        </div>
+                        <button class="btn-add" onclick="openModal('aula')">+ Nova Aula</button>
+                        <div id="aulas-lista">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>Ordem</th><th>Título</th><th>Duração</th><th>Vídeo</th><th>Ações</th></tr>
+                                </thead>
+                                <tbody id="aulas-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB: ALUNOS -->
+                    <div id="tab-alunos" class="admin-section">
+                        <div id="alunos-lista">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>Nome</th><th>Email</th><th>Plano</th><th>Status</th><th>Data</th></tr>
+                                </thead>
+                                <tbody id="alunos-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB: ASSINATURAS -->
+                    <div id="tab-assinaturas" class="admin-section">
+                        <div id="assinaturas-lista">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Status</th><th>Expiração</th></tr>
+                                </thead>
+                                <tbody id="assinaturas-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CURSO -->
+    <div class="modal-overlay" id="modal-curso">
+        <div class="modal">
+            <h2>📚 Cadastrar Curso</h2>
+            <form id="form-curso">
+                <div class="form-group">
+                    <label>Título *</label>
+                    <input type="text" id="curso-titulo" required placeholder="Ex: Jump Fitness">
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="curso-descricao" rows="3" placeholder="Descrição do curso..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Preço (R$) *</label>
+                        <input type="number" id="curso-preco" required step="0.01" value="49.90">
+                    </div>
+                    <div class="form-group">
+                        <label>Total de Aulas</label>
+                        <input type="number" id="curso-total-aulas" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duração Total</label>
+                        <input type="text" id="curso-duracao" placeholder="Ex: 8h">
+                    </div>
+                    <div class="form-group">
+                        <label>Ordem</label>
+                        <input type="number" id="curso-ordem" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail (URL da imagem)</label>
+                    <input type="url" id="curso-thumbnail" placeholder="https://...">
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:8px">
+                    <input type="checkbox" id="curso-ativo" checked style="width:auto">
+                    <label for="curso-ativo" style="margin-bottom:0">Curso ativo</label>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:24px">
+                    <button type="submit" class="btn-submit">Salvar Curso</button>
+                    <button type="button" class="btn-ghost" onclick="closeModal('curso')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL AULA -->
+    <div class="modal-overlay" id="modal-aula">
+        <div class="modal">
+            <h2>🎬 Cadastrar Aula</h2>
+            <form id="form-aula">
+                <div class="form-group">
+                    <label>Curso *</label>
+                    <select id="aula-curso" required>
+                        <option value="">Selecione o curso</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Título da Aula *</label>
+                    <input type="text" id="aula-titulo" required placeholder="Ex: Aula 1 - Introdução">
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="aula-descricao" rows="2" placeholder="Descrição da aula..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>URL do Vídeo (YouTube) *</label>
+                        <input type="url" id="aula-video" required placeholder="https://youtube.com/watch?v=...">
+                    </div>
+                    <div class="form-group">
+                        <label>Duração</label>
+                        <input type="text" id="aula-duracao" placeholder="Ex: 30:00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ordem</label>
+                    <input type="number" id="aula-ordem" value="0">
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:8px">
+                    <input type="checkbox" id="aula-ativo" checked style="width:auto">
+                    <label for="aula-ativo" style="margin-bottom:0">Aula ativa</label>
+                </div>
+                <div style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px">
+                    <p style="font-size:13px;color:var(--text-muted);margin:0">
+                        💡 <strong>Dica:</strong> No YouTube, configure o vídeo como <strong>"Não listado"</strong> (Unlisted) e permita incorporação. 
+                        NÃO use "Privado" pois não permite embed.
+                    </p>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:24px">
+                    <button type="submit" class="btn-submit">Salvar Aula</button>
+                    <button type="button" class="btn-ghost" onclick="closeModal('aula')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        let currentUser = null;
+        let cursosCache = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                initAdmin();
+            });
+        });
+
+        async function initAdmin() {
+            const auth = await requireAuth();
+            if (!auth) return;
+
+            currentUser = auth.user;
+            document.getElementById('sidebar-name').textContent = auth.user.nome || 'Admin';
+            document.getElementById('sidebar-email').textContent = auth.user.email;
+            document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+
+            // Verificar se é admin (simplificado: verificar se email está em uma lista)
+            // Em produção, use uma tabela de admins
+
+            await loadCursosAdmin();
+            await loadAlunosAdmin();
+            await loadAssinaturasAdmin();
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            if (tab === 'aulas') loadAulasAdmin();
+        }
+
+        function openModal(tipo) {
+            document.getElementById('modal-' + tipo).classList.add('active');
+            if (tipo === 'aula') preencherSelectCursos();
+        }
+
+        function closeModal(tipo) {
+            document.getElementById('modal-' + tipo).classList.remove('active');
+        }
+
+        // CARREGAR CURSOS
+        async function loadCursosAdmin() {
+            try {
+                const { data: cursos, error } = await supabaseClient
+                    .from('cursos')
+                    .select('*')
+                    .order('ordem', { ascending: true });
+
+                if (error) throw error;
+
+                cursosCache = cursos || [];
+
+                const tbody = document.getElementById('cursos-tbody');
+                tbody.innerHTML = cursosCache.map(c => `
+                    <tr>
+                        <td><strong>${c.titulo}</strong></td>
+                        <td>R$ ${c.preco?.toFixed(2).replace('.', ',') || '0,00'}</td>
+                        <td>${c.total_aulas || 0}</td>
+                        <td><span style="color:${c.ativo ? 'var(--success)' : 'var(--danger)'}">${c.ativo ? '✅ Ativo' : '❌ Inativo'}</span></td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editarCurso('${c.id}')">Editar</button>
+                            <button class="btn-small btn-delete" onclick="excluirCurso('${c.id}')">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Preencher selects
+                preencherSelectCursos();
+
+            } catch (e) {
+                console.error('Erro:', e);
+                showToast('Erro', 'Erro ao carregar cursos', 'error');
+            }
+        }
+
+        function preencherSelectCursos() {
+            const selects = [document.getElementById('aula-curso'), document.getElementById('aula-curso-filter')];
+            selects.forEach(select => {
+                if (!select) return;
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">Selecione um curso</option>';
+                cursosCache.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.titulo}</option>`;
+                });
+                select.value = currentValue;
+            });
+        }
+
+        // SALVAR CURSO
+        document.getElementById('form-curso').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showLoading('Salvando curso...');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('cursos')
+                    .insert({
+                        titulo: document.getElementById('curso-titulo').value,
+                        descricao: document.getElementById('curso-descricao').value,
+                        preco: parseFloat(document.getElementById('curso-preco').value),
+                        total_aulas: parseInt(document.getElementById('curso-total-aulas').value) || 0,
+                        duracao_total: document.getElementById('curso-duracao').value,
+                        ordem: parseInt(document.getElementById('curso-ordem').value) || 0,
+                        thumbnail: document.getElementById('curso-thumbnail').value,
+                        ativo: document.getElementById('curso-ativo').checked
+                    })
+                    .select();
+
+                if (error) throw error;
+
+                hideLoading();
+                closeModal('curso');
+                showToast('Sucesso!', 'Curso cadastrado com sucesso!', 'success');
+                this.reset();
+                await loadCursosAdmin();
+
+            } catch (e) {
+                hideLoading();
+                showToast('Erro', e.message || 'Erro ao salvar curso', 'error');
+            }
+        });
+
+        // CARREGAR AULAS
+        async function loadAulasAdmin() {
+            const cursoId = document.getElementById('aula-curso-filter').value;
+            if (!cursoId) {
+                document.getElementById('aulas-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Selecione um curso</td></tr>';
+                return;
+            }
+
+            try {
+                const { data: aulas, error } = await supabaseClient
+                    .from('aulas')
+                    .select('*')
+                    .eq('curso_id', cursoId)
+                    .order('ordem', { ascending: true });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('aulas-tbody');
+                tbody.innerHTML = (aulas || []).map(a => `
+                    <tr>
+                        <td>${a.ordem || 0}</td>
+                        <td><strong>${a.titulo}</strong></td>
+                        <td>${a.duracao || '-'}</td>
+                        <td><a href="${a.video_url}" target="_blank" style="color:var(--primary);font-size:12px">Ver vídeo ↗</a></td>
+                        <td>
+                            <button class="btn-small btn-delete" onclick="excluirAula('${a.id}')">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (e) {
+                console.error('Erro:', e);
+            }
+        }
+
+        // SALVAR AULA
+        document.getElementById('form-aula').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showLoading('Salvando aula...');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('aulas')
+                    .insert({
+                        curso_id: document.getElementById('aula-curso').value,
+                        titulo: document.getElementById('aula-titulo').value,
+                        descricao: document.getElementById('aula-descricao').value,
+                        video_url: document.getElementById('aula-video').value,
+                        duracao: document.getElementById('aula-duracao').value,
+                        ordem: parseInt(document.getElementById('aula-ordem').value) || 0,
+                        ativo: document.getElementById('aula-ativo').checked
+                    })
+                    .select();
+
+                if (error) throw error;
+
+                // Atualizar contagem de aulas do curso
+                const cursoId = document.getElementById('aula-curso').value;
+                const { count } = await supabaseClient
+                    .from('aulas')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('curso_id', cursoId);
+
+                await supabaseClient
+                    .from('cursos')
+                    .update({ total_aulas: count || 0 })
+                    .eq('id', cursoId);
+
+                hideLoading();
+                closeModal('aula');
+                showToast('Sucesso!', 'Aula cadastrada com sucesso!', 'success');
+                this.reset();
+                await loadAulasAdmin();
+                await loadCursosAdmin();
+
+            } catch (e) {
+                hideLoading();
+                showToast('Erro', e.message || 'Erro ao salvar aula', 'error');
+            }
+        });
+
+        // CARREGAR ALUNOS
+        async function loadAlunosAdmin() {
+            try {
+                const { data: alunos, error } = await supabaseClient
+                    .from('usuarios')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('alunos-tbody');
+                tbody.innerHTML = (alunos || []).map(a => `
+                    <tr>
+                        <td>${a.nome}</td>
+                        <td>${a.email}</td>
+                        <td><span style="color:var(--primary);font-weight:500">${a.plano}</span></td>
+                        <td><span style="color:${a.status === 'ativo' ? 'var(--success)' : 'var(--warning)'}">${a.status}</span></td>
+                        <td>${new Date(a.created_at).toLocaleDateString('pt-BR')}</td>
+                    </tr>
+                `).join('');
+
+            } catch (e) {
+                console.error('Erro alunos:', e);
+            }
+        }
+
+        // CARREGAR ASSINATURAS
+        async function loadAssinaturasAdmin() {
+            try {
+                const { data: assinaturas, error } = await supabaseClient
+                    .from('assinaturas')
+                    .select('*, usuarios(nome, email)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('assinaturas-tbody');
+                tbody.innerHTML = (assinaturas || []).map(a => `
+                    <tr>
+                        <td>${a.usuarios?.nome || '-'}</td>
+                        <td><span style="color:var(--primary);font-weight:500">${a.plano}</span></td>
+                        <td>R$ ${a.valor?.toFixed(2).replace('.', ',') || '0,00'}</td>
+                        <td><span style="color:${a.status === 'ativa' ? 'var(--success)' : 'var(--warning)'}">${a.status}</span></td>
+                        <td>${a.data_expiracao ? new Date(a.data_expiracao).toLocaleDateString('pt-BR') : '-'}</td>
+                    </tr>
+                `).join('');
+
+            } catch (e) {
+                console.error('Erro assinaturas:', e);
+            }
+        }
+
+        async function excluirCurso(id) {
+            if (!confirm('Tem certeza que deseja excluir este curso? Todas as aulas serão excluídas também.')) return;
+
+            try {
+                showLoading('Excluindo...');
+                await supabaseClient.from('cursos').delete().eq('id', id);
+                hideLoading();
+                showToast('Sucesso!', 'Curso excluído', 'success');
+                await loadCursosAdmin();
+            } catch (e) {
+                hideLoading();
+                showToast('Erro', 'Erro ao excluir', 'error');
+            }
+        }
+
+        async function excluirAula(id) {
+            if (!confirm('Tem certeza que deseja excluir esta aula?')) return;
+
+            try {
+                showLoading('Excluindo...');
+                await supabaseClient.from('aulas').delete().eq('id', id);
+                hideLoading();
+                showToast('Sucesso!', 'Aula excluída', 'success');
+                await loadAulasAdmin();
+            } catch (e) {
+                hideLoading();
+                showToast('Erro', 'Erro ao excluir', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
