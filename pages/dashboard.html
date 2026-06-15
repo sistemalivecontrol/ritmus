@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Painel - Ritmus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="active">Meu Painel</a>
+                <a href="cursos.html">Cursos</a>
+                <a href="" onclick="logout();return false">Sair</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>👋 Olá, <span id="user-name">Aluno</span>!</h1>
+                <p id="user-status">Carregando...</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <aside class="sidebar">
+                    <div class="sidebar-user">
+                        <div class="sidebar-avatar" id="user-avatar">👤</div>
+                        <div>
+                            <div class="sidebar-name" id="sidebar-name">Carregando...</div>
+                            <div class="sidebar-email" id="sidebar-email">...</div>
+                        </div>
+                    </div>
+                    <ul class="sidebar-menu">
+                        <li><a href="dashboard.html" class="active"><span class="menu-icon">📊</span> Meu Painel</a></li>
+                        <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
+                        <li><a href="assinatura.html"><span class="menu-icon">💳</span> Assinatura</a></li>
+                        <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
+                    </ul>
+                </aside>
+
+                <main class="main-content">
+                    <!-- Stats -->
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎬</div>
+                            <div class="stat-value" id="stat-cursos">0</div>
+                            <div class="stat-label">Cursos Ativos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">▶️</div>
+                            <div class="stat-value" id="stat-aulas">0</div>
+                            <div class="stat-label">Aulas Assistidas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-value" id="stat-horas">0h</div>
+                            <div class="stat-label">Horas de Treino</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-value" id="stat-streak">0</div>
+                            <div class="stat-label">Dias Seguidos</div>
+                        </div>
+                    </div>
+
+                    <!-- Aviso de Assinatura -->
+                    <div id="assinatura-alerta" style="display:none;margin-bottom:24px">
+                        <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.05));border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:16px">
+                            <span style="font-size:32px">⚠️</span>
+                            <div style="flex:1">
+                                <h3 style="font-size:16px;font-weight:600;margin-bottom:4px">Assinatura Expirada</h3>
+                                <p style="font-size:14px;color:var(--text-muted)">Sua assinatura expirou. Renove agora para continuar acessando as aulas.</p>
+                            </div>
+                            <a href="assinatura.html" class="btn-curso" style="flex-shrink:0">Renovar</a>
+                        </div>
+                    </div>
+
+                    <!-- Aviso Teste -->
+                    <div id="teste-alerta" style="display:none;margin-bottom:24px">
+                        <div style="background:linear-gradient(135deg,rgba(247,201,72,0.1),rgba(247,201,72,0.05));border:1px solid rgba(247,201,72,0.3);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:16px">
+                            <span style="font-size:32px">🎁</span>
+                            <div style="flex:1">
+                                <h3 style="font-size:16px;font-weight:600;margin-bottom:4px">Período de Teste</h3>
+                                <p style="font-size:14px;color:var(--text-muted)">Você está no período de teste. Aproveite todas as aulas! <span id="teste-dias">7</span> dias restantes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Continue Assistindo -->
+                    <div id="continue-section" style="margin-bottom:32px">
+                        <h2 style="font-size:20px;font-weight:700;margin-bottom:16px">▶️ Continue Assistindo</h2>
+                        <div id="continue-grid" class="meus-cursos-grid">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Meus Cursos -->
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                            <h2 style="font-size:20px;font-weight:700">📚 Meus Cursos</h2>
+                            <a href="cursos.html" style="color:var(--primary);font-size:14px;text-decoration:none;font-weight:500">Ver todos →</a>
+                        </div>
+                        <div id="meus-cursos-grid" class="meus-cursos-grid">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                initDashboard();
+            });
+        });
+
+        async function initDashboard() {
+            const auth = await requireAuth();
+            if (!auth) return;
+
+            currentUser = auth.user;
+
+            // Preencher dados do usuário
+            document.getElementById('user-name').textContent = auth.user.nome || 'Aluno';
+            document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
+            document.getElementById('sidebar-email').textContent = auth.user.email;
+            document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+
+            // Verificar status da assinatura
+            const assinatura = await checkAssinaturaStatus();
+
+            if (!assinatura.ativa && auth.user.plano !== 'teste') {
+                document.getElementById('user-status').innerHTML = '<span style="color:var(--danger)">⚠️ Assinatura expirada</span>';
+                document.getElementById('assinatura-alerta').style.display = 'block';
+            } else if (auth.user.plano === 'teste') {
+                document.getElementById('user-status').innerHTML = '<span style="color:var(--accent)">🎁 Período de teste</span>';
+                document.getElementById('teste-alerta').style.display = 'block';
+                // Calcular dias restantes
+                const diasRestantes = calcularDiasTeste(auth.user.created_at);
+                document.getElementById('teste-dias').textContent = diasRestantes;
+            } else {
+                const expiracao = new Date(assinatura.expiracao);
+                document.getElementById('user-status').innerHTML = 
+                    `<span style="color:var(--success)">✅ Assinatura ativa até ${expiracao.toLocaleDateString('pt-BR')}</span>`;
+            }
+
+            // Carregar estatísticas e cursos
+            await loadStats(auth.user.id);
+            await loadMeusCursos(auth.user.id);
+            await loadContinueWatching(auth.user.id);
+        }
+
+        function calcularDiasTeste(createdAt) {
+            const criacao = new Date(createdAt);
+            const expiracao = new Date(criacao);
+            expiracao.setDate(expiracao.getDate() + 7);
+            const agora = new Date();
+            const diff = Math.ceil((expiracao - agora) / (1000 * 60 * 60 * 24));
+            return Math.max(0, diff);
+        }
+
+        async function loadStats(userId) {
+            try {
+                // Cursos ativos
+                const { data: cursosCount } = await supabaseClient
+                    .from('compras_cursos')
+                    .select('id', { count: 'exact' })
+                    .eq('usuario_id', userId)
+                    .eq('status', 'pago');
+
+                const { data: assinatura } = await supabaseClient
+                    .from('assinaturas')
+                    .select('id')
+                    .eq('usuario_id', userId)
+                    .eq('status', 'ativa')
+                    .gte('data_expiracao', new Date().toISOString())
+                    .maybeSingle();
+
+                const totalCursos = (cursosCount?.length || 0) + (assinatura ? 999 : 0); // 999 = todos os cursos
+                document.getElementById('stat-cursos').textContent = assinatura ? '∞' : (cursosCount?.length || 0);
+
+                // Aulas assistidas
+                const { data: progressos } = await supabaseClient
+                    .from('progresso_aulas')
+                    .select('aula_id')
+                    .eq('usuario_id', userId)
+                    .eq('concluida', true);
+
+                document.getElementById('stat-aulas').textContent = progressos?.length || 0;
+
+                // Horas (estimativa: 30 min por aula)
+                const horas = Math.round(((progressos?.length || 0) * 30) / 60);
+                document.getElementById('stat-horas').textContent = horas + 'h';
+
+                // Streak (simplificado)
+                document.getElementById('stat-streak').textContent = progressos?.length > 0 ? '1' : '0';
+
+            } catch (e) {
+                console.error('Erro stats:', e);
+            }
+        }
+
+        async function loadMeusCursos(userId) {
+            const grid = document.getElementById('meus-cursos-grid');
+
+            try {
+                // Verificar assinatura
+                const assinatura = await checkAssinaturaStatus();
+
+                let cursos = [];
+
+                if (assinatura.ativa) {
+                    // Assinatura ativa = acesso a todos os cursos
+                    const { data: allCursos } = await supabaseClient
+                        .from('cursos')
+                        .select('*')
+                        .eq('ativo', true)
+                        .order('ordem');
+                    cursos = allCursos || [];
+                } else {
+                    // Cursos comprados individualmente
+                    const { data: compras } = await supabaseClient
+                        .from('compras_cursos')
+                        .select('curso_id')
+                        .eq('usuario_id', userId)
+                        .eq('status', 'pago');
+
+                    if (compras && compras.length > 0) {
+                        const cursoIds = compras.map(c => c.curso_id);
+                        const { data: cursosData } = await supabaseClient
+                            .from('cursos')
+                            .select('*')
+                            .in('id', cursoIds)
+                            .eq('ativo', true);
+                        cursos = cursosData || [];
+                    }
+                }
+
+                if (cursos.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column:1/-1;text-align:center;padding:40px 20px">
+                            <div style="font-size:48px;margin-bottom:16px">🎬</div>
+                            <h3 style="font-size:16px;margin-bottom:8px">Nenhum curso ativo</h3>
+                            <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Adquira um curso ou assinatura para começar.</p>
+                            <a href="cursos.html" class="btn-curso">Ver Cursos Disponíveis</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Buscar progresso
+                const { data: progressos } = await supabaseClient
+                    .from('progresso_aulas')
+                    .select('aula_id, concluida')
+                    .eq('usuario_id', userId);
+
+                const progressoMap = {};
+                (progressos || []).forEach(p => {
+                    progressoMap[p.aula_id] = p.concluida;
+                });
+
+                grid.innerHTML = cursos.map(curso => {
+                    // Calcular progresso
+                    const totalAulas = curso.total_aulas || 1;
+                    const aulasConcluidas = Object.keys(progressoMap).filter(aulaId => progressoMap[aulaId]).length;
+                    const percentual = Math.round((aulasConcluidas / totalAulas) * 100);
+
+                    return `
+                        <div class="meu-curso-card" onclick="location.href='aula.html?curso=${curso.id}'">
+                            <div class="curso-thumb">
+                                <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy">
+                            </div>
+                            <div class="curso-info">
+                                <h3>${curso.titulo}</h3>
+                                <p style="font-size:13px;color:var(--text-muted)">${curso.total_aulas || 0} aulas • ${curso.duracao_total || '0h'}</p>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width:${percentual}%"></div>
+                                </div>
+                                <div class="progress-text">${percentual}% concluído</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (e) {
+                console.error('Erro cursos:', e);
+                grid.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar cursos.</p>';
+            }
+        }
+
+        async function loadContinueWatching(userId) {
+            const grid = document.getElementById('continue-grid');
+            const section = document.getElementById('continue-section');
+
+            try {
+                // Buscar última aula assistida
+                const { data: ultimoProgresso } = await supabaseClient
+                    .from('progresso_aulas')
+                    .select('aula_id, curso_id, updated_at')
+                    .eq('usuario_id', userId)
+                    .order('updated_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (!ultimoProgresso) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                // Buscar dados da aula e curso
+                const { data: aula } = await supabaseClient
+                    .from('aulas')
+                    .select('*, cursos!inner(titulo, thumbnail)')
+                    .eq('id', ultimoProgresso.aula_id)
+                    .single();
+
+                if (!aula) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                grid.innerHTML = `
+                    <div class="meu-curso-card" onclick="location.href='aula.html?curso=${aula.curso_id}&aula=${aula.id}'">
+                        <div class="curso-thumb" style="position:relative">
+                            <img src="${aula.cursos.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(aula.cursos.titulo)}" alt="${aula.cursos.titulo}" loading="lazy">
+                            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center">
+                                <div class="play-btn">▶</div>
+                            </div>
+                        </div>
+                        <div class="curso-info">
+                            <h3>${aula.cursos.titulo}</h3>
+                            <p style="font-size:14px;color:var(--text-muted);margin-bottom:4px">Aula ${aula.ordem}: ${aula.titulo}</p>
+                            <p style="font-size:12px;color:var(--primary);font-weight:500">▶ Continuar assistindo</p>
+                        </div>
+                    </div>
+                `;
+
+            } catch (e) {
+                section.style.display = 'none';
+                console.error('Erro continue:', e);
+            }
+        }
+    </script>
+</body>
+</html>

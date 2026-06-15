@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritmus - Plataforma de Aulas Fitness Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+            <div class="nav-links">
+                <a href="#cursos">Cursos</a>
+                <a href="#como-funciona">Como Funciona</a>
+                <a href="#precos">Preços</a>
+                <a href="pages/login.html" class="btn-login">Entrar</a>
+                <a href="pages/cadastro.html" class="btn-primary">Começar Agora</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-badge">🎯 Novo</div>
+            <h1>Transforme seu Corpo com <span class="gradient-text">Aulas Fitness Online</span></h1>
+            <p class="hero-subtitle">Acesse vídeos exclusivos de Jump, Dança, Funcional e muito mais. Treine quando quiser, onde quiser.</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Aulas</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">10k+</span>
+                    <span class="stat-label">Alunos</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">4.9</span>
+                    <span class="stat-label">Avaliação</span>
+                </div>
+            </div>
+            <div class="hero-cta">
+                <a href="pages/cadastro.html" class="btn-hero">Começar 7 Dias Grátis</a>
+                <a href="#cursos" class="btn-ghost">Ver Cursos</a>
+            </div>
+            <p class="hero-note">💳 Pagamento via Asaas • Cancelamento a qualquer momento</p>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-card card-1">
+                <div class="card-icon">🏃‍♀️</div>
+                <div class="card-title">Jump</div>
+                <div class="card-duration">45 min</div>
+            </div>
+            <div class="hero-card card-2">
+                <div class="card-icon">💃</div>
+                <div class="card-title">Dança</div>
+                <div class="card-duration">30 min</div>
+            </div>
+            <div class="hero-card card-3">
+                <div class="card-icon">🍑</div>
+                <div class="card-title">Glúteos</div>
+                <div class="card-duration">25 min</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cursos Section -->
+    <section id="cursos" class="cursos-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">📚 Cursos Disponíveis</span>
+                <h2>Escolha seu <span class="gradient-text">Ritmo</span></h2>
+                <p>Cursos completos com aulas gravadas em vídeo. Acesso ilimitado após a compra.</p>
+            </div>
+            <div class="cursos-grid" id="cursos-grid">
+                <!-- Cursos carregados via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Como Funciona -->
+    <section id="como-funciona" class="how-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">⚡ Simples e Rápido</span>
+                <h2>Como <span class="gradient-text">Funciona</span></h2>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">📝</div>
+                    <h3>Crie sua Conta</h3>
+                    <p>Cadastre-se em menos de 2 minutos com seu e-mail e dados básicos.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">💳</div>
+                    <h3>Escolha e Pague</h3>
+                    <p>Selecione o curso desejado e pague via PIX ou Cartão pelo Asaas.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">▶️</div>
+                    <h3>Acesse as Aulas</h3>
+                    <p>Liberação automática! Assista aos vídeos exclusivos na plataforma.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preços -->
+    <section id="precos" class="pricing-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">💰 Investimento</span>
+                <h2>Planos e <span class="gradient-text">Preços</span></h2>
+                <p>Escolha o plano ideal para você</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Curso Individual</h3>
+                        <div class="pricing-price">
+                            <span class="currency">R$</span>
+                            <span class="amount">49</span>
+                            <span class="period">,90</span>
+                        </div>
+                        <p class="pricing-desc">Acesso vitalício a 1 curso</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Acesso vitalício</li>
+                        <li>✅ Todas as aulas do curso</li>
+                        <li>✅ Suporte por e-mail</li>
+                        <li>✅ Certificado de conclusão</li>
+                        <li>❌ Acesso a outros cursos</li>
+                    </ul>
+                    <a href="pages/cadastro.html?plano=individual" class="btn-pricing">Escolher Curso</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">⭐ Mais Popular</div>
+                    <div class="pricing-header">
+                        <h3>Plano Mensal</h3>
+                        <div class="pricing-price">
+                            <span class="currency">R$</span>
+                            <span class="amount">79</span>
+                            <span class="period">,90</span>
+                        </div>
+                        <p class="pricing-desc">Acesso a todos os cursos</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Acesso a TODOS os cursos</li>
+                        <li>✅ Aulas novas toda semana</li>
+                        <li>✅ Suporte prioritário</li>
+                        <li>✅ Certificado de conclusão</li>
+                        <li>✅ Comunidade exclusiva</li>
+                    </ul>
+                    <a href="pages/cadastro.html?plano=mensal" class="btn-pricing btn-featured">Assinar Agora</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Plano Anual</h3>
+                        <div class="pricing-price">
+                            <span class="currency">R$</span>
+                            <span class="amount">599</span>
+                            <span class="period">,90</span>
+                        </div>
+                        <p class="pricing-desc">Economize 37% no ano</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Tudo do plano mensal</li>
+                        <li>✅ 2 meses grátis</li>
+                        <li>✅ Materiais extras</li>
+                        <li>✅ Planilha de treino</li>
+                        <li>✅ Suporte VIP</li>
+                    </ul>
+                    <a href="pages/cadastro.html?plano=anual" class="btn-pricing">Assinar Anual</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">💪</span>
+                        <span class="logo-text">Ritmus</span>
+                    </div>
+                    <p>Plataforma de aulas fitness online. Treine quando quiser, onde quiser.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Links</h4>
+                    <a href="pages/login.html">Login</a>
+                    <a href="pages/cadastro.html">Cadastro</a>
+                    <a href="#cursos">Cursos</a>
+                    <a href="pages/termos.html">Termos de Uso</a>
+                    <a href="pages/politica.html">Política de Privacidade</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Contato</h4>
+                    <p>📧 suporte@ritmus.fit</p>
+                    <p>💬 WhatsApp</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Ritmus. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
