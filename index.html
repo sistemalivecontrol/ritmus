@@ -1,12 +1,330 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ritmus - Plataforma Fitness</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritmus - Plataforma de Aulas Fitness Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+            <div class="nav-links">
+                <a href="#cursos">Cursos</a>
+                <a href="#como-funciona">Como Funciona</a>
+                <a href="#precos">Preços</a>
+                <a href="pages/login.html" class="btn-login">Entrar</a>
+                <a href="pages/cadastro.html" class="btn-primary">Começar Agora</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-badge">🎯 Novo</div>
+            <h1>Transforme seu Corpo com <span class="gradient-text">Aulas Fitness Online</span></h1>
+            <p class="hero-subtitle">Acesse vídeos exclusivos de Jump, Dança, Funcional e muito mais. Treine quando quiser, onde quiser.</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Aulas</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">10k+</span>
+                    <span class="stat-label">Alunos</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">4.9</span>
+                    <span class="stat-label">Avaliação</span>
+                </div>
+            </div>
+            <div class="hero-cta">
+                <a href="pages/cadastro.html" class="btn-hero">Começar 7 Dias Grátis</a>
+                <a href="#cursos" class="btn-ghost">Ver Cursos</a>
+            </div>
+            <p class="hero-note">💳 Pagamento via Asaas • Cancelamento a qualquer momento</p>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-card card-1">
+                <div class="card-icon">🏃‍♀️</div>
+                <div class="card-title">Jump</div>
+                <div class="card-duration">45 min</div>
+            </div>
+            <div class="hero-card card-2">
+                <div class="card-icon">💃</div>
+                <div class="card-title">Dança</div>
+                <div class="card-duration">30 min</div>
+            </div>
+            <div class="hero-card card-3">
+                <div class="card-icon">🍑</div>
+                <div class="card-title">Glúteos</div>
+                <div class="card-duration">25 min</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cursos Section -->
+    <section id="cursos" class="cursos-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">📚 Cursos Disponíveis</span>
+                <h2>Escolha seu <span class="gradient-text">Ritmo</span></h2>
+                <p>Cursos completos com aulas gravadas em vídeo. Acesso ilimitado após a compra.</p>
+            </div>
+            <div class="cursos-grid" id="cursos-grid">
+                <!-- Cursos carregados via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Como Funciona -->
+    <section id="como-funciona" class="how-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">⚡ Simples e Rápido</span>
+                <h2>Como <span class="gradient-text">Funciona</span></h2>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">📝</div>
+                    <h3>Crie sua Conta</h3>
+                    <p>Cadastre-se em menos de 2 minutos com seu e-mail e dados básicos.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">💳</div>
+                    <h3>Escolha e Pague</h3>
+                    <p>Selecione o curso desejado e pague via PIX ou Cartão pelo Asaas.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">▶️</div>
+                    <h3>Acesse as Aulas</h3>
+                    <p>Liberação automática! Assista aos vídeos exclusivos na plataforma.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preços -->
+    <section id="precos" class="pricing-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">💰 Investimento</span>
+                <h2>Planos e <span class="gradient-text">Preços</span></h2>
+                <p>Escolha o plano ideal para você</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Curso Individual</h3>
+                        <div class="pricing-price">
+                            <span class="currency">R$</span>
+                            <span class="amount">49</span>
+                            <span class="period">,90</span>
+                        </div>
+                        <p class="pricing-desc">Acesso vitalício a 1 curso</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Acesso vitalício</li>
+                        <li>✅ Todas as aulas do curso</li>
+                        <li>✅ Suporte por e-mail</li>
+                        <li>✅ Certificado de conclusão</li>
+                        <li>❌ Acesso a outros cursos</li>
+                    </ul>
+                    <a href="pages/cadastro.html?plano=individual" class="btn-pricing">Escolher Curso</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">⭐ Mais Popular</div>
+                    <div class="pricing-header">
+                        <h3>Plano Mensal</h3>
+                        <div class="pricing-price">
+                            <span class="currency">R$</span>
+                            <span class="amount">79</span>
+                            <span class="period">,90</span>
+                        </div>
+                        <p class="pricing-desc">Acesso a todos os cursos</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Acesso a TODOS os cursos</li>
+                        <li>✅ Aulas novas toda semana</li>
+                        <li>✅ Suporte prioritário</li>
+                        <li>✅ Certificado de conclusão</li>
+                        <li>✅ Comunidade exclusiva</li>
+                    </ul>
+                    <a href="pages/cadastro.html?plano=mensal" class="btn-pricing btn-featured">Assinar Agora</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Plano Anual</h3>
+                        <div class="pricing-price">
+                            <span class="currency">R$</span>
+                            <span class="amount">599</span>
+                            <span class="period">,90</span>
+                        </div>
+                        <p class="pricing-desc">Economize 37% no ano</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Tudo do plano mensal</li>
+                        <li>✅ 2 meses grátis</li>
+                        <li>✅ Materiais extras</li>
+                        <li>✅ Planilha de treino</li>
+                        <li>✅ Suporte VIP</li>
+                    </ul>
+                    <a href="pages/cadastro.html?plano=anual" class="btn-pricing">Assinar Anual</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">💪</span>
+                        <span class="logo-text">Ritmus</span>
+                    </div>
+                    <p>Plataforma de aulas fitness online. Treine quando quiser, onde quiser.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Links</h4>
+                    <a href="pages/login.html">Login</a>
+                    <a href="pages/cadastro.html">Cadastro</a>
+                    <a href="#cursos">Cursos</a>
+                    <a href="pages/termos.html">Termos de Uso</a>
+                    <a href="pages/politica.html">Política de Privacidade</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Contato</h4>
+                    <p>📧 suporte@ritmus.fit</p>
+                    <p>💬 WhatsApp</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Ritmus. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="js/config.js"></script>
+    <script>
+        // CURSOS HARDCODED (fallback)
+        const CURSOS_HARDCODED = [
+            { id: 'jump-fitness', titulo: 'Jump Fitness', descricao: 'Curso completo de jump com técnicas avançadas, coreografias e treinos de resistência. Queime calorias se divertindo!', preco: 49.90, total_aulas: 12, duracao_total: '8h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Jump+Fitness' },
+            { id: 'danca-fitness', titulo: 'Dança Fitness', descricao: 'Aulas de dança para queimar calorias e se divertir. Samba, funk, salsa e muito mais!', preco: 49.90, total_aulas: 15, duracao_total: '10h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Danca+Fitness' },
+            { id: 'empina-bumbum', titulo: 'Empina Bumbum', descricao: 'Treinos específicos para fortalecimento e hipertrofia dos glúteos. Resultados em 30 dias!', preco: 49.90, total_aulas: 10, duracao_total: '6h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Empina+Bumbum' },
+            { id: 'funcional-total', titulo: 'Funcional Total', descricao: 'Treinamento funcional para todo o corpo, sem equipamentos. Fortaleça e defina!', preco: 39.90, total_aulas: 8, duracao_total: '5h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Funcional+Total' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                loadCursosLanding();
+            });
+        });
+
+        async function loadCursosLanding() {
+            const grid = document.getElementById('cursos-grid');
+            if (!grid) return;
+
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px"><div class="loading-spinner" style="margin:0 auto"></div><p style="margin-top:16px;color:var(--text-muted)">Carregando cursos...</p></div>';
+
+            try {
+                // Buscar cursos do Supabase
+                const { data: cursos, error } = await supabaseClient
+                    .from('cursos')
+                    .select('id, titulo, descricao, thumbnail, preco, total_aulas, duracao_total, total_alunos, avaliacao, ordem, ativo, gratuito')
+                    .eq('ativo', true)
+                    .order('ordem', { ascending: true });
+
+                if (!error && cursos && cursos.length > 0) {
+                    renderCursos(cursos);
+                    console.log('[RITMUS] Cursos carregados do Supabase:', cursos.length);
+                    return;
+                }
+
+                // Fallback: usar hardcoded
+                console.log('[RITMUS] Usando cursos hardcoded como fallback');
+                renderCursos(CURSOS_HARDCODED);
+
+            } catch (e) {
+                console.error('[RITMUS] Erro ao carregar cursos:', e);
+                renderCursos(CURSOS_HARDCODED);
+            }
+        }
+
+        function renderCursos(cursos) {
+            const grid = document.getElementById('cursos-grid');
+
+            grid.innerHTML = cursos.map(curso => {
+                const isFree = curso.gratuito === true || curso.gratuito === 'true' || curso.preco === 0 || curso.preco === '0';
+
+                return `
+                    <div class="curso-card" onclick="location.href='pages/cadastro.html?plano=individual&curso=${curso.id}'">
+                        <div class="curso-thumb">
+                            <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy" onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
+                            <div class="curso-play">
+                                <div class="play-btn">▶</div>
+                            </div>
+                            ${isFree ? `
+                                <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#F7C948,#D97706);color:white;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:600">🎁 GRATUITO</div>
+                            ` : `
+                                <div class="curso-badge">${curso.total_aulas || 0} aulas</div>
+                            `}
+                        </div>
+                        <div class="curso-info">
+                            <h3>${curso.titulo}</h3>
+                            <p>${curso.descricao || 'Curso completo com aulas gravadas em vídeo.'}</p>
+                            <div class="curso-meta">
+                                <span>⏱️ ${curso.duracao_total || '0h'} total</span>
+                                <span>👥 ${curso.total_alunos || 0} alunos</span>
+                                <span>⭐ ${curso.avaliacao || '5.0'}</span>
+                            </div>
+                            <div class="curso-footer">
+                                ${isFree ? `
+                                    <span class="curso-price" style="color:var(--success)">🎁 GRATUITO</span>
+                                ` : `
+                                    <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
+                                `}
+                                <button class="btn-curso">${isFree ? 'Assistir Agora' : 'Ver Curso'}</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Toggle menu mobile
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.classList.toggle('active');
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(15, 15, 26, 0.95)';
+            } else {
+                navbar.style.background = 'rgba(15, 15, 26, 0.85)';
+            }
+        });
+    </script>
+</body>
 </html>
