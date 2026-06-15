@@ -119,6 +119,18 @@
                     cursosComprados = (compras || []).map(c => c.curso_id);
                 }
 
+                // Buscar aulas gratuitas por curso
+                const { data: aulasFree } = await supabaseClient
+                    .from('aulas')
+                    .select('curso_id')
+                    .eq('gratuito', true)
+                    .eq('ativo', true);
+
+                const aulasFreeMap = {};
+                (aulasFree || []).forEach(a => {
+                    aulasFreeMap[a.curso_id] = true;
+                });
+
                 // Buscar progresso
                 const { data: progressos } = await supabaseClient
                     .from('progresso_aulas')
