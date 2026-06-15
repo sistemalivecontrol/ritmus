@@ -300,7 +300,10 @@
                     return `
                         <div class="meu-curso-card" onclick="location.href='aula.html?curso=${curso.id}'">
                             <div class="curso-thumb">
-                                <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy">
+                                <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" 
+                                     alt="${curso.titulo}" 
+                                     loading="lazy"
+                                     onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
                             </div>
                             <div class="curso-info">
                                 <h3>${curso.titulo}</h3>
@@ -366,7 +369,10 @@
                 grid.innerHTML = `
                     <div class="meu-curso-card" onclick="location.href='aula.html?curso=${aula.curso_id}&aula=${aula.id}'">
                         <div class="curso-thumb" style="position:relative">
-                            <img src="${aula.cursos.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(aula.cursos.titulo)}" alt="${aula.cursos.titulo}" loading="lazy">
+                            <img src="${aula.cursos.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(aula.cursos.titulo)}" 
+                                 alt="${aula.cursos.titulo}" 
+                                 loading="lazy"
+                                 onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${aula.cursos.titulo}')">
                             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center">
                                 <div class="play-btn">▶</div>
                             </div>
