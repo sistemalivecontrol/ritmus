@@ -1,6 +1,6 @@
 // Configuração Supabase - Ritmus
 const SUPABASE_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4ODI5ODAsImV4cCI6MjA2NTQ1ODk4MH0.placeholder'; // SUBSTITUA PELO ANON KEY REAL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MDUzODcsImV4cCI6MjA5NzA4MTM4N30.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
 
 // Inicializa Supabase
 let supabaseClient = null;
@@ -98,7 +98,6 @@ async function checkAuth() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) return null;
 
-        // Buscar dados do usuário
         const { data: userData } = await supabaseClient
             .from('usuarios')
             .select('*')
@@ -136,7 +135,6 @@ async function checkCursoAccess(cursoId) {
     if (!auth) return false;
 
     try {
-        // Verificar se tem assinatura ativa
         const { data: assinatura } = await supabaseClient
             .from('assinaturas')
             .select('*')
@@ -145,9 +143,8 @@ async function checkCursoAccess(cursoId) {
             .gte('data_expiracao', new Date().toISOString())
             .single();
 
-        if (assinatura) return true; // Plano mensal/anual tem acesso a tudo
+        if (assinatura) return true;
 
-        // Verificar compra individual do curso
         const { data: compra } = await supabaseClient
             .from('compras_cursos')
             .select('*')

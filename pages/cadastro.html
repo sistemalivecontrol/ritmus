@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
 </head>
 <body>
     <nav class="navbar">
@@ -60,7 +59,7 @@
                     <div class="form-group" id="curso-select-group" style="display:none">
                         <label for="curso_id">Curso Desejado</label>
                         <select id="curso_id">
-                            <option value="">Selecione o curso</option>
+                            <option value="">Carregando cursos...</option>
                         </select>
                     </div>
                     <div class="form-group" style="display:flex;align-items:flex-start;gap:8px">
@@ -85,6 +84,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
+        // CURSOS HARDCODED (funciona sem Supabase)
+        const CURSOS_DISPONIVEIS = [
+            { id: 'jump-fitness', titulo: 'Jump Fitness', preco: 49.90 },
+            { id: 'danca-fitness', titulo: 'Dança Fitness', preco: 49.90 },
+            { id: 'empina-bumbum', titulo: 'Empina Bumbum', preco: 49.90 },
+            { id: 'funcional-total', titulo: 'Funcional Total', preco: 39.90 }
+        ];
+
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
                 initCadastro();
@@ -95,12 +102,14 @@
             // Preencher plano da URL
             const urlParams = new URLSearchParams(window.location.search);
             const planoUrl = urlParams.get('plano');
+            const cursoUrl = urlParams.get('curso');
+
             if (planoUrl) {
                 document.getElementById('plano').value = planoUrl;
                 toggleCursoSelect(planoUrl);
             }
 
-            // Carregar cursos disponíveis
+            // Carregar cursos (hardcoded primeiro, depois tenta Supabase)
             loadCursosSelect();
 
             // Máscara telefone
@@ -133,24 +142,33 @@
         }
 
         async function loadCursosSelect() {
+            const select = document.getElementById('curso_id');
+            select.innerHTML = '<option value="">Selecione o curso</option>';
+
+            // TENTATIVA 1: Buscar do Supabase (se RLS permitir)
             try {
-                const { data: cursos } = await supabaseClient
+                const { data: cursos, error } = await supabaseClient
                     .from('cursos')
                     .select('id, titulo, preco')
                     .eq('ativo', true)
-                    .order('titulo');
+                    .order('ordem', { ascending: true });
 
-                const select = document.getElementById('curso_id');
-                select.innerHTML = '<option value="">Selecione o curso</option>';
-
-                if (cursos) {
+                if (!error && cursos && cursos.length > 0) {
                     cursos.forEach(c => {
-                        select.innerHTML += `<option value="${c.id}">${c.titulo} - R$ ${c.preco?.toFixed(2).replace('.', ',') || '49,90'}</option>`;
+                        select.innerHTML += `<option value="${c.id}">${c.titulo} - R$ ${c.preco ? c.preco.toFixed(2).replace('.', ',') : '49,90'}</option>`;
                     });
+                    console.log('[RITMUS] Cursos carregados do Supabase:', cursos.length);
+                    return;
                 }
             } catch (e) {
-                console.error('Erro ao carregar cursos:', e);
+                console.log('[RITMUS] Supabase indisponível, usando hardcoded');
             }
+
+            // TENTATIVA 2: Usar cursos hardcoded
+            CURSOS_DISPONIVEIS.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.titulo} - R$ ${c.preco.toFixed(2).replace('.', ',')}</option>`;
+            });
+            console.log('[RITMUS] Cursos carregados (hardcoded)');
         }
 
         async function handleCadastro(e) {
@@ -198,13 +216,22 @@
                 let descricao = '';
 
                 if (plano === 'individual') {
-                    const { data: curso } = await supabaseClient
-                        .from('cursos')
-                        .select('preco, titulo')
-                        .eq('id', cursoId)
-                        .single();
-                    valor = curso?.preco || 49.90;
-                    descricao = `Curso: ${curso?.titulo || 'Individual'}`;
+                    // Buscar preço do curso selecionado
+                    const cursoHardcoded = CURSOS_DISPONIVEIS.find(c => c.id === cursoId);
+                    const precoCurso = cursoHardcoded ? cursoHardcoded.preco : 49.90;
+
+                    try {
+                        const { data: curso } = await supabaseClient
+                            .from('cursos')
+                            .select('preco, titulo')
+                            .eq('id', cursoId)
+                            .single();
+                        valor = curso?.preco || precoCurso;
+                        descricao = `Curso: ${curso?.titulo || cursoHardcoded?.titulo || 'Individual'}`;
+                    } catch (e) {
+                        valor = precoCurso;
+                        descricao = `Curso: ${cursoHardcoded?.titulo || 'Individual'}`;
+                    }
 
                     await supabaseClient.from('compras_cursos').insert({
                         usuario_id: userData.id,
@@ -228,36 +255,48 @@
                 }
 
                 // 4. Criar pagamento no Asaas
-                const { data: paymentData } = await supabaseClient.functions.invoke('asaas-criar-cobranca', {
-                    body: {
-                        nome: nome,
-                        email: email,
-                        telefone: telefone,
-                        valor: valor,
-                        descricao: descricao,
-                        usuario_id: userData.id,
-                        plano: plano,
-                        curso_id: cursoId || null
+                try {
+                    const { data: paymentData, error: paymentError } = await supabaseClient.functions.invoke('asaas-criar-cobranca', {
+                        body: {
+                            nome: nome,
+                            email: email,
+                            telefone: telefone,
+                            valor: valor,
+                            descricao: descricao,
+                            usuario_id: userData.id,
+                            plano: plano,
+                            curso_id: cursoId || null
+                        }
+                    });
+
+                    hideLoading();
+
+                    if (paymentError) throw paymentError;
+
+                    if (paymentData && paymentData.success && paymentData.payment_url) {
+                        sessionStorage.setItem('ritmus_pagamento', JSON.stringify({
+                            usuario_id: userData.id,
+                            plano: plano,
+                            curso_id: cursoId,
+                            payment_id: paymentData.payment_id
+                        }));
+
+                        showToast('Sucesso!', 'Redirecionando para o pagamento...', 'success');
+                        setTimeout(() => {
+                            window.location.href = paymentData.payment_url;
+                        }, 1500);
+                    } else {
+                        throw new Error('Erro ao gerar link de pagamento');
                     }
-                });
+                } catch (paymentErr) {
+                    // Se Edge Function falhar, mostrar mensagem para pagamento manual
+                    hideLoading();
+                    console.error('[RITMUS] Erro pagamento:', paymentErr);
 
-                hideLoading();
-
-                if (paymentData && paymentData.payment_url) {
-                    // Salvar dados no sessionStorage para pós-pagamento
-                    sessionStorage.setItem('ritmus_pagamento', JSON.stringify({
-                        usuario_id: userData.id,
-                        plano: plano,
-                        curso_id: cursoId,
-                        payment_id: paymentData.payment_id
-                    }));
-
-                    showToast('Sucesso!', 'Redirecionando para o pagamento...', 'success');
+                    showToast('Conta criada!', 'Sua conta foi criada! Entre em contato para ativar o pagamento.', 'warning');
                     setTimeout(() => {
-                        window.location.href = paymentData.payment_url;
-                    }, 1500);
-                } else {
-                    throw new Error('Erro ao gerar link de pagamento');
+                        window.location.href = 'login.html';
+                    }, 3000);
                 }
 
             } catch (error) {
@@ -270,4 +309,67 @@
         }
     </script>
 </body>
-</html>
+</html> progresso
+                const { data: existing } = await supabaseClient
+                    .from('progresso_aulas')
+                    .select('id')
+                    .eq('usuario_id', currentUser.id)
+                    .eq('aula_id', aulaId)
+                    .maybeSingle();
+
+                if (existing) {
+                    await supabaseClient
+                        .from('progresso_aulas')
+                        .update({ concluida, updated_at: new Date().toISOString() })
+                        .eq('id', existing.id);
+                } else {
+                    await supabaseClient
+                        .from('progresso_aulas')
+                        .insert({
+                            usuario_id: currentUser.id,
+                            aula_id: aulaId,
+                            curso_id: currentCurso.id,
+                            concluida
+                        });
+                }
+            } catch (e) {
+                console.error('Erro progresso:', e);
+            }
+        }
+    </script>
+</body>
+</html>ment.getElementById('modal-' + tipo).classList.add('active');
+            if (tipo === 'aula') preencherSelectCursos();
+        }
+
+        function closeModal(tipo) {
+            document.getElementById('modal-' + tipo).classList.remove('active');
+        }
+
+        // CARREGAR CURSOS
+        async function loadCursosAdmin() {
+            try {
+                const { data: cursos, error } = await supabaseClient
+                    .from('cursos')
+                    .select('*')
+                    .order('ordem', { ascending: true });
+
+                if (error) throw error;
+
+                cursosCache = cursos || [];
+
+                const tbody = document.getElementById('cursos-tbody');
+                tbody.innerHTML = cursosCache.map(c => `
+                    <tr>
+                        <td><strong>${c.titulo}</strong></td>
+                        <td>R$ ${c.preco?.toFixed(2).replace('.', ',') || '0,00'}</td>
+                        <td>${c.total_aulas || 0}</td>
+                        <td><span style="color:${c.ativo ? 'var(--success)' : 'var(--danger)'}">${c.ativo ? '✅ Ativo' : '❌ Inativo'}</span></td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editarCurso('${c.id}')">Editar</button>
+                            <button class="btn-small btn-delete" onclick="excluirCurso('${c.id}')">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Preencher selects

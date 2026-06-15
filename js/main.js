@@ -1,69 +1,103 @@
 // Main.js - Ritmus Landing Page
+// Versão que funciona sem depender do Supabase para cursos
+
+const CURSOS_HARDCODED = [
+    { 
+        id: 'jump-fitness', 
+        titulo: 'Jump Fitness', 
+        descricao: 'Curso completo de jump com técnicas avançadas, coreografias e treinos de resistência. Queime calorias se divertindo!',
+        preco: 49.90, 
+        total_aulas: 12, 
+        duracao_total: '8h', 
+        total_alunos: 0, 
+        avaliacao: 5.0,
+        thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Jump+Fitness'
+    },
+    { 
+        id: 'danca-fitness', 
+        titulo: 'Dança Fitness', 
+        descricao: 'Aulas de dança para queimar calorias e se divertir. Samba, funk, salsa e muito mais!',
+        preco: 49.90, 
+        total_aulas: 15, 
+        duracao_total: '10h', 
+        total_alunos: 0, 
+        avaliacao: 5.0,
+        thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Danca+Fitness'
+    },
+    { 
+        id: 'empina-bumbum', 
+        titulo: 'Empina Bumbum', 
+        descricao: 'Treinos específicos para fortalecimento e hipertrofia dos glúteos. Resultados em 30 dias!',
+        preco: 49.90, 
+        total_aulas: 10, 
+        duracao_total: '6h', 
+        total_alunos: 0, 
+        avaliacao: 5.0,
+        thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Empina+Bumbum'
+    },
+    { 
+        id: 'funcional-total', 
+        titulo: 'Funcional Total', 
+        descricao: 'Treinamento funcional para todo o corpo, sem equipamentos. Fortaleça e defina!',
+        preco: 39.90, 
+        total_aulas: 8, 
+        duracao_total: '5h', 
+        total_alunos: 0, 
+        avaliacao: 5.0,
+        thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Funcional+Total'
+    }
+];
 
 document.addEventListener('DOMContentLoaded', function() {
-    waitForSupabase(() => {
-        loadCursos();
-    });
+    // Carregar cursos imediatamente (não depende do Supabase)
+    loadCursos();
+
+    // Inicializar Supabase em background (para outras funcionalidades)
+    if (typeof supabase !== 'undefined') {
+        initSupabase();
+    }
 });
 
-// Carregar cursos na landing page
-async function loadCursos() {
+function initSupabase() {
+    // O Supabase será inicializado pelo config.js se necessário
+    console.log('[RITMUS] Supabase disponível para funcionalidades avançadas');
+}
+
+function loadCursos() {
     const grid = document.getElementById('cursos-grid');
     if (!grid) return;
 
-    try {
-        const { data: cursos, error } = await supabaseClient
-            .from('cursos')
-            .select('*')
-            .eq('ativo', true)
-            .order('ordem', { ascending: true });
+    console.log('[RITMUS] Carregando cursos (modo offline)...');
+    renderCursos(CURSOS_HARDCODED);
+}
 
-        if (error) throw error;
+function renderCursos(cursos) {
+    const grid = document.getElementById('cursos-grid');
 
-        if (!cursos || cursos.length === 0) {
-            grid.innerHTML = `
-                <div style="grid-column:1/-1;text-align:center;padding:60px 20px">
-                    <div style="font-size:48px;margin-bottom:16px">🎬</div>
-                    <h3 style="font-size:18px;margin-bottom:8px">Cursos em breve!</h3>
-                    <p style="color:var(--text-muted)">Estamos preparando aulas incríveis para você.</p>
+    grid.innerHTML = cursos.map(curso => `
+        <div class="curso-card" onclick="location.href='pages/cadastro.html?plano=individual&curso=${curso.id}'">
+            <div class="curso-thumb">
+                <img src="${curso.thumbnail}" alt="${curso.titulo}" loading="lazy">
+                <div class="curso-play">
+                    <div class="play-btn">▶</div>
                 </div>
-            `;
-            return;
-        }
-
-        grid.innerHTML = cursos.map(curso => `
-            <div class="curso-card" onclick="location.href='pages/curso.html?id=${curso.id}'">
-                <div class="curso-thumb">
-                    <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy">
-                    <div class="curso-play">
-                        <div class="play-btn">▶</div>
-                    </div>
-                    <div class="curso-badge">${curso.total_aulas || 0} aulas</div>
+                <div class="curso-badge">${curso.total_aulas} aulas</div>
+            </div>
+            <div class="curso-info">
+                <h3>${curso.titulo}</h3>
+                <p>${curso.descricao}</p>
+                <div class="curso-meta">
+                    <span>⏱️ ${curso.duracao_total} total</span>
+                    <span>👥 ${curso.total_alunos} alunos</span>
+                    <span>⭐ ${curso.avaliacao}</span>
                 </div>
-                <div class="curso-info">
-                    <h3>${curso.titulo}</h3>
-                    <p>${curso.descricao || 'Curso completo com aulas gravadas em vídeo.'}</p>
-                    <div class="curso-meta">
-                        <span>⏱️ ${curso.duracao_total || '0h'} total</span>
-                        <span>👥 ${curso.total_alunos || 0} alunos</span>
-                        <span>⭐ ${curso.avaliacao || '5.0'}</span>
-                    </div>
-                    <div class="curso-footer">
-                        <span class="curso-price">R$ ${curso.preco ? curso.preco.toFixed(2).replace('.', ',') : '49,90'}</span>
-                        <button class="btn-curso">Ver Curso</button>
-                    </div>
+                <div class="curso-footer">
+                    <span class="curso-price">R$ ${curso.preco.toFixed(2).replace('.', ',')}</span>
+                    <button class="btn-curso">Ver Curso</button>
                 </div>
             </div>
-        `).join('');
-
-    } catch (e) {
-        console.error('[RITMUS] Erro ao carregar cursos:', e);
-        grid.innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:60px 20px">
-                <p style="color:var(--text-muted)">Erro ao carregar cursos. Tente novamente mais tarde.</p>
-            </div>
-        `;
-    }
+        </div>
+    `).join('');
 }
 
 // Toggle menu mobile
