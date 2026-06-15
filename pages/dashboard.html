@@ -191,42 +191,60 @@
 
         async function loadStats(userId) {
             try {
-                // Cursos ativos
-                const { data: cursosCount } = await supabaseClient
-                    .from('compras_cursos')
-                    .select('id', { count: 'exact' })
-                    .eq('usuario_id', userId)
-                    .eq('status', 'pago');
+                // Cursos ativos (compras individuais)
+                let cursosCount = 0;
+                try {
+                    const { data, count } = await supabaseClient
+                        .from('compras_cursos')
+                        .select('*', { count: 'exact' })
+                        .eq('usuario_id', userId)
+                        .eq('status', 'pago');
+                    cursosCount = count || 0;
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar compras:', e.message);
+                }
 
-                const { data: assinatura } = await supabaseClient
-                    .from('assinaturas')
-                    .select('id')
-                    .eq('usuario_id', userId)
-                    .eq('status', 'ativa')
-                    .gte('data_expiracao', new Date().toISOString())
-                    .maybeSingle();
+                // Verificar assinatura ativa
+                let temAssinatura = false;
+                try {
+                    const { data: assinatura } = await supabaseClient
+                        .from('assinaturas')
+                        .select('id')
+                        .eq('usuario_id', userId)
+                        .eq('status', 'ativa')
+                        .gte('data_expiracao', new Date().toISOString())
+                        .maybeSingle();
+                    temAssinatura = !!assinatura;
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar assinatura:', e.message);
+                }
 
-                const totalCursos = (cursosCount?.length || 0) + (assinatura ? 999 : 0); // 999 = todos os cursos
-                document.getElementById('stat-cursos').textContent = assinatura ? '∞' : (cursosCount?.length || 0);
+                document.getElementById('stat-cursos').textContent = temAssinatura ? '∞' : cursosCount;
 
                 // Aulas assistidas
-                const { data: progressos } = await supabaseClient
-                    .from('progresso_aulas')
-                    .select('aula_id')
-                    .eq('usuario_id', userId)
-                    .eq('concluida', true);
+                let progressos = [];
+                try {
+                    const { data } = await supabaseClient
+                        .from('progresso_aulas')
+                        .select('aula_id')
+                        .eq('usuario_id', userId)
+                        .eq('concluida', true);
+                    progressos = data || [];
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar progresso:', e.message);
+                }
 
-                document.getElementById('stat-aulas').textContent = progressos?.length || 0;
+                document.getElementById('stat-aulas').textContent = progressos.length || 0;
 
                 // Horas (estimativa: 30 min por aula)
-                const horas = Math.round(((progressos?.length || 0) * 30) / 60);
+                const horas = Math.round(((progressos.length || 0) * 30) / 60);
                 document.getElementById('stat-horas').textContent = horas + 'h';
 
                 // Streak (simplificado)
-                document.getElementById('stat-streak').textContent = progressos?.length > 0 ? '1' : '0';
+                document.getElementById('stat-streak').textContent = progressos.length > 0 ? '1' : '0';
 
             } catch (e) {
-                console.error('Erro stats:', e);
+                console.error('[RITMUS] Erro stats:', e);
             }
         }
 
@@ -234,35 +252,63 @@
             const grid = document.getElementById('meus-cursos-grid');
 
             try {
-                // Verificar assinatura
-                const assinatura = await checkAssinaturaStatus();
+                // Verificar assinatura (com tratamento de erro)
+                let assinatura = { ativa: false };
+                try {
+                    assinatura = await checkAssinaturaStatus();
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao verificar assinatura:', e.message);
+                }
 
                 let cursos = [];
 
                 if (assinatura.ativa) {
                     // Assinatura ativa = acesso a todos os cursos
-                    const { data: allCursos } = await supabaseClient
-                        .from('cursos')
-                        .select('*')
-                        .eq('ativo', true)
-                        .order('ordem');
-                    cursos = allCursos || [];
-                } else {
-                    // Cursos comprados individualmente
-                    const { data: compras } = await supabaseClient
-                        .from('compras_cursos')
-                        .select('curso_id')
-                        .eq('usuario_id', userId)
-                        .eq('status', 'pago');
-
-                    if (compras && compras.length > 0) {
-                        const cursoIds = compras.map(c => c.curso_id);
-                        const { data: cursosData } = await supabaseClient
+                    try {
+                        const { data: allCursos } = await supabaseClient
                             .from('cursos')
                             .select('*')
-                            .in('id', cursoIds)
-                            .eq('ativo', true);
-                        cursos = cursosData || [];
+                            .eq('ativo', true)
+                            .order('ordem');
+                        cursos = allCursos || [];
+                    } catch (e) {
+                        console.log('[RITMUS] Erro ao buscar todos cursos:', e.message);
+                    }
+                } else {
+                    // Cursos comprados individualmente
+                    try {
+                        const { data: compras } = await supabaseClient
+                            .from('compras_cursos')
+                            .select('curso_id')
+                            .eq('usuario_id', userId)
+                            .eq('status', 'pago');
+
+                        if (compras && compras.length > 0) {
+                            const cursoIds = compras.map(c => c.curso_id);
+                            const { data: cursosData } = await supabaseClient
+                                .from('cursos')
+                                .select('*')
+                                .in('id', cursoIds)
+                                .eq('ativo', true);
+                            cursos = cursosData || [];
+                        }
+                    } catch (e) {
+                        console.log('[RITMUS] Erro ao buscar cursos comprados:', e.message);
+                    }
+                }
+
+                // Se não tem cursos comprados, mostrar cursos gratuitos
+                if (cursos.length === 0) {
+                    try {
+                        const { data: cursosFree } = await supabaseClient
+                            .from('cursos')
+                            .select('*')
+                            .eq('ativo', true)
+                            .eq('gratuito', true)
+                            .order('ordem');
+                        cursos = cursosFree || [];
+                    } catch (e) {
+                        console.log('[RITMUS] Erro ao buscar cursos gratuitos:', e.message);
                     }
                 }
 
@@ -279,15 +325,19 @@
                 }
 
                 // Buscar progresso
-                const { data: progressos } = await supabaseClient
-                    .from('progresso_aulas')
-                    .select('aula_id, concluida')
-                    .eq('usuario_id', userId);
+                let progressoMap = {};
+                try {
+                    const { data: progressos } = await supabaseClient
+                        .from('progresso_aulas')
+                        .select('aula_id, concluida')
+                        .eq('usuario_id', userId);
 
-                const progressoMap = {};
-                (progressos || []).forEach(p => {
-                    progressoMap[p.aula_id] = p.concluida;
-                });
+                    (progressos || []).forEach(p => {
+                        progressoMap[p.aula_id] = p.concluida;
+                    });
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar progresso:', e.message);
+                }
 
                 grid.innerHTML = cursos.map(curso => {
                     // Calcular progresso
@@ -313,7 +363,7 @@
                 }).join('');
 
             } catch (e) {
-                console.error('Erro cursos:', e);
+                console.error('[RITMUS] Erro cursos:', e);
                 grid.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar cursos.</p>';
             }
         }
