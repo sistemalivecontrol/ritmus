@@ -174,24 +174,7 @@
                 const plano = document.getElementById('plano').value;
                 const cursoId = document.getElementById('curso_id').value;
 
-                // 1. Verificar se usuário já existe
-                try {
-                    const { data: existingUser } = await supabaseClient
-                        .from('usuarios')
-                        .select('email')
-                        .eq('email', email)
-                        .maybeSingle();
-
-                    if (existingUser) {
-                        hideLoading();
-                        btn.disabled = false;
-                        btn.textContent = 'Criar Conta e Pagar';
-                        showToast('Atenção', 'Este e-mail já está cadastrado. Tente fazer login.', 'warning');
-                        return;
-                    }
-                } catch (e) {}
-
-                // 2. Criar usuário no Auth
+                // 1. Criar usuário no Auth
                 const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                     email: email,
                     password: senha,
@@ -199,7 +182,6 @@
                 });
 
                 if (authError) {
-                    // Tratar erro 429 (Too Many Requests)
                     if (authError.message && authError.message.includes('security purposes')) {
                         hideLoading();
                         btn.disabled = false;
@@ -210,7 +192,22 @@
                     throw authError;
                 }
 
-                // 3. Inserir na tabela usuarios
+                console.log('[RITMUS] Usuário criado no Auth:', authData.user.id);
+
+                // 2. Fazer login automaticamente para criar sessão (necessário para RLS)
+                const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: senha
+                });
+
+                if (loginError) {
+                    console.error('[RITMUS] Erro login automático:', loginError);
+                    // Continuar mesmo sem login - tentar insert com auth_id
+                } else {
+                    console.log('[RITMUS] Login automático realizado');
+                }
+
+                // 3. Inserir na tabela usuarios (agora com sessão ativa, RLS deve permitir)
                 const { data: userData, error: userError } = await supabaseClient
                     .from('usuarios')
                     .insert({
@@ -224,7 +221,13 @@
                     .select()
                     .single();
 
-                if (userError) throw userError;
+                if (userError) {
+                    console.error('[RITMUS] Erro ao inserir usuário:', userError);
+                    // Se falhou por RLS, tentar com upsert usando auth_id
+                    throw userError;
+                }
+
+                console.log('[RITMUS] Usuário inserido na tabela:', userData);
 
                 // 4. Criar assinatura/compra
                 let valor = 0;
@@ -306,7 +309,7 @@
                     hideLoading();
                     console.error('[RITMUS] Erro pagamento:', paymentErr);
 
-                    showToast('Conta criada!', 'Sua conta foi criada! Entre em contato para ativar o pagamento.', 'warning');
+                    showToast('Conta criada!', 'Sua conta foi criada! Faça login para continuar.', 'warning');
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 3000);
@@ -321,6 +324,9 @@
                 let msg = error.message || 'Erro ao criar conta. Tente novamente.';
                 if (msg.includes('security purposes')) {
                     msg = 'Muitas tentativas. Aguarde 1 minuto e tente novamente.';
+                }
+                if (msg.includes('row-level security')) {
+                    msg = 'Erro de permissão. Tente fazer login primeiro.';
                 }
                 showToast('Erro', msg, 'error');
             }
