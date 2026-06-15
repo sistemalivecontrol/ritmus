@@ -59,7 +59,7 @@
                     <div class="form-group" id="curso-select-group" style="display:none">
                         <label for="curso_id">Curso Desejado</label>
                         <select id="curso_id">
-                            <option value="">Carregando cursos...</option>
+                            <option value="">Selecione o curso</option>
                         </select>
                     </div>
                     <div class="form-group" style="display:flex;align-items:flex-start;gap:8px">
@@ -99,20 +99,16 @@
         });
 
         function initCadastro() {
-            // Preencher plano da URL
             const urlParams = new URLSearchParams(window.location.search);
             const planoUrl = urlParams.get('plano');
-            const cursoUrl = urlParams.get('curso');
 
             if (planoUrl) {
                 document.getElementById('plano').value = planoUrl;
                 toggleCursoSelect(planoUrl);
             }
 
-            // Carregar cursos (hardcoded primeiro, depois tenta Supabase)
             loadCursosSelect();
 
-            // Máscara telefone
             document.getElementById('telefone').addEventListener('input', function(e) {
                 let v = e.target.value.replace(/\D/g, '');
                 v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
@@ -120,12 +116,10 @@
                 e.target.value = v;
             });
 
-            // Toggle curso select
             document.getElementById('plano').addEventListener('change', function() {
                 toggleCursoSelect(this.value);
             });
 
-            // Submit
             document.getElementById('form-cadastro').addEventListener('submit', handleCadastro);
         }
 
@@ -145,7 +139,6 @@
             const select = document.getElementById('curso_id');
             select.innerHTML = '<option value="">Selecione o curso</option>';
 
-            // TENTATIVA 1: Buscar do Supabase (se RLS permitir)
             try {
                 const { data: cursos, error } = await supabaseClient
                     .from('cursos')
@@ -157,18 +150,13 @@
                     cursos.forEach(c => {
                         select.innerHTML += `<option value="${c.id}">${c.titulo} - R$ ${c.preco ? c.preco.toFixed(2).replace('.', ',') : '49,90'}</option>`;
                     });
-                    console.log('[RITMUS] Cursos carregados do Supabase:', cursos.length);
                     return;
                 }
-            } catch (e) {
-                console.log('[RITMUS] Supabase indisponível, usando hardcoded');
-            }
+            } catch (e) {}
 
-            // TENTATIVA 2: Usar cursos hardcoded
             CURSOS_DISPONIVEIS.forEach(c => {
                 select.innerHTML += `<option value="${c.id}">${c.titulo} - R$ ${c.preco.toFixed(2).replace('.', ',')}</option>`;
             });
-            console.log('[RITMUS] Cursos carregados (hardcoded)');
         }
 
         async function handleCadastro(e) {
@@ -186,16 +174,43 @@
                 const plano = document.getElementById('plano').value;
                 const cursoId = document.getElementById('curso_id').value;
 
-                // 1. Criar usuário no Auth
+                // 1. Verificar se usuário já existe
+                try {
+                    const { data: existingUser } = await supabaseClient
+                        .from('usuarios')
+                        .select('email')
+                        .eq('email', email)
+                        .maybeSingle();
+
+                    if (existingUser) {
+                        hideLoading();
+                        btn.disabled = false;
+                        btn.textContent = 'Criar Conta e Pagar';
+                        showToast('Atenção', 'Este e-mail já está cadastrado. Tente fazer login.', 'warning');
+                        return;
+                    }
+                } catch (e) {}
+
+                // 2. Criar usuário no Auth
                 const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                     email: email,
                     password: senha,
                     options: { data: { nome: nome } }
                 });
 
-                if (authError) throw authError;
+                if (authError) {
+                    // Tratar erro 429 (Too Many Requests)
+                    if (authError.message && authError.message.includes('security purposes')) {
+                        hideLoading();
+                        btn.disabled = false;
+                        btn.textContent = 'Criar Conta e Pagar';
+                        showToast('Aguarde', 'Você fez muitas tentativas. Aguarde 1 minuto e tente novamente.', 'warning');
+                        return;
+                    }
+                    throw authError;
+                }
 
-                // 2. Inserir na tabela usuarios
+                // 3. Inserir na tabela usuarios
                 const { data: userData, error: userError } = await supabaseClient
                     .from('usuarios')
                     .insert({
@@ -211,12 +226,11 @@
 
                 if (userError) throw userError;
 
-                // 3. Criar assinatura/compra
+                // 4. Criar assinatura/compra
                 let valor = 0;
                 let descricao = '';
 
                 if (plano === 'individual') {
-                    // Buscar preço do curso selecionado
                     const cursoHardcoded = CURSOS_DISPONIVEIS.find(c => c.id === cursoId);
                     const precoCurso = cursoHardcoded ? cursoHardcoded.preco : 49.90;
 
@@ -254,7 +268,7 @@
                     });
                 }
 
-                // 4. Criar pagamento no Asaas
+                // 5. Criar pagamento no Asaas
                 try {
                     const { data: paymentData, error: paymentError } = await supabaseClient.functions.invoke('asaas-criar-cobranca', {
                         body: {
@@ -289,7 +303,6 @@
                         throw new Error('Erro ao gerar link de pagamento');
                     }
                 } catch (paymentErr) {
-                    // Se Edge Function falhar, mostrar mensagem para pagamento manual
                     hideLoading();
                     console.error('[RITMUS] Erro pagamento:', paymentErr);
 
@@ -304,72 +317,14 @@
                 btn.disabled = false;
                 btn.textContent = 'Criar Conta e Pagar';
                 console.error('[RITMUS] Erro cadastro:', error);
-                showToast('Erro', error.message || 'Erro ao criar conta. Tente novamente.', 'error');
-            }
-        }
-    </script>
-</body>
-</html> progresso
-                const { data: existing } = await supabaseClient
-                    .from('progresso_aulas')
-                    .select('id')
-                    .eq('usuario_id', currentUser.id)
-                    .eq('aula_id', aulaId)
-                    .maybeSingle();
 
-                if (existing) {
-                    await supabaseClient
-                        .from('progresso_aulas')
-                        .update({ concluida, updated_at: new Date().toISOString() })
-                        .eq('id', existing.id);
-                } else {
-                    await supabaseClient
-                        .from('progresso_aulas')
-                        .insert({
-                            usuario_id: currentUser.id,
-                            aula_id: aulaId,
-                            curso_id: currentCurso.id,
-                            concluida
-                        });
+                let msg = error.message || 'Erro ao criar conta. Tente novamente.';
+                if (msg.includes('security purposes')) {
+                    msg = 'Muitas tentativas. Aguarde 1 minuto e tente novamente.';
                 }
-            } catch (e) {
-                console.error('Erro progresso:', e);
+                showToast('Erro', msg, 'error');
             }
         }
     </script>
 </body>
-</html>ment.getElementById('modal-' + tipo).classList.add('active');
-            if (tipo === 'aula') preencherSelectCursos();
-        }
-
-        function closeModal(tipo) {
-            document.getElementById('modal-' + tipo).classList.remove('active');
-        }
-
-        // CARREGAR CURSOS
-        async function loadCursosAdmin() {
-            try {
-                const { data: cursos, error } = await supabaseClient
-                    .from('cursos')
-                    .select('*')
-                    .order('ordem', { ascending: true });
-
-                if (error) throw error;
-
-                cursosCache = cursos || [];
-
-                const tbody = document.getElementById('cursos-tbody');
-                tbody.innerHTML = cursosCache.map(c => `
-                    <tr>
-                        <td><strong>${c.titulo}</strong></td>
-                        <td>R$ ${c.preco?.toFixed(2).replace('.', ',') || '0,00'}</td>
-                        <td>${c.total_aulas || 0}</td>
-                        <td><span style="color:${c.ativo ? 'var(--success)' : 'var(--danger)'}">${c.ativo ? '✅ Ativo' : '❌ Inativo'}</span></td>
-                        <td>
-                            <button class="btn-small btn-edit" onclick="editarCurso('${c.id}')">Editar</button>
-                            <button class="btn-small btn-delete" onclick="excluirCurso('${c.id}')">Excluir</button>
-                        </td>
-                    </tr>
-                `).join('');
-
-                // Preencher selects
+</html>
