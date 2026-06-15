@@ -196,7 +196,40 @@
             }
         }
 
-        function renderAulaLista(progressoMap) {
+        // Função para extrair ID do vídeo do YouTube (suporta vários formatos)
+function extrairVideoId(url) {
+    if (!url) return null;
+
+    // youtube.com/watch?v=VIDEO_ID
+    let match = url.match(/[?&]v=([^&]+)/);
+    if (match) return match[1];
+
+    // youtu.be/VIDEO_ID
+    match = url.match(/youtu\.be\/([^?&]+)/);
+    if (match) return match[1];
+
+    // youtube.com/embed/VIDEO_ID
+    match = url.match(/embed\/([^?&]+)/);
+    if (match) return match[1];
+
+    // youtube.com/shorts/VIDEO_ID
+    match = url.match(/shorts\/([^?&]+)/);
+    if (match) return match[1];
+
+    // Se nada funcionar, tentar extrair último segmento da URL
+    try {
+        const urlObj = new URL(url);
+        const pathParts = urlObj.pathname.split('/').filter(p => p);
+        if (pathParts.length > 0) {
+            const lastPart = pathParts[pathParts.length - 1];
+            if (lastPart.length >= 10) return lastPart; // Provável ID de vídeo
+        }
+    } catch (e) {}
+
+    return null;
+}
+
+function renderAulaLista(progressoMap) {
             const lista = document.getElementById('aula-lista');
 
             lista.innerHTML = currentAulas.map((aula, index) => {
@@ -274,23 +307,45 @@
             const videoContainer = document.getElementById('video-container');
 
             if (aula.video_url) {
-                let videoId = aula.video_url;
-                if (videoId.includes('youtube.com/watch?v=')) {
-                    videoId = videoId.split('v=')[1].split('&')[0];
-                } else if (videoId.includes('youtu.be/')) {
-                    videoId = videoId.split('youtu.be/')[1].split('?')[0];
-                } else if (videoId.includes('youtube.com/embed/')) {
-                    videoId = videoId.split('embed/')[1].split('?')[0];
-                }
+                let videoId = extrairVideoId(aula.video_url);
 
-                videoContainer.innerHTML = `
-                    <iframe 
-                        src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen
-                        title="${aula.titulo}"
-                    ></iframe>
-                `;
+                if (videoId) {
+                    // Verificar se é Shorts (não permite embed)
+                    const isShorts = aula.video_url.includes('/shorts/');
+
+                    if (isShorts) {
+                        // Para Shorts, mostrar player alternativo ou link direto
+                        videoContainer.innerHTML = `
+                            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);padding:20px;text-align:center">
+                                <div style="font-size:48px;margin-bottom:16px">📱</div>
+                                <p style="margin-bottom:16px;font-size:16px">Este vídeo é um YouTube Shorts</p>
+                                <p style="font-size:14px;margin-bottom:20px;color:var(--text-dark)">Os Shorts não podem ser incorporados diretamente. Abra no YouTube:</p>
+                                <a href="${aula.video_url}" target="_blank" class="btn-curso" style="text-decoration:none">▶️ Assistir no YouTube</a>
+                            </div>
+                        `;
+                    } else {
+                        // Vídeo normal - embed padrão
+                        videoContainer.innerHTML = `
+                            <iframe 
+                                src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen
+                                title="${aula.titulo}"
+                                onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted)\'><div style=\'text-align:center\'><div style=\'font-size:48px;margin-bottom:16px\'>⚠️</div><p>Erro ao carregar vídeo</p><a href=\'${aula.video_url}\' target=\'_blank\' class=\'btn-curso\' style=\'margin-top:16px;display:inline-block;text-decoration:none\'>▶️ Abrir no YouTube</a></div></div>'"
+                            ></iframe>
+                        `;
+                    }
+                } else {
+                    videoContainer.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted)">
+                            <div style="text-align:center">
+                                <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+                                <p>URL do vídeo inválida</p>
+                                <a href="${aula.video_url}" target="_blank" class="btn-curso" style="margin-top:16px;display:inline-block;text-decoration:none">🔗 Abrir Link</a>
+                            </div>
+                        </div>
+                    `;
+                }
             } else {
                 videoContainer.innerHTML = `
                     <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted)">
