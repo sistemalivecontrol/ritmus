@@ -82,15 +82,6 @@ function hideLoading() {
     if (overlay) overlay.style.display = 'none';
 }
 
-// Formatação
-function formatCurrency(value) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
-
-function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-}
-
 // Verificar autenticação
 async function checkAuth() {
     if (!supabaseClient) return null;
@@ -109,6 +100,13 @@ async function checkAuth() {
         console.error('[RITMUS] Erro auth:', e);
         return null;
     }
+}
+
+// Verificar se é admin
+async function checkAdmin() {
+    const auth = await checkAuth();
+    if (!auth) return false;
+    return auth.user && auth.user.nivel_acesso === 'admin';
 }
 
 // Logout

@@ -19,6 +19,7 @@
             <div class="nav-links">
                 <a href="dashboard.html" class="active">Meu Painel</a>
                 <a href="cursos.html">Cursos</a>
+                <a href="admin.html" id="nav-admin" style="display:none">⚙️ Admin</a>
                 <a href="" onclick="logout();return false">Sair</a>
             </div>
             <button class="menu-toggle" onclick="toggleMenu()">
@@ -47,6 +48,7 @@
                         <li><a href="dashboard.html" class="active"><span class="menu-icon">📊</span> Meu Painel</a></li>
                         <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
                         <li><a href="assinatura.html"><span class="menu-icon">💳</span> Assinatura</a></li>
+                        <li id="sidebar-admin" style="display:none"><a href="admin.html"><span class="menu-icon">⚙️</span> Admin</a></li>
                         <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
                     </ul>
                 </aside>
@@ -144,6 +146,15 @@
             document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
             document.getElementById('sidebar-email').textContent = auth.user.email;
             document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+                
+                // Verificar se é admin e mostrar menu
+                const isAdmin = await checkAdmin();
+                if (isAdmin) {
+                    const navAdmin = document.getElementById('nav-admin');
+                    const sidebarAdmin = document.getElementById('sidebar-admin');
+                    if (navAdmin) navAdmin.style.display = 'inline-flex';
+                    if (sidebarAdmin) sidebarAdmin.style.display = 'block';
+                }
 
             // Verificar status da assinatura
             const assinatura = await checkAssinaturaStatus();
