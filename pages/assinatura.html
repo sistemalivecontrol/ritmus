@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assinatura - Ritmus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html">Meu Painel</a>
+                <a href="cursos.html">Cursos</a>
+                <a href="assinatura.html" class="active">Assinatura</a>
+                <a href="" onclick="logout();return false">Sair</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>💳 Minha Assinatura</h1>
+                <p>Gerencie seu plano e pagamentos</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <aside class="sidebar">
+                    <div class="sidebar-user">
+                        <div class="sidebar-avatar" id="user-avatar">👤</div>
+                        <div>
+                            <div class="sidebar-name" id="sidebar-name">Carregando...</div>
+                            <div class="sidebar-email" id="sidebar-email">...</div>
+                        </div>
+                    </div>
+                    <ul class="sidebar-menu">
+                        <li><a href="dashboard.html"><span class="menu-icon">📊</span> Meu Painel</a></li>
+                        <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
+                        <li><a href="assinatura.html" class="active"><span class="menu-icon">💳</span> Assinatura</a></li>
+                        <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
+                    </ul>
+                </aside>
+
+                <main class="main-content">
+                    <!-- Status da Assinatura -->
+                    <div id="status-card" style="margin-bottom:32px">
+                        <!-- Preenchido via JS -->
+                    </div>
+
+                    <!-- Planos Disponíveis -->
+                    <h2 style="font-size:20px;font-weight:700;margin-bottom:24px">📋 Planos Disponíveis</h2>
+                    <div class="pricing-grid" style="margin-bottom:32px">
+                        <div class="pricing-card">
+                            <div class="pricing-header">
+                                <h3>Plano Mensal</h3>
+                                <div class="pricing-price">
+                                    <span class="currency">R$</span>
+                                    <span class="amount">79</span>
+                                    <span class="period">,90</span>
+                                </div>
+                                <p class="pricing-desc">Acesso a todos os cursos por 1 mês</p>
+                            </div>
+                            <ul class="pricing-features">
+                                <li>✅ Acesso a TODOS os cursos</li>
+                                <li>✅ Aulas novas toda semana</li>
+                                <li>✅ Suporte prioritário</li>
+                                <li>✅ Certificado de conclusão</li>
+                                <li>✅ Comunidade exclusiva</li>
+                            </ul>
+                            <button class="btn-pricing" onclick="assinarPlano('mensal', 79.90)">Assinar Mensal</button>
+                        </div>
+                        <div class="pricing-card featured">
+                            <div class="pricing-badge">⭐ Mais Popular</div>
+                            <div class="pricing-header">
+                                <h3>Plano Anual</h3>
+                                <div class="pricing-price">
+                                    <span class="currency">R$</span>
+                                    <span class="amount">599</span>
+                                    <span class="period">,90</span>
+                                </div>
+                                <p class="pricing-desc">Economize 37% no ano</p>
+                            </div>
+                            <ul class="pricing-features">
+                                <li>✅ Tudo do plano mensal</li>
+                                <li>✅ 2 meses grátis</li>
+                                <li>✅ Materiais extras</li>
+                                <li>✅ Planilha de treino</li>
+                                <li>✅ Suporte VIP</li>
+                            </ul>
+                            <button class="btn-pricing btn-featured" onclick="assinarPlano('anual', 599.90)">Assinar Anual</button>
+                        </div>
+                    </div>
+
+                    <!-- Histórico de Pagamentos -->
+                    <h2 style="font-size:20px;font-weight:700;margin-bottom:24px">📜 Histórico de Pagamentos</h2>
+                    <div id="historico-pagamentos">
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Data</th><th>Plano</th><th>Valor</th><th>Status</th><th>Expiração</th></tr>
+                            </thead>
+                            <tbody id="historico-tbody">
+                                <tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                initAssinatura();
+            });
+        });
+
+        async function initAssinatura() {
+            const auth = await requireAuth();
+            if (!auth) return;
+
+            currentUser = auth.user;
+            document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
+            document.getElementById('sidebar-email').textContent = auth.user.email;
+            document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+
+            await loadStatusAssinatura();
+            await loadHistorico();
+        }
+
+        async function loadStatusAssinatura() {
+            const container = document.getElementById('status-card');
+
+            try {
+                const assinatura = await checkAssinaturaStatus();
+
+                if (assinatura.ativa) {
+                    const expiracao = new Date(assinatura.expiracao);
+                    const diasRestantes = Math.ceil((expiracao - new Date()) / (1000 * 60 * 60 * 24));
+
+                    container.innerHTML = `
+                        <div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));border:1px solid rgba(16,185,129,0.3);border-radius:var(--radius);padding:24px 32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+                            <div style="font-size:48px">✅</div>
+                            <div style="flex:1">
+                                <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Assinatura Ativa</h3>
+                                <p style="color:var(--text-muted);font-size:14px">Plano: <strong style="color:var(--primary)">${assinatura.plano === 'anual' ? 'Anual' : 'Mensal'}</strong></p>
+                                <p style="color:var(--text-muted);font-size:14px">Expira em: <strong>${expiracao.toLocaleDateString('pt-BR')}</strong> (${diasRestantes} dias restantes)</p>
+                            </div>
+                            <button class="btn-curso" onclick="assinarPlano('${assinatura.plano}', ${assinatura.plano === 'anual' ? 599.90 : 79.90})">Renovar Agora</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.05));border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:24px 32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+                            <div style="font-size:48px">⚠️</div>
+                            <div style="flex:1">
+                                <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">Sem Assinatura Ativa</h3>
+                                <p style="color:var(--text-muted);font-size:14px">Você não possui uma assinatura ativa. Escolha um plano abaixo para começar.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error('[RITMUS] Erro ao carregar status:', e);
+                container.innerHTML = `
+                    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 32px">
+                        <p style="color:var(--text-muted)">Erro ao carregar status da assinatura.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadHistorico() {
+            const tbody = document.getElementById('historico-tbody');
+
+            try {
+                const { data: assinaturas, error } = await supabaseClient
+                    .from('assinaturas')
+                    .select('*')
+                    .eq('usuario_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!assinaturas || assinaturas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Nenhum pagamento encontrado.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = assinaturas.map(a => {
+                    const statusColor = a.status === 'ativa' ? 'var(--success)' : (a.status === 'cancelada' ? 'var(--danger)' : 'var(--warning)');
+                    return `
+                        <tr>
+                            <td>${new Date(a.created_at).toLocaleDateString('pt-BR')}</td>
+                            <td><span style="color:var(--primary);font-weight:500">${a.plano === 'anual' ? 'Anual' : 'Mensal'}</span></td>
+                            <td>R$ ${a.valor?.toFixed(2).replace('.', ',') || '0,00'}</td>
+                            <td><span style="color:${statusColor};font-weight:500">${a.status === 'ativa' ? '✅ Ativa' : (a.status === 'cancelada' ? '❌ Cancelada' : '⏳ Pendente')}</span></td>
+                            <td>${a.data_expiracao ? new Date(a.data_expiracao).toLocaleDateString('pt-BR') : '-'}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (e) {
+                console.error('[RITMUS] Erro ao carregar histórico:', e);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Erro ao carregar histórico.</td></tr>';
+            }
+        }
+
+        async function assinarPlano(plano, valor) {
+            showLoading('Processando pagamento...');
+
+            try {
+                const descricao = plano === 'anual' ? 'Plano Anual' : 'Plano Mensal';
+
+                const { data: paymentData, error: paymentError } = await supabaseClient.functions.invoke('asaas-criar-cobranca', {
+                    body: {
+                        nome: currentUser.nome || currentUser.email,
+                        email: currentUser.email,
+                        telefone: currentUser.telefone || '',
+                        valor: valor,
+                        descricao: descricao,
+                        usuario_id: currentUser.id,
+                        plano: plano
+                    }
+                });
+
+                hideLoading();
+
+                if (paymentError) throw paymentError;
+
+                if (paymentData && paymentData.success && paymentData.payment_url) {
+                    showToast('Sucesso!', 'Redirecionando para o pagamento...', 'success');
+                    setTimeout(() => {
+                        window.location.href = paymentData.payment_url;
+                    }, 1500);
+                } else {
+                    throw new Error('Erro ao gerar link de pagamento');
+                }
+
+            } catch (error) {
+                hideLoading();
+                console.error('[RITMUS] Erro ao assinar:', error);
+                showToast('Erro', error.message || 'Erro ao processar pagamento. Tente novamente.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

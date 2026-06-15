@@ -686,3 +686,24 @@ body {
 
 /* ===== SELECTION ===== */
 ::selection { background: rgba(255, 107, 53, 0.3); color: var(--text); }
+
+
+/* ===== IMAGEM FALLBACK ===== */
+img {
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--secondary) 100%);
+    min-height: 160px;
+}
+
+img::before {
+    content: '🎬';
+    display: block;
+    text-align: center;
+    font-size: 48px;
+    padding: 40px 0;
+    color: var(--text-muted);
+}
+
+.curso-thumb img {
+    object-fit: cover;
+    background: linear-gradient(135deg, #1A1A2E 0%, #2D2D4A 100%);
+}
