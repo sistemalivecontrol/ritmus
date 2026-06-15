@@ -19,7 +19,6 @@
             <div class="nav-links">
                 <a href="dashboard.html" class="active">Meu Painel</a>
                 <a href="cursos.html">Cursos</a>
-                <a href="admin.html" id="nav-admin" style="display:none">⚙️ Admin</a>
                 <a href="" onclick="logout();return false">Sair</a>
             </div>
             <button class="menu-toggle" onclick="toggleMenu()">
@@ -48,7 +47,6 @@
                         <li><a href="dashboard.html" class="active"><span class="menu-icon">📊</span> Meu Painel</a></li>
                         <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
                         <li><a href="assinatura.html"><span class="menu-icon">💳</span> Assinatura</a></li>
-                        <li id="sidebar-admin" style="display:none"><a href="admin.html"><span class="menu-icon">⚙️</span> Admin</a></li>
                         <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
                     </ul>
                 </aside>
@@ -87,17 +85,6 @@
                                 <p style="font-size:14px;color:var(--text-muted)">Sua assinatura expirou. Renove agora para continuar acessando as aulas.</p>
                             </div>
                             <a href="assinatura.html" class="btn-curso" style="flex-shrink:0">Renovar</a>
-                        </div>
-                    </div>
-
-                    <!-- Aviso Teste -->
-                    <div id="teste-alerta" style="display:none;margin-bottom:24px">
-                        <div style="background:linear-gradient(135deg,rgba(247,201,72,0.1),rgba(247,201,72,0.05));border:1px solid rgba(247,201,72,0.3);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:16px">
-                            <span style="font-size:32px">🎁</span>
-                            <div style="flex:1">
-                                <h3 style="font-size:16px;font-weight:600;margin-bottom:4px">Período de Teste</h3>
-                                <p style="font-size:14px;color:var(--text-muted)">Você está no período de teste. Aproveite todas as aulas! <span id="teste-dias">7</span> dias restantes.</p>
-                            </div>
                         </div>
                     </div>
 
@@ -146,32 +133,29 @@
             document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
             document.getElementById('sidebar-email').textContent = auth.user.email;
             document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
-                
-                // Verificar se é admin e mostrar menu
-                const isAdmin = await checkAdmin();
-                if (isAdmin) {
-                    const navAdmin = document.getElementById('nav-admin');
-                    const sidebarAdmin = document.getElementById('sidebar-admin');
-                    if (navAdmin) navAdmin.style.display = 'inline-flex';
-                    if (sidebarAdmin) sidebarAdmin.style.display = 'block';
-                }
 
-            // Verificar status da assinatura
-            const assinatura = await checkAssinaturaStatus();
+            // Verificar status da assinatura (com tratamento de erro)
+            let assinaturaAtiva = false;
+            let dataExpiracao = null;
+            try {
+                const assinatura = await checkAssinaturaStatus();
+                assinaturaAtiva = assinatura.ativa;
+                dataExpiracao = assinatura.expiracao;
+            } catch (e) {
+                console.log('[RITMUS] Erro ao verificar assinatura:', e.message);
+            }
 
-            if (!assinatura.ativa && auth.user.plano !== 'teste') {
+            if (!assinaturaAtiva && auth.user.plano !== 'teste') {
                 document.getElementById('user-status').innerHTML = '<span style="color:var(--danger)">⚠️ Assinatura expirada</span>';
                 document.getElementById('assinatura-alerta').style.display = 'block';
             } else if (auth.user.plano === 'teste') {
                 document.getElementById('user-status').innerHTML = '<span style="color:var(--accent)">🎁 Período de teste</span>';
-                document.getElementById('teste-alerta').style.display = 'block';
-                // Calcular dias restantes
-                const diasRestantes = calcularDiasTeste(auth.user.created_at);
-                document.getElementById('teste-dias').textContent = diasRestantes;
-            } else {
-                const expiracao = new Date(assinatura.expiracao);
+            } else if (dataExpiracao) {
+                const expiracao = new Date(dataExpiracao);
                 document.getElementById('user-status').innerHTML = 
                     `<span style="color:var(--success)">✅ Assinatura ativa até ${expiracao.toLocaleDateString('pt-BR')}</span>`;
+            } else {
+                document.getElementById('user-status').innerHTML = '<span style="color:var(--text-muted)">Sem assinatura ativa</span>';
             }
 
             // Carregar estatísticas e cursos
@@ -180,23 +164,14 @@
             await loadContinueWatching(auth.user.id);
         }
 
-        function calcularDiasTeste(createdAt) {
-            const criacao = new Date(createdAt);
-            const expiracao = new Date(criacao);
-            expiracao.setDate(expiracao.getDate() + 7);
-            const agora = new Date();
-            const diff = Math.ceil((expiracao - agora) / (1000 * 60 * 60 * 24));
-            return Math.max(0, diff);
-        }
-
         async function loadStats(userId) {
             try {
                 // Cursos ativos (compras individuais)
                 let cursosCount = 0;
                 try {
-                    const { data, count } = await supabaseClient
+                    const { count } = await supabaseClient
                         .from('compras_cursos')
-                        .select('*', { count: 'exact' })
+                        .select('*', { count: 'exact', head: true })
                         .eq('usuario_id', userId)
                         .eq('status', 'pago');
                     cursosCount = count || 0;
@@ -252,52 +227,30 @@
             const grid = document.getElementById('meus-cursos-grid');
 
             try {
-                // Verificar assinatura (com tratamento de erro)
-                let assinatura = { ativa: false };
-                try {
-                    assinatura = await checkAssinaturaStatus();
-                } catch (e) {
-                    console.log('[RITMUS] Erro ao verificar assinatura:', e.message);
-                }
-
                 let cursos = [];
 
-                if (assinatura.ativa) {
-                    // Assinatura ativa = acesso a todos os cursos
-                    try {
-                        const { data: allCursos } = await supabaseClient
+                // Tentar buscar cursos comprados
+                try {
+                    const { data: compras } = await supabaseClient
+                        .from('compras_cursos')
+                        .select('curso_id')
+                        .eq('usuario_id', userId)
+                        .eq('status', 'pago');
+
+                    if (compras && compras.length > 0) {
+                        const cursoIds = compras.map(c => c.curso_id);
+                        const { data: cursosData } = await supabaseClient
                             .from('cursos')
                             .select('*')
-                            .eq('ativo', true)
-                            .order('ordem');
-                        cursos = allCursos || [];
-                    } catch (e) {
-                        console.log('[RITMUS] Erro ao buscar todos cursos:', e.message);
+                            .in('id', cursoIds)
+                            .eq('ativo', true);
+                        cursos = cursosData || [];
                     }
-                } else {
-                    // Cursos comprados individualmente
-                    try {
-                        const { data: compras } = await supabaseClient
-                            .from('compras_cursos')
-                            .select('curso_id')
-                            .eq('usuario_id', userId)
-                            .eq('status', 'pago');
-
-                        if (compras && compras.length > 0) {
-                            const cursoIds = compras.map(c => c.curso_id);
-                            const { data: cursosData } = await supabaseClient
-                                .from('cursos')
-                                .select('*')
-                                .in('id', cursoIds)
-                                .eq('ativo', true);
-                            cursos = cursosData || [];
-                        }
-                    } catch (e) {
-                        console.log('[RITMUS] Erro ao buscar cursos comprados:', e.message);
-                    }
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar cursos comprados:', e.message);
                 }
 
-                // Se não tem cursos comprados, mostrar cursos gratuitos
+                // Se não tem cursos comprados, buscar cursos gratuitos
                 if (cursos.length === 0) {
                     try {
                         const { data: cursosFree } = await supabaseClient
@@ -340,7 +293,6 @@
                 }
 
                 grid.innerHTML = cursos.map(curso => {
-                    // Calcular progresso
                     const totalAulas = curso.total_aulas || 1;
                     const aulasConcluidas = Object.keys(progressoMap).filter(aulaId => progressoMap[aulaId]).length;
                     const percentual = Math.round((aulasConcluidas / totalAulas) * 100);
@@ -374,13 +326,19 @@
 
             try {
                 // Buscar última aula assistida
-                const { data: ultimoProgresso } = await supabaseClient
-                    .from('progresso_aulas')
-                    .select('aula_id, curso_id, updated_at')
-                    .eq('usuario_id', userId)
-                    .order('updated_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
+                let ultimoProgresso = null;
+                try {
+                    const { data } = await supabaseClient
+                        .from('progresso_aulas')
+                        .select('aula_id, curso_id, updated_at')
+                        .eq('usuario_id', userId)
+                        .order('updated_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+                    ultimoProgresso = data;
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar último progresso:', e.message);
+                }
 
                 if (!ultimoProgresso) {
                     section.style.display = 'none';
@@ -388,11 +346,17 @@
                 }
 
                 // Buscar dados da aula e curso
-                const { data: aula } = await supabaseClient
-                    .from('aulas')
-                    .select('*, cursos!inner(titulo, thumbnail)')
-                    .eq('id', ultimoProgresso.aula_id)
-                    .single();
+                let aula = null;
+                try {
+                    const { data } = await supabaseClient
+                        .from('aulas')
+                        .select('*, cursos!inner(titulo, thumbnail)')
+                        .eq('id', ultimoProgresso.aula_id)
+                        .single();
+                    aula = data;
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar aula:', e.message);
+                }
 
                 if (!aula) {
                     section.style.display = 'none';
@@ -417,7 +381,7 @@
 
             } catch (e) {
                 section.style.display = 'none';
-                console.error('Erro continue:', e);
+                console.error('[RITMUS] Erro continue:', e);
             }
         }
     </script>
