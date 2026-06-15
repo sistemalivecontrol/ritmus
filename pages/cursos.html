@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
 </head>
 <body>
     <nav class="navbar">
@@ -72,13 +71,17 @@
         });
 
         async function initCursos() {
-            const auth = await requireAuth();
-            if (!auth) return;
-
-            currentUser = auth.user;
-            document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
-            document.getElementById('sidebar-email').textContent = auth.user.email;
-            document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+            const auth = await checkAuth();
+            if (auth) {
+                currentUser = auth.user;
+                document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
+                document.getElementById('sidebar-email').textContent = auth.user.email;
+                document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+            } else {
+                document.getElementById('sidebar-name').textContent = 'Visitante';
+                document.getElementById('sidebar-email').textContent = 'Faça login para mais recursos';
+                document.getElementById('user-avatar').textContent = '👤';
+            }
 
             await loadCursosPage();
         }
@@ -87,15 +90,20 @@
             const container = document.getElementById('cursos-container');
 
             try {
-                // Verificar assinatura
-                const assinatura = await checkAssinaturaStatus();
+                // Verificar assinatura (se logado)
+                let assinatura = { ativa: false };
+                if (currentUser) {
+                    assinatura = await checkAssinaturaStatus();
+                }
 
                 // Buscar todos os cursos
-                const { data: cursos } = await supabaseClient
+                const { data: cursos, error } = await supabaseClient
                     .from('cursos')
-                    .select('*')
+                    .select('id, titulo, descricao, thumbnail, preco, total_aulas, duracao_total, total_alunos, avaliacao, ordem, ativo, gratuito, created_at')
                     .eq('ativo', true)
                     .order('ordem', { ascending: true });
+
+                if (error) throw error;
 
                 if (!cursos || cursos.length === 0) {
                     container.innerHTML = `
@@ -108,9 +116,9 @@
                     return;
                 }
 
-                // Buscar cursos comprados
+                // Buscar cursos comprados (se logado)
                 let cursosComprados = [];
-                if (!assinatura.ativa) {
+                if (currentUser && !assinatura.ativa) {
                     const { data: compras } = await supabaseClient
                         .from('compras_cursos')
                         .select('curso_id')
@@ -131,36 +139,48 @@
                     aulasFreeMap[a.curso_id] = true;
                 });
 
-                // Buscar progresso
-                const { data: progressos } = await supabaseClient
-                    .from('progresso_aulas')
-                    .select('aula_id, concluida')
-                    .eq('usuario_id', currentUser.id);
+                // Buscar progresso (se logado)
+                let progressoMap = {};
+                if (currentUser) {
+                    const { data: progressos } = await supabaseClient
+                        .from('progresso_aulas')
+                        .select('aula_id, concluida')
+                        .eq('usuario_id', currentUser.id);
 
-                const progressoMap = {};
-                (progressos || []).forEach(p => {
-                    progressoMap[p.aula_id] = p.concluida;
-                });
+                    (progressos || []).forEach(p => {
+                        progressoMap[p.aula_id] = p.concluida;
+                    });
+                }
 
                 // Renderizar cursos
                 container.innerHTML = `
                     <div class="cursos-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
                         ${cursos.map(curso => {
+                            // VERIFICAÇÃO DE ACESSO
                             const temAcesso = assinatura.ativa || cursosComprados.includes(curso.id);
+                            const temAulasFree = aulasFreeMap[curso.id] || false;
 
-                            // Calcular progresso
-                            let percentual = 0;
-                            if (temAcesso) {
-                                // Buscar aulas do curso
-                                // Simplificado: mostrar 0% se não tiver progresso
-                                percentual = 0;
+                            // VERIFICAR SE CURSO É GRATUITO (robusto para diferentes formatos)
+                            let isCursoFree = false;
+                            if (curso.gratuito === true || curso.gratuito === 'true' || curso.gratuito === 't' || curso.gratuito === 1 || curso.gratuito === '1') {
+                                isCursoFree = true;
                             }
 
+                            // Se preço é 0, também considerar gratuito
+                            if (curso.preco === 0 || curso.preco === '0' || curso.preco === '0.00') {
+                                isCursoFree = true;
+                            }
+
+                            const podeAssistir = temAcesso || temAulasFree || isCursoFree;
+
+                            // DEBUG: mostrar no console
+                            console.log('[RITMUS] Curso:', curso.titulo, '| gratuito:', curso.gratuito, '| preco:', curso.preco, '| isCursoFree:', isCursoFree, '| podeAssistir:', podeAssistir);
+
                             return `
-                                <div class="curso-card" style="cursor:${temAcesso ? 'pointer' : 'default'}">
+                                <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
                                     <div class="curso-thumb" style="position:relative">
                                         <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy">
-                                        ${temAcesso ? `
+                                        ${podeAssistir ? `
                                             <div class="curso-play">
                                                 <div class="play-btn">▶</div>
                                             </div>
@@ -172,6 +192,11 @@
                                                 </div>
                                             </div>
                                         `}
+                                        ${isCursoFree ? `
+                                            <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#F7C948,#D97706);color:white;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:600">🎁 CURSO GRATUITO</div>
+                                        ` : (temAulasFree ? `
+                                            <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--success),#059669);color:white;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:600">🎁 TEM AULAS FREE</div>
+                                        ` : '')}
                                         <div class="curso-badge">${curso.total_aulas || 0} aulas</div>
                                     </div>
                                     <div class="curso-info">
@@ -181,19 +206,15 @@
                                             <span>⏱️ ${curso.duracao_total || '0h'}</span>
                                             <span>👥 ${curso.total_alunos || 0} alunos</span>
                                         </div>
-                                        ${temAcesso ? `
-                                            <div style="margin-top:12px">
-                                                <div class="progress-bar">
-                                                    <div class="progress-fill" style="width:${percentual}%"></div>
-                                                </div>
-                                                <div class="progress-text">${percentual}% concluído</div>
-                                            </div>
+                                        ${podeAssistir ? `
                                             <div style="margin-top:16px">
-                                                <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">Assistir Aulas</a>
+                                                <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
+                                                    ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcesso ? '🎁 Assistir Aulas Free' : 'Assistir Aulas')}
+                                                </a>
                                             </div>
                                         ` : `
                                             <div class="curso-footer" style="margin-top:12px">
-                                                <span class="curso-price">R$ ${curso.preco?.toFixed(2).replace('.', ',') || '49,90'}</span>
+                                                <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
                                                 <a href="../index.html#precos" class="btn-curso">Comprar</a>
                                             </div>
                                         `}
