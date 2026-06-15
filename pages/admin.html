@@ -641,27 +641,35 @@
             });
         }
 
-        // SALVAR CURSO
+        // SALVAR CURSO via Edge Function
         document.getElementById('form-curso').addEventListener('submit', async function(e) {
             e.preventDefault();
             showLoading('Salvando curso...');
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('cursos')
-                    .insert({
-                        titulo: document.getElementById('curso-titulo').value,
-                        descricao: document.getElementById('curso-descricao').value,
-                        preco: parseFloat(document.getElementById('curso-preco').value),
-                        total_aulas: parseInt(document.getElementById('curso-total-aulas').value) || 0,
-                        duracao_total: document.getElementById('curso-duracao').value,
-                        ordem: parseInt(document.getElementById('curso-ordem').value) || 0,
-                        thumbnail: document.getElementById('curso-thumbnail').value,
-                        ativo: document.getElementById('curso-ativo').checked
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'insert_curso',
+                        data: {
+                            titulo: document.getElementById('curso-titulo').value,
+                            descricao: document.getElementById('curso-descricao').value,
+                            preco: parseFloat(document.getElementById('curso-preco').value),
+                            total_aulas: parseInt(document.getElementById('curso-total-aulas').value) || 0,
+                            duracao_total: document.getElementById('curso-duracao').value,
+                            ordem: parseInt(document.getElementById('curso-ordem').value) || 0,
+                            thumbnail: document.getElementById('curso-thumbnail').value,
+                            ativo: document.getElementById('curso-ativo').checked
+                        }
                     })
-                    .select();
+                });
 
-                if (error) throw error;
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro ao salvar');
 
                 hideLoading();
                 closeModal('curso');
@@ -692,26 +700,35 @@
             openModal('editar-curso');
         }
 
-        // ATUALIZAR CURSO
+        // ATUALIZAR CURSO via Edge Function
         document.getElementById('form-editar-curso').addEventListener('submit', async function(e) {
             e.preventDefault();
             showLoading('Atualizando curso...');
 
             try {
                 const id = document.getElementById('edit-curso-id').value;
-                const { error } = await supabaseClient
-                    .from('cursos')
-                    .update({
-                        titulo: document.getElementById('edit-curso-titulo').value,
-                        descricao: document.getElementById('edit-curso-descricao').value,
-                        preco: parseFloat(document.getElementById('edit-curso-preco').value),
-                        ordem: parseInt(document.getElementById('edit-curso-ordem').value) || 0,
-                        thumbnail: document.getElementById('edit-curso-thumbnail').value,
-                        ativo: document.getElementById('edit-curso-ativo').checked
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'update_curso',
+                        id: id,
+                        data: {
+                            titulo: document.getElementById('edit-curso-titulo').value,
+                            descricao: document.getElementById('edit-curso-descricao').value,
+                            preco: parseFloat(document.getElementById('edit-curso-preco').value),
+                            ordem: parseInt(document.getElementById('edit-curso-ordem').value) || 0,
+                            thumbnail: document.getElementById('edit-curso-thumbnail').value,
+                            ativo: document.getElementById('edit-curso-ativo').checked
+                        }
                     })
-                    .eq('id', id);
+                });
 
-                if (error) throw error;
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro ao atualizar');
 
                 hideLoading();
                 closeModal('editar-curso');
@@ -727,22 +744,30 @@
         async function excluirCurso(id) {
             if (!confirm('Tem certeza que deseja excluir este curso? Todas as aulas serão excluídas também.')) return;
 
-            const isAdmin = await checkAdmin();
-            if (!isAdmin) {
-                showToast('Acesso Negado', 'Você não tem permissão para excluir cursos.', 'error');
-                return;
-            }
-
             try {
                 showLoading('Excluindo...');
-                await supabaseClient.from('cursos').delete().eq('id', id);
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_curso',
+                        id: id
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro ao excluir');
+
                 hideLoading();
                 showToast('Sucesso!', 'Curso excluído', 'success');
                 await loadCursosAdmin();
                 await loadStatsAdmin();
             } catch (e) {
                 hideLoading();
-                showToast('Erro', 'Erro ao excluir', 'error');
+                showToast('Erro', e.message || 'Erro ao excluir', 'error');
             }
         }
 
@@ -789,38 +814,35 @@
             }
         }
 
-        // SALVAR AULA
+        // SALVAR AULA via Edge Function
         document.getElementById('form-aula').addEventListener('submit', async function(e) {
             e.preventDefault();
             showLoading('Salvando aula...');
 
             try {
                 const cursoId = document.getElementById('aula-curso').value;
-                const { data, error } = await supabaseClient
-                    .from('aulas')
-                    .insert({
-                        curso_id: cursoId,
-                        titulo: document.getElementById('aula-titulo').value,
-                        descricao: document.getElementById('aula-descricao').value,
-                        video_url: document.getElementById('aula-video').value,
-                        duracao: document.getElementById('aula-duracao').value,
-                        ordem: parseInt(document.getElementById('aula-ordem').value) || 1,
-                        ativo: document.getElementById('aula-ativo').checked
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'insert_aula',
+                        data: {
+                            curso_id: cursoId,
+                            titulo: document.getElementById('aula-titulo').value,
+                            descricao: document.getElementById('aula-descricao').value,
+                            video_url: document.getElementById('aula-video').value,
+                            duracao: document.getElementById('aula-duracao').value,
+                            ordem: parseInt(document.getElementById('aula-ordem').value) || 1,
+                            ativo: document.getElementById('aula-ativo').checked
+                        }
                     })
-                    .select();
+                });
 
-                if (error) throw error;
-
-                // Atualizar contagem de aulas do curso
-                const { count } = await supabaseClient
-                    .from('aulas')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('curso_id', cursoId);
-
-                await supabaseClient
-                    .from('cursos')
-                    .update({ total_aulas: count || 0 })
-                    .eq('id', cursoId);
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro ao salvar');
 
                 hideLoading();
                 closeModal('aula');
@@ -839,22 +861,30 @@
         async function excluirAula(id) {
             if (!confirm('Tem certeza que deseja excluir esta aula?')) return;
 
-            const isAdmin = await checkAdmin();
-            if (!isAdmin) {
-                showToast('Acesso Negado', 'Você não tem permissão para excluir aulas.', 'error');
-                return;
-            }
-
             try {
                 showLoading('Excluindo...');
-                await supabaseClient.from('aulas').delete().eq('id', id);
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_aula',
+                        id: id
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro ao excluir');
+
                 hideLoading();
                 showToast('Sucesso!', 'Aula excluída', 'success');
                 await loadAulasAdmin();
                 await loadStatsAdmin();
             } catch (e) {
                 hideLoading();
-                showToast('Erro', 'Erro ao excluir', 'error');
+                showToast('Erro', e.message || 'Erro ao excluir', 'error');
             }
         }
 
@@ -888,11 +918,6 @@
         }
 
         async function tornarAdmin(userId) {
-            const isAdmin = await checkAdmin();
-            if (!isAdmin) {
-                showToast('Acesso Negado', 'Você não tem permissão para alterar permissões.', 'error');
-                return;
-            }
             try {
                 const { data: user } = await supabaseClient
                     .from('usuarios')
@@ -902,16 +927,27 @@
 
                 const novoNivel = user.nivel_acesso === 'admin' ? 'usuario' : 'admin';
 
-                await supabaseClient
-                    .from('usuarios')
-                    .update({ nivel_acesso: novoNivel })
-                    .eq('id', userId);
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'update_usuario',
+                        id: userId,
+                        data: { nivel_acesso: novoNivel }
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro');
 
                 showToast('Sucesso!', `Usuário agora é ${novoNivel === 'admin' ? 'administrador' : 'usuário comum'}!`, 'success');
                 await loadAlunosAdmin();
 
             } catch (e) {
-                showToast('Erro', 'Erro ao alterar permissão', 'error');
+                showToast('Erro', e.message || 'Erro ao alterar permissão', 'error');
             }
         }
 
@@ -946,49 +982,61 @@
         }
 
         async function renovarAssinatura(id) {
-            const isAdmin = await checkAdmin();
-            if (!isAdmin) {
-                showToast('Acesso Negado', 'Você não tem permissão para renovar assinaturas.', 'error');
-                return;
-            }
             try {
                 const dataExp = new Date();
                 dataExp.setMonth(dataExp.getMonth() + 1);
 
-                await supabaseClient
-                    .from('assinaturas')
-                    .update({ 
-                        status: 'ativa', 
-                        data_expiracao: dataExp.toISOString() 
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'update_assinatura',
+                        id: id,
+                        data: { 
+                            status: 'ativa', 
+                            data_expiracao: dataExp.toISOString() 
+                        }
                     })
-                    .eq('id', id);
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro');
 
                 showToast('Sucesso!', 'Assinatura renovada!', 'success');
                 await loadAssinaturasAdmin();
                 await loadStatsAdmin();
             } catch (e) {
-                showToast('Erro', 'Erro ao renovar', 'error');
+                showToast('Erro', e.message || 'Erro ao renovar', 'error');
             }
         }
 
         async function cancelarAssinatura(id) {
             if (!confirm('Tem certeza que deseja cancelar esta assinatura?')) return;
 
-            const isAdmin = await checkAdmin();
-            if (!isAdmin) {
-                showToast('Acesso Negado', 'Você não tem permissão para cancelar assinaturas.', 'error');
-                return;
-            }
             try {
-                await supabaseClient
-                    .from('assinaturas')
-                    .update({ status: 'cancelada' })
-                    .eq('id', id);
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'update_assinatura',
+                        id: id,
+                        data: { status: 'cancelada' }
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro');
 
                 showToast('Sucesso!', 'Assinatura cancelada', 'success');
                 await loadAssinaturasAdmin();
             } catch (e) {
-                showToast('Erro', 'Erro ao cancelar', 'error');
+                showToast('Erro', e.message || 'Erro ao cancelar', 'error');
             }
         }
     </script>
