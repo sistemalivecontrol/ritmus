@@ -163,14 +163,19 @@ async function checkAssinaturaStatus() {
     if (!auth) return { ativa: false, plano: null, expiracao: null };
 
     try {
-        const { data: assinatura } = await supabaseClient
+        const { data: assinatura, error } = await supabaseClient
             .from('assinaturas')
             .select('*')
             .eq('usuario_id', auth.user.id)
             .eq('status', 'ativa')
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
+
+        if (error) {
+            console.log('[RITMUS] Erro ao buscar assinatura:', error.message);
+            return { ativa: false, plano: null, expiracao: null };
+        }
 
         if (!assinatura) return { ativa: false, plano: null, expiracao: null };
 
@@ -185,6 +190,7 @@ async function checkAssinaturaStatus() {
             assinatura_id: assinatura.id
         };
     } catch (e) {
+        console.log('[RITMUS] Erro checkAssinaturaStatus:', e.message);
         return { ativa: false, plano: null, expiracao: null };
     }
 }
