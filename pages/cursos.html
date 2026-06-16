@@ -1,21 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- SCRIPT ANTI-BLANK: Intercepta TODOS os cliques antes de tudo -->
-    <script>
-    (function() {
-        document.addEventListener('click', function(e) {
-            var link = e.target.closest('a');
-            if (link) {
-                link.removeAttribute('target');
-                var href = link.getAttribute('href') || '';
-                if (href && !href.match(/^https?:\/\//) && !href.match(/^mailto:/) && !href.match(/^tel:/)) {
-                    link.removeAttribute('target');
-                }
-            }
-        }, true);
-    })();
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cursos - Ritmus</title>
@@ -23,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
-<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
