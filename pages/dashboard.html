@@ -47,7 +47,6 @@
                     <ul class="sidebar-menu">
                         <li><a href="dashboard.html" class="active"><span class="menu-icon">📊</span> Meu Painel</a></li>
                         <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
-                        <li><a href="assinatura.html"><span class="menu-icon">💳</span> Assinatura</a></li>
                         <li id="sidebar-admin" style="display:none"><a href="admin.html"><span class="menu-icon">⚙️</span> Admin</a></li>
                         <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
                     </ul>
@@ -78,15 +77,15 @@
                         </div>
                     </div>
 
-                    <!-- Aviso de Assinatura -->
-                    <div id="assinatura-alerta" style="display:none;margin-bottom:24px">
-                        <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.05));border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:16px">
-                            <span style="font-size:32px">⚠️</span>
+                    <!-- Aviso: Sem cursos comprados -->
+                    <div id="sem-cursos-alerta" style="display:none;margin-bottom:24px">
+                        <div style="background:linear-gradient(135deg,rgba(255,107,53,0.1),rgba(255,107,53,0.05));border:1px solid rgba(255,107,53,0.3);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:16px">
+                            <span style="font-size:32px">🎬</span>
                             <div style="flex:1">
-                                <h3 style="font-size:16px;font-weight:600;margin-bottom:4px">Assinatura Expirada</h3>
-                                <p style="font-size:14px;color:var(--text-muted)">Sua assinatura expirou. Renove agora para continuar acessando as aulas.</p>
+                                <h3 style="font-size:16px;font-weight:600;margin-bottom:4px">Comece a Treinar!</h3>
+                                <p style="font-size:14px;color:var(--text-muted)">Você ainda não comprou nenhum curso. Explore nossa lista e comece hoje mesmo!</p>
                             </div>
-                            <a href="assinatura.html" class="btn-curso" style="flex-shrink:0">Renovar</a>
+                            <a href="cursos.html" class="btn-curso" style="flex-shrink:0">Ver Cursos</a>
                         </div>
                     </div>
 
@@ -150,28 +149,24 @@
                 console.log('[RITMUS] Erro ao verificar admin:', e.message);
             }
 
-            // Verificar status da assinatura (com tratamento de erro)
-            let assinaturaAtiva = false;
-            let dataExpiracao = null;
+            // Verificar cursos comprados
+            let cursosComprados = 0;
             try {
-                const assinatura = await checkAssinaturaStatus();
-                assinaturaAtiva = assinatura.ativa;
-                dataExpiracao = assinatura.expiracao;
+                const { count } = await supabaseClient
+                    .from('compras_cursos')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('usuario_id', auth.user.id)
+                    .eq('status', 'pago');
+                cursosComprados = count || 0;
             } catch (e) {
-                console.log('[RITMUS] Erro ao verificar assinatura:', e.message);
+                console.log('[RITMUS] Erro ao verificar compras:', e.message);
             }
 
-            if (!assinaturaAtiva && auth.user.plano !== 'teste') {
-                document.getElementById('user-status').innerHTML = '<span style="color:var(--danger)">⚠️ Assinatura expirada</span>';
-                document.getElementById('assinatura-alerta').style.display = 'block';
-            } else if (auth.user.plano === 'teste') {
-                document.getElementById('user-status').innerHTML = '<span style="color:var(--accent)">🎁 Período de teste</span>';
-            } else if (dataExpiracao) {
-                const expiracao = new Date(dataExpiracao);
+            if (cursosComprados > 0) {
                 document.getElementById('user-status').innerHTML = 
-                    `<span style="color:var(--success)">✅ Assinatura ativa até ${expiracao.toLocaleDateString('pt-BR')}</span>`;
+                    `<span style="color:var(--success)">✅ ${cursosComprados} curso${cursosComprados > 1 ? 's' : ''} comprado${cursosComprados > 1 ? 's' : ''} - Acesso vitalício</span>`;
             } else {
-                document.getElementById('user-status').innerHTML = '<span style="color:var(--text-muted)">Sem assinatura ativa</span>';
+                document.getElementById('user-status').innerHTML = '<span style="color:var(--text-muted)">Explore nossos cursos e comece a treinar!</span>';
             }
 
             // Carregar estatísticas e cursos
@@ -182,7 +177,7 @@
 
         async function loadStats(userId) {
             try {
-                // Cursos ativos (compras individuais)
+                // Cursos comprados (pagos)
                 let cursosCount = 0;
                 try {
                     const { count } = await supabaseClient
@@ -195,22 +190,20 @@
                     console.log('[RITMUS] Erro ao buscar compras:', e.message);
                 }
 
-                // Verificar assinatura ativa
-                let temAssinatura = false;
+                // Cursos gratuitos
+                let cursosFree = 0;
                 try {
-                    const { data: assinatura } = await supabaseClient
-                        .from('assinaturas')
-                        .select('id')
-                        .eq('usuario_id', userId)
-                        .eq('status', 'ativa')
-                        .gte('data_expiracao', new Date().toISOString())
-                        .maybeSingle();
-                    temAssinatura = !!assinatura;
+                    const { count } = await supabaseClient
+                        .from('cursos')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('ativo', true)
+                        .eq('gratuito', true);
+                    cursosFree = count || 0;
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar assinatura:', e.message);
+                    console.log('[RITMUS] Erro ao buscar cursos gratuitos:', e.message);
                 }
 
-                document.getElementById('stat-cursos').textContent = temAssinatura ? '∞' : cursosCount;
+                document.getElementById('stat-cursos').textContent = cursosCount + cursosFree;
 
                 // Aulas assistidas
                 let progressos = [];
@@ -245,7 +238,7 @@
             try {
                 let cursos = [];
 
-                // Tentar buscar cursos comprados
+                // Buscar cursos comprados (pagos)
                 try {
                     const { data: compras } = await supabaseClient
                         .from('compras_cursos')
@@ -266,31 +259,42 @@
                     console.log('[RITMUS] Erro ao buscar cursos comprados:', e.message);
                 }
 
-                // Se não tem cursos comprados, buscar cursos gratuitos
-                if (cursos.length === 0) {
-                    try {
-                        const { data: cursosFree } = await supabaseClient
-                            .from('cursos')
-                            .select('*')
-                            .eq('ativo', true)
-                            .eq('gratuito', true)
-                            .order('ordem');
-                        cursos = cursosFree || [];
-                    } catch (e) {
-                        console.log('[RITMUS] Erro ao buscar cursos gratuitos:', e.message);
+                // Buscar cursos gratuitos também
+                try {
+                    const { data: cursosFree } = await supabaseClient
+                        .from('cursos')
+                        .select('*')
+                        .eq('ativo', true)
+                        .eq('gratuito', true)
+                        .order('ordem');
+
+                    if (cursosFree && cursosFree.length > 0) {
+                        // Adicionar cursos gratuitos que ainda não estão na lista
+                        const existingIds = cursos.map(c => c.id);
+                        cursosFree.forEach(cf => {
+                            if (!existingIds.includes(cf.id)) {
+                                cursos.push(cf);
+                            }
+                        });
                     }
+                } catch (e) {
+                    console.log('[RITMUS] Erro ao buscar cursos gratuitos:', e.message);
                 }
 
+                // Mostrar alerta se não tem cursos
                 if (cursos.length === 0) {
+                    document.getElementById('sem-cursos-alerta').style.display = 'block';
                     grid.innerHTML = `
                         <div style="grid-column:1/-1;text-align:center;padding:40px 20px">
                             <div style="font-size:48px;margin-bottom:16px">🎬</div>
                             <h3 style="font-size:16px;margin-bottom:8px">Nenhum curso ativo</h3>
-                            <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Adquira um curso ou assinatura para começar.</p>
-                            <a href="cursos.html" class="btn-curso">Ver Cursos Disponíveis</a>
+                            <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Compre um curso ou assista aos gratuitos para começar!</p>
+                            <a href="cursos.html" class="btn-curso">Explorar Cursos</a>
                         </div>
                     `;
                     return;
+                } else {
+                    document.getElementById('sem-cursos-alerta').style.display = 'none';
                 }
 
                 // Buscar progresso

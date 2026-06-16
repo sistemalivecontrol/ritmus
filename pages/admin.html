@@ -280,7 +280,7 @@
                         <button class="admin-tab active" onclick="showTab('cursos')">📚 Cursos</button>
                         <button class="admin-tab" onclick="showTab('aulas')">🎬 Aulas</button>
                         <button class="admin-tab" onclick="showTab('alunos')">👥 Alunos</button>
-                        <button class="admin-tab" onclick="showTab('assinaturas')">💳 Assinaturas</button>
+                        <button class="admin-tab" onclick="showTab('compras')">🛒 Compras</button>
                     </div>
 
                     <!-- TAB: CURSOS -->
@@ -327,14 +327,14 @@
                         </div>
                     </div>
 
-                    <!-- TAB: ASSINATURAS -->
-                    <div id="tab-assinaturas" class="admin-section">
-                        <div id="assinaturas-lista">
+                    <!-- TAB: COMPRAS -->
+                    <div id="tab-compras" class="admin-section">
+                        <div id="compras-lista">
                             <table class="admin-table">
                                 <thead>
-                                    <tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Status</th><th>Expiração</th><th>Ações</th></tr>
+                                    <tr><th>Aluno</th><th>Curso</th><th>Valor</th><th>Status</th><th>Data Pagamento</th><th>Ações</th></tr>
                                 </thead>
-                                <tbody id="assinaturas-tbody"></tbody>
+                                <tbody id="compras-tbody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -543,7 +543,7 @@
             await loadStatsAdmin();
             await loadCursosAdmin();
             await loadAlunosAdmin();
-            await loadAssinaturasAdmin();
+            await loadComprasAdmin();
         }
 
         function showTab(tab) {
@@ -553,6 +553,7 @@
             document.getElementById('tab-' + tab).classList.add('active');
 
             if (tab === 'aulas') loadAulasAdmin();
+            if (tab === 'compras') loadComprasAdmin();
         }
 
         function openModal(tipo) {
@@ -585,19 +586,13 @@
                     .select('*', { count: 'exact', head: true });
                 document.getElementById('stat-total-alunos').textContent = alunosCount || 0;
 
-                // Faturamento
-                const { data: pagos } = await supabaseClient
-                    .from('assinaturas')
-                    .select('valor')
-                    .eq('status', 'ativa');
-
+                // Faturamento (compras pagas)
                 const { data: comprasPagas } = await supabaseClient
                     .from('compras_cursos')
                     .select('valor')
                     .eq('status', 'pago');
 
                 let total = 0;
-                (pagos || []).forEach(p => total += p.valor || 0);
                 (comprasPagas || []).forEach(c => total += c.valor || 0);
 
                 document.getElementById('stat-faturamento').textContent = 
@@ -972,90 +967,80 @@
             }
         }
 
-        // ========== ASSINATURAS ==========
-        async function loadAssinaturasAdmin() {
+        // ========== COMPRAS ==========
+        async function loadComprasAdmin() {
             try {
-                const { data: assinaturas, error } = await supabaseClient
-                    .from('assinaturas')
-                    .select('*, usuarios(nome, email)')
+                const { data: compras, error } = await supabaseClient
+                    .from('compras_cursos')
+                    .select('*, usuarios(nome, email), cursos(titulo)')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                const tbody = document.getElementById('assinaturas-tbody');
-                tbody.innerHTML = (assinaturas || []).map(a => `
+                const tbody = document.getElementById('compras-tbody');
+                tbody.innerHTML = (compras || []).map(c => {
+                    const statusColor = c.status === 'pago' ? 'var(--success)' : 
+                                       (c.status === 'pendente' ? 'var(--warning)' : 'var(--danger)');
+                    const statusIcon = c.status === 'pago' ? '✅' : 
+                                      (c.status === 'pendente' ? '⏳' : '❌');
+                    return `
                     <tr>
-                        <td><strong>${a.usuarios?.nome || '-'}</strong><br><small style="color:var(--text-muted)">${a.usuarios?.email || ''}</small></td>
-                        <td><span style="color:var(--primary);font-weight:500">${a.plano}</span></td>
-                        <td>R$ ${a.valor?.toFixed(2).replace('.', ',') || '0,00'}</td>
-                        <td><span style="color:${a.status === 'ativa' ? 'var(--success)' : 'var(--warning)'};font-weight:500">${a.status}</span></td>
-                        <td>${a.data_expiracao ? new Date(a.data_expiracao).toLocaleDateString('pt-BR') : '-'}</td>
+                        <td><strong>${c.usuarios?.nome || '-'}</strong><br><small style="color:var(--text-muted)">${c.usuarios?.email || ''}</small></td>
+                        <td><span style="color:var(--primary);font-weight:500">${c.cursos?.titulo || '-'}</span></td>
+                        <td>R$ ${c.valor?.toFixed(2).replace('.', ',') || '0,00'}</td>
+                        <td><span style="color:${statusColor};font-weight:500">${statusIcon} ${c.status}</span></td>
+                        <td>${c.data_pagamento ? new Date(c.data_pagamento).toLocaleDateString('pt-BR') : '-'}</td>
                         <td>
-                            <button class="btn-small btn-edit" onclick="renovarAssinatura('${a.id}')">Renovar</button>
-                            <button class="btn-small btn-delete" onclick="cancelarAssinatura('${a.id}')">Cancelar</button>
+                            <button class="btn-small btn-edit" onclick="liberarCompra('${c.id}')">Liberar</button>
+                            <button class="btn-small btn-delete" onclick="cancelarCompra('${c.id}')">Cancelar</button>
                         </td>
                     </tr>
-                `).join('');
+                `}).join('');
 
             } catch (e) {
-                console.error('Erro assinaturas:', e);
+                console.error('Erro compras:', e);
             }
         }
 
-        async function renovarAssinatura(id) {
+        async function liberarCompra(id) {
+            if (!confirm('Tem certeza que deseja liberar esta compra manualmente?')) return;
+
             try {
-                const dataExp = new Date();
-                dataExp.setMonth(dataExp.getMonth() + 1);
-
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify({
-                        action: 'update_assinatura',
-                        id: id,
-                        data: { 
-                            status: 'ativa', 
-                            data_expiracao: dataExp.toISOString() 
-                        }
+                const { error } = await supabaseClient
+                    .from('compras_cursos')
+                    .update({ 
+                        status: 'pago', 
+                        data_pagamento: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
                     })
-                });
+                    .eq('id', id);
 
-                const result = await response.json();
-                if (!response.ok || !result.success) throw new Error(result.error || 'Erro');
+                if (error) throw error;
 
-                showToast('Sucesso!', 'Assinatura renovada!', 'success');
-                await loadAssinaturasAdmin();
+                showToast('Sucesso!', 'Compra liberada!', 'success');
+                await loadComprasAdmin();
                 await loadStatsAdmin();
             } catch (e) {
-                showToast('Erro', e.message || 'Erro ao renovar', 'error');
+                showToast('Erro', e.message || 'Erro ao liberar', 'error');
             }
         }
 
-        async function cancelarAssinatura(id) {
-            if (!confirm('Tem certeza que deseja cancelar esta assinatura?')) return;
+        async function cancelarCompra(id) {
+            if (!confirm('Tem certeza que deseja cancelar esta compra?')) return;
 
             try {
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify({
-                        action: 'update_assinatura',
-                        id: id,
-                        data: { status: 'cancelada' }
+                const { error } = await supabaseClient
+                    .from('compras_cursos')
+                    .update({ 
+                        status: 'cancelado',
+                        updated_at: new Date().toISOString()
                     })
-                });
+                    .eq('id', id);
 
-                const result = await response.json();
-                if (!response.ok || !result.success) throw new Error(result.error || 'Erro');
+                if (error) throw error;
 
-                showToast('Sucesso!', 'Assinatura cancelada', 'success');
-                await loadAssinaturasAdmin();
+                showToast('Sucesso!', 'Compra cancelada', 'success');
+                await loadComprasAdmin();
             } catch (e) {
                 showToast('Erro', e.message || 'Erro ao cancelar', 'error');
             }

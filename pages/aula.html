@@ -265,10 +265,10 @@ function renderAulaLista(progressoMap) {
             const isCursoFree = currentCurso.gratuito;
             const isFree = isAulaFree || isCursoFree;
 
-            // Verificar acesso (se não for gratuita)
+            // Verificar acesso: gratuito OU comprou o curso
             temAcesso = isFree;
             if (!isFree && currentUser) {
-                temAcesso = await checkCursoAccess(currentCurso.id);
+                temAcesso = await checkCursoAccessCompra(currentCurso.id, currentUser.id);
             }
 
             // Mostrar/ocultar badges de gratuito
@@ -453,6 +453,44 @@ function renderAulaLista(progressoMap) {
                 }
             } catch (e) {
                 console.error('Erro progresso:', e);
+            }
+        }
+
+        // Verificar acesso ao curso por compra (vitalício)
+        async function checkCursoAccessCompra(cursoId, usuarioId) {
+            try {
+                // Verificar se comprou o curso
+                const { data: compra, error } = await supabaseClient
+                    .from('compras_cursos')
+                    .select('*')
+                    .eq('usuario_id', usuarioId)
+                    .eq('curso_id', cursoId)
+                    .eq('status', 'pago')
+                    .maybeSingle();
+
+                if (compra) {
+                    console.log('[RITMUS] Acesso liberado - curso comprado:', cursoId);
+                    return true;
+                }
+
+                // Verificar se curso é gratuito
+                const { data: curso } = await supabaseClient
+                    .from('cursos')
+                    .select('gratuito')
+                    .eq('id', cursoId)
+                    .single();
+
+                if (curso && curso.gratuito) {
+                    console.log('[RITMUS] Acesso liberado - curso gratuito:', cursoId);
+                    return true;
+                }
+
+                console.log('[RITMUS] Acesso negado - curso não comprado:', cursoId);
+                return false;
+
+            } catch (e) {
+                console.error('[RITMUS] Erro ao verificar acesso:', e);
+                return false;
             }
         }
     </script>

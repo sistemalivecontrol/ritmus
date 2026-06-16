@@ -47,21 +47,6 @@
                         <label for="senha">Senha</label>
                         <input type="password" id="senha" required placeholder="Mínimo 6 caracteres" minlength="6">
                     </div>
-                    <div class="form-group">
-                        <label for="plano">Plano</label>
-                        <select id="plano" required>
-                            <option value="">Selecione um plano</option>
-                            <option value="individual">Curso Individual - R$ 49,90</option>
-                            <option value="mensal">Plano Mensal - R$ 79,90/mês</option>
-                            <option value="anual">Plano Anual - R$ 599,90/ano</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="curso-select-group" style="display:none">
-                        <label for="curso_id">Curso Desejado</label>
-                        <select id="curso_id">
-                            <option value="">Selecione o curso</option>
-                        </select>
-                    </div>
                     <div class="form-group" style="display:flex;align-items:flex-start;gap:8px">
                         <input type="checkbox" id="termos" required style="width:auto;margin-top:4px">
                         <label for="termos" style="margin-bottom:0;font-size:13px">
@@ -70,7 +55,7 @@
                         </label>
                     </div>
                     <button type="submit" class="btn-submit" id="btn-cadastrar">
-                        Criar Conta e Pagar
+                        Criar Conta Grátis
                     </button>
                 </form>
 
@@ -84,13 +69,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
-        // CURSOS HARDCODED (funciona sem Supabase)
-        const CURSOS_DISPONIVEIS = [
-            { id: 'jump-fitness', titulo: 'Jump Fitness', preco: 49.90 },
-            { id: 'danca-fitness', titulo: 'Dança Fitness', preco: 49.90 },
-            { id: 'empina-bumbum', titulo: 'Empina Bumbum', preco: 49.90 },
-            { id: 'funcional-total', titulo: 'Funcional Total', preco: 39.90 }
-        ];
+
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -99,63 +78,20 @@
         });
 
         function initCadastro() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const planoUrl = urlParams.get('plano');
-            if (planoUrl) {
-                document.getElementById('plano').value = planoUrl;
-                toggleCursoSelect(planoUrl);
-            }
-            loadCursosSelect();
             document.getElementById('telefone').addEventListener('input', function(e) {
                 let v = e.target.value.replace(/\D/g, '');
                 v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
                 v = v.replace(/(\d{5})(\d)/, '$1-$2');
                 e.target.value = v;
             });
-            document.getElementById('plano').addEventListener('change', function() {
-                toggleCursoSelect(this.value);
-            });
             document.getElementById('form-cadastro').addEventListener('submit', handleCadastro);
-        }
-
-        function toggleCursoSelect(plano) {
-            const group = document.getElementById('curso-select-group');
-            const select = document.getElementById('curso_id');
-            if (plano === 'individual') {
-                group.style.display = 'block';
-                select.required = true;
-            } else {
-                group.style.display = 'none';
-                select.required = false;
-            }
-        }
-
-        async function loadCursosSelect() {
-            const select = document.getElementById('curso_id');
-            select.innerHTML = '<option value="">Selecione o curso</option>';
-            try {
-                const { data: cursos, error } = await supabaseClient
-                    .from('cursos')
-                    .select('id, titulo, preco')
-                    .eq('ativo', true)
-                    .order('ordem', { ascending: true });
-                if (!error && cursos && cursos.length > 0) {
-                    cursos.forEach(c => {
-                        select.innerHTML += `<option value="${c.id}">${c.titulo} - R$ ${c.preco ? c.preco.toFixed(2).replace('.', ',') : '49,90'}</option>`;
-                    });
-                    return;
-                }
-            } catch (e) {}
-            CURSOS_DISPONIVEIS.forEach(c => {
-                select.innerHTML += `<option value="${c.id}">${c.titulo} - R$ ${c.preco.toFixed(2).replace('.', ',')}</option>`;
-            });
         }
 
         async function handleCadastro(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-cadastrar');
             btn.disabled = true;
-            btn.textContent = 'Processando...';
+            btn.textContent = 'Criando conta...';
             showLoading('Criando sua conta...');
 
             try {
@@ -163,8 +99,6 @@
                 const email = document.getElementById('email').value.trim().toLowerCase();
                 const telefone = document.getElementById('telefone').value.replace(/\D/g, '');
                 const senha = document.getElementById('senha').value;
-                const plano = document.getElementById('plano').value;
-                const cursoId = document.getElementById('curso_id').value;
 
                 // USAR EDGE FUNCTION (ignora rate limits e signups disabled)
                 console.log('[RITMUS] Chamando Edge Function de cadastro...');
@@ -178,9 +112,7 @@
                         nome: nome,
                         email: email,
                         telefone: telefone,
-                        senha: senha,
-                        plano: plano,
-                        curso_id: cursoId
+                        senha: senha
                     })
                 });
 
@@ -199,50 +131,26 @@
 
                 if (loginError) {
                     console.error('[RITMUS] Erro login:', loginError);
+                    hideLoading();
+                    showToast('Conta criada!', 'Sua conta foi criada! Faça login para continuar.', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
                 }
 
                 hideLoading();
+                showToast('Bem-vindo!', 'Conta criada com sucesso! Explore nossos cursos.', 'success');
 
-                // Redirecionar para pagamento
-                let valor = plano === 'individual' ? 49.90 : (plano === 'mensal' ? 79.90 : 599.90);
-                const descricao = plano === 'individual' ? 'Curso Individual' : (plano === 'mensal' ? 'Plano Mensal' : 'Plano Anual');
-
-                try {
-                    const { data: paymentData, error: paymentError } = await supabaseClient.functions.invoke('asaas-criar-cobranca', {
-                        body: {
-                            nome: nome,
-                            email: email,
-                            telefone: telefone,
-                            valor: valor,
-                            descricao: descricao,
-                            usuario_id: result.user_id,
-                            plano: plano,
-                            curso_id: cursoId || null
-                        }
-                    });
-
-                    if (paymentError) throw paymentError;
-
-                    if (paymentData && paymentData.success && paymentData.payment_url) {
-                        showToast('Sucesso!', 'Redirecionando para o pagamento...', 'success');
-                        setTimeout(() => {
-                            window.location.href = paymentData.payment_url;
-                        }, 1500);
-                    } else {
-                        throw new Error('Erro ao gerar link de pagamento');
-                    }
-                } catch (paymentErr) {
-                    console.error('[RITMUS] Erro pagamento:', paymentErr);
-                    showToast('Conta criada!', 'Sua conta foi criada! Faça login para continuar.', 'warning');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 3000);
-                }
+                // Redirecionar para cursos após 2 segundos
+                setTimeout(() => {
+                    window.location.href = 'cursos.html';
+                }, 2000);
 
             } catch (error) {
                 hideLoading();
                 btn.disabled = false;
-                btn.textContent = 'Criar Conta e Pagar';
+                btn.textContent = 'Criar Conta Grátis';
                 console.error('[RITMUS] Erro cadastro:', error);
                 showToast('Erro', error.message || 'Erro ao criar conta. Tente novamente.', 'error');
             }
