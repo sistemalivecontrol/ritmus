@@ -39,7 +39,7 @@
         .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
         .status-pill.pendente { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
         .status-pill.pago { background: rgba(16, 185, 129, 0.1); color: #10B981; }
-        .status-pill.atrasado { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+        .check-count { font-size: 11px; color: var(--text-dark); margin-top: 8px; }
         @media (max-width: 768px) {
             .payment-container { grid-template-columns: 1fr; padding: 24px; }
             .payment-summary { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 24px; }
@@ -91,7 +91,7 @@
                     <div class="spinner-large"></div>
                     <h3>🕐 Aguardando confirmação do pagamento</h3>
                     <p>O checkout do Asaas foi aberto em uma nova aba.<br>Após o pagamento, esta página será atualizada automaticamente.</p>
-                    <p style="margin-top:12px;font-size:12px;color:var(--text-dark)">Verificando a cada 5 segundos...</p>
+                    <p class="check-count" id="check-count">Verificando... (tentativa 1)</p>
                 </div>
 
                 <div id="payment-actions">
@@ -137,8 +137,8 @@
     <script>
         let cursoData = null;
         let currentUser = null;
-        let compraId = null;
         let checkInterval = null;
+        let checkCount = 0;
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -194,8 +194,8 @@
                 document.getElementById('subtotal').textContent = precoFormatado;
                 document.getElementById('total-final').textContent = precoFormatado;
 
-                // Verificar se já comprou
-                const { data: compra } = await supabaseClient
+                // Verificar se já comprou (status pago)
+                const { data: compraPaga } = await supabaseClient
                     .from('compras_cursos')
                     .select('*')
                     .eq('usuario_id', currentUser.id)
@@ -203,7 +203,8 @@
                     .eq('status', 'pago')
                     .maybeSingle();
 
-                if (compra) {
+                if (compraPaga) {
+                    console.log('[RITMUS] Curso já comprado!');
                     mostrarSucesso();
                     return;
                 }
@@ -218,7 +219,7 @@
                     .maybeSingle();
 
                 if (compraPendente) {
-                    compraId = compraPendente.id;
+                    console.log('[RITMUS] Compra pendente encontrada, iniciando verificação...');
                     mostrarAguardando();
                     iniciarVerificacao();
                     return;
@@ -269,20 +270,6 @@
                     throw new Error(result.error || 'Erro ao criar cobrança');
                 }
 
-                // Salvar compra_id para verificação
-                if (result.payment_id) {
-                    // Buscar a compra criada
-                    const { data: compra } = await supabaseClient
-                        .from('compras_cursos')
-                        .select('id')
-                        .eq('asaas_payment_id', result.payment_id)
-                        .single();
-
-                    if (compra) {
-                        compraId = compra.id;
-                    }
-                }
-
                 // ABRIR CHECKOUT DO ASAAS EM NOVA ABA
                 if (result.invoiceUrl) {
                     window.open(result.invoiceUrl, '_blank');
@@ -322,27 +309,38 @@
         }
 
         function iniciarVerificacao() {
+            checkCount = 0;
+
             // Verificar a cada 5 segundos
             checkInterval = setInterval(async () => {
-                if (!compraId && !cursoData) return;
+                checkCount++;
+                document.getElementById('check-count').textContent = 'Verificando... (tentativa ' + checkCount + ')';
+
+                if (!cursoData || !currentUser) return;
 
                 try {
-                    let query = supabaseClient
+                    console.log('[RITMUS] Verificando pagamento... tentativa', checkCount);
+
+                    // Verificar pelo usuario_id + curso_id + status = pago
+                    const { data: compra, error } = await supabaseClient
                         .from('compras_cursos')
                         .select('*')
                         .eq('usuario_id', currentUser.id)
                         .eq('curso_id', cursoData.id)
-                        .eq('status', 'pago');
+                        .eq('status', 'pago')
+                        .maybeSingle();
 
-                    if (compraId) {
-                        query = query.eq('id', compraId);
+                    if (error) {
+                        console.error('[RITMUS] Erro na verificação:', error);
+                        return;
                     }
 
-                    const { data: compra } = await query.maybeSingle();
-
                     if (compra) {
-                        console.log('[RITMUS] Pagamento confirmado!');
+                        console.log('[RITMUS] ✅ PAGAMENTO CONFIRMADO! Compra encontrada:', compra.id);
                         mostrarSucesso();
+                        showToast('Parabéns!', 'Pagamento confirmado! Acesso liberado.', 'success');
+                    } else {
+                        console.log('[RITMUS] Pagamento ainda não confirmado (tentativa', checkCount + ')');
                     }
                 } catch (e) {
                     console.error('[RITMUS] Erro na verificação:', e);
@@ -354,7 +352,7 @@
                 if (checkInterval) {
                     clearInterval(checkInterval);
                     checkInterval = null;
-                    // Mostrar mensagem de timeout
+
                     const waitingBox = document.getElementById('waiting-box');
                     if (waitingBox.classList.contains('active')) {
                         waitingBox.innerHTML = `
