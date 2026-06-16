@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+    // REMOVER base target="_blank" se existir - executa ANTES de qualquer outro script
+    (function() {
+        var bases = document.querySelectorAll('base');
+        bases.forEach(function(b) { if(b.target) b.remove(); });
+
+        // Interceptar todos os cliques em links
+        document.addEventListener('click', function(e) {
+            var link = e.target.closest('a');
+            if (link) {
+                link.removeAttribute('target');
+            }
+        }, true);
+
+        // Remover target="_blank" de todos os links existentes
+        document.querySelectorAll('a[target="_blank"]').forEach(function(a) {
+            a.removeAttribute('target');
+        });
+    })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Painel - Scheila Almeida</title>
@@ -409,13 +429,6 @@
                 console.error('[SCHEILA] Erro continue:', e);
             }
         }
-    </script>
-
-    <script>
-    // Forçar todos os links a abrirem na mesma aba
-    document.querySelectorAll('a').forEach(function(a) {
-        a.removeAttribute('target');
-    });
     </script>
 
 </body>
