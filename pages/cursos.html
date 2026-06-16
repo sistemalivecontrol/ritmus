@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Painel - Scheila Almeida</title>
+    <title>Cursos - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
@@ -15,10 +15,10 @@
         <div class="nav-container">
             <a href="../index.html" class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></a>
             <div class="nav-links">
-                <a href="dashboard.html" class="active">Meu Painel</a>
-                <a href="cursos.html">Cursos</a>
+                <a href="dashboard.html">Meu Painel</a>
+                <a href="cursos.html" class="active">Cursos</a>
                 <a href="admin.html" id="nav-admin" style="display:none">⚙️ Admin</a>
-                <a href="" onclick="logout();return false">Sair</a>
+                <a href="#" onclick="logout();return false">Sair</a>
             </div>
             <button class="menu-toggle" onclick="toggleMenu()">
                 <span></span><span></span><span></span>
@@ -26,86 +26,15 @@
         </div>
     </nav>
 
-    <div class="dashboard-page">
+    <div class="cursos-page">
         <div class="container">
-            <div class="dashboard-header">
-                <h1>👋 Olá, <span id="user-name">Aluno</span>!</h1>
-                <p id="user-status">Carregando...</p>
+            <div class="cursos-header">
+                <h1>🎬 Nossos Cursos</h1>
+                <p>Escolha seu curso e comece a treinar hoje mesmo!</p>
             </div>
 
-            <div class="dashboard-grid">
-                <aside class="sidebar">
-                    <div class="sidebar-user">
-                        <div class="sidebar-avatar" id="user-avatar">👤</div>
-                        <div>
-                            <div class="sidebar-name" id="sidebar-name">Carregando...</div>
-                            <div class="sidebar-email" id="sidebar-email">...</div>
-                        </div>
-                    </div>
-                    <ul class="sidebar-menu">
-                        <li><a href="dashboard.html" class="active"><span class="menu-icon">📊</span> Meu Painel</a></li>
-                        <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
-                        <li id="sidebar-admin" style="display:none"><a href="admin.html"><span class="menu-icon">⚙️</span> Admin</a></li>
-                        <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
-                    </ul>
-                </aside>
-
-                <main class="main-content">
-                    <!-- Stats -->
-                    <div class="stats-row">
-                        <div class="stat-card">
-                            <div class="stat-icon">🎬</div>
-                            <div class="stat-value" id="stat-cursos">0</div>
-                            <div class="stat-label">Cursos Ativos</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">▶️</div>
-                            <div class="stat-value" id="stat-aulas">0</div>
-                            <div class="stat-label">Aulas Assistidas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">⏱️</div>
-                            <div class="stat-value" id="stat-horas">0h</div>
-                            <div class="stat-label">Horas de Treino</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🔥</div>
-                            <div class="stat-value" id="stat-streak">0</div>
-                            <div class="stat-label">Dias Seguidos</div>
-                        </div>
-                    </div>
-
-                    <!-- Aviso: Sem cursos comprados -->
-                    <div id="sem-cursos-alerta" style="display:none;margin-bottom:24px">
-                        <div style="background:linear-gradient(135deg,rgba(255,107,53,0.1),rgba(255,107,53,0.05));border:1px solid rgba(255,107,53,0.3);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:16px">
-                            <span style="font-size:32px">🎬</span>
-                            <div style="flex:1">
-                                <h3 style="font-size:16px;font-weight:600;margin-bottom:4px">Comece a Treinar!</h3>
-                                <p style="font-size:14px;color:var(--text-muted)">Você ainda não comprou nenhum curso. Explore nossa lista e comece hoje mesmo!</p>
-                            </div>
-                            <a href="cursos.html" class="btn-curso" style="flex-shrink:0">Ver Cursos</a>
-                        </div>
-                    </div>
-
-                    <!-- Continue Assistindo -->
-                    <div id="continue-section" style="margin-bottom:32px">
-                        <h2 style="font-size:20px;font-weight:700;margin-bottom:16px">▶️ Continue Assistindo</h2>
-                        <div id="continue-grid" class="meus-cursos-grid">
-                            <!-- Preenchido via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Meus Cursos -->
-                    <div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                            <h2 style="font-size:20px;font-weight:700">📚 Meus Cursos</h2>
-                            <a href="cursos.html" style="color:var(--primary);font-size:14px;text-decoration:none;font-weight:500">Ver todos →</a>
-                        </div>
-                        <div id="meus-cursos-grid" class="meus-cursos-grid">
-                            <!-- Preenchido via JS -->
-                        </div>
-                    </div>
-                </main>
+            <div id="cursos-grid" class="cursos-grid">
+                <!-- Preenchido via JS -->
             </div>
         </div>
     </div>
@@ -113,299 +42,142 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
-        let currentUser = null;
-
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
-                initDashboard();
+                initCursos();
             });
         });
 
-        async function initDashboard() {
-            const auth = await requireAuth();
-            if (!auth) return;
-
-            currentUser = auth.user;
-
-            // Preencher dados do usuário
-            document.getElementById('user-name').textContent = auth.user.nome || 'Aluno';
-            document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
-            document.getElementById('sidebar-email').textContent = auth.user.email;
-            document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
-
-            // Verificar se é admin e mostrar menu
-            try {
-                const isAdmin = await checkAdmin();
-                if (isAdmin) {
-                    const navAdmin = document.getElementById('nav-admin');
-                    const sidebarAdmin = document.getElementById('sidebar-admin');
-                    if (navAdmin) navAdmin.style.display = 'inline-flex';
-                    if (sidebarAdmin) sidebarAdmin.style.display = 'block';
-                    console.log('[SCHEILA] Usuário é admin - menu exibido');
-                }
-            } catch (e) {
-                console.log('[SCHEILA] Erro ao verificar admin:', e.message);
-            }
-
-            // Verificar cursos comprados
-            let cursosComprados = 0;
-            try {
-                const { count } = await supabaseClient
-                    .from('compras_cursos')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('usuario_id', auth.user.id)
-                    .eq('status', 'pago');
-                cursosComprados = count || 0;
-            } catch (e) {
-                console.log('[SCHEILA] Erro ao verificar compras:', e.message);
-            }
-
-            if (cursosComprados > 0) {
-                document.getElementById('user-status').innerHTML = 
-                    `<span style="color:var(--success)">✅ ${cursosComprados} curso${cursosComprados > 1 ? 's' : ''} comprado${cursosComprados > 1 ? 's' : ''} - Acesso vitalício</span>`;
-            } else {
-                document.getElementById('user-status').innerHTML = '<span style="color:var(--text-muted)">Explore nossos cursos e comece a treinar!</span>';
-            }
-
-            // Carregar estatísticas e cursos
-            await loadStats(auth.user.id);
-            await loadMeusCursos(auth.user.id);
-            await loadContinueWatching(auth.user.id);
-        }
-
-        async function loadStats(userId) {
-            try {
-                // Cursos comprados (pagos)
-                let cursosCount = 0;
-                try {
-                    const { count } = await supabaseClient
-                        .from('compras_cursos')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('usuario_id', userId)
-                        .eq('status', 'pago');
-                    cursosCount = count || 0;
-                } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar compras:', e.message);
-                }
-
-                // Cursos gratuitos
-                let cursosFree = 0;
-                try {
-                    const { count } = await supabaseClient
-                        .from('cursos')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('ativo', true)
-                        .eq('gratuito', true);
-                    cursosFree = count || 0;
-                } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar cursos gratuitos:', e.message);
-                }
-
-                document.getElementById('stat-cursos').textContent = cursosCount + cursosFree;
-
-                // Aulas assistidas
-                let progressos = [];
-                try {
-                    const { data } = await supabaseClient
-                        .from('progresso_aulas')
-                        .select('aula_id')
-                        .eq('usuario_id', userId)
-                        .eq('concluida', true);
-                    progressos = data || [];
-                } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar progresso:', e.message);
-                }
-
-                document.getElementById('stat-aulas').textContent = progressos.length || 0;
-
-                // Horas (estimativa: 30 min por aula)
-                const horas = Math.round(((progressos.length || 0) * 30) / 60);
-                document.getElementById('stat-horas').textContent = horas + 'h';
-
-                // Streak (simplificado)
-                document.getElementById('stat-streak').textContent = progressos.length > 0 ? '1' : '0';
-
-            } catch (e) {
-                console.error('[SCHEILA] Erro stats:', e);
-            }
-        }
-
-        async function loadMeusCursos(userId) {
-            const grid = document.getElementById('meus-cursos-grid');
+        async function initCursos() {
+            const grid = document.getElementById('cursos-grid');
+            grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Carregando cursos...</p>';
 
             try {
-                let cursos = [];
+                const { data: cursos, error } = await supabaseClient
+                    .from('cursos')
+                    .select('*')
+                    .eq('ativo', true)
+                    .order('ordem');
 
-                // Buscar cursos comprados (pagos)
-                try {
-                    const { data: compras } = await supabaseClient
-                        .from('compras_cursos')
-                        .select('curso_id')
-                        .eq('usuario_id', userId)
-                        .eq('status', 'pago');
-
-                    if (compras && compras.length > 0) {
-                        const cursoIds = compras.map(c => c.curso_id);
-                        const { data: cursosData } = await supabaseClient
-                            .from('cursos')
-                            .select('*')
-                            .in('id', cursoIds)
-                            .eq('ativo', true);
-                        cursos = cursosData || [];
-                    }
-                } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar cursos comprados:', e.message);
-                }
-
-                // Buscar cursos gratuitos também
-                try {
-                    const { data: cursosFree } = await supabaseClient
-                        .from('cursos')
-                        .select('*')
-                        .eq('ativo', true)
-                        .eq('gratuito', true)
-                        .order('ordem');
-
-                    if (cursosFree && cursosFree.length > 0) {
-                        // Adicionar cursos gratuitos que ainda não estão na lista
-                        const existingIds = cursos.map(c => c.id);
-                        cursosFree.forEach(cf => {
-                            if (!existingIds.includes(cf.id)) {
-                                cursos.push(cf);
-                            }
-                        });
-                    }
-                } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar cursos gratuitos:', e.message);
-                }
-
-                // Mostrar alerta se não tem cursos
-                if (cursos.length === 0) {
-                    document.getElementById('sem-cursos-alerta').style.display = 'block';
-                    grid.innerHTML = `
-                        <div style="grid-column:1/-1;text-align:center;padding:40px 20px">
-                            <div style="font-size:48px;margin-bottom:16px">🎬</div>
-                            <h3 style="font-size:16px;margin-bottom:8px">Nenhum curso ativo</h3>
-                            <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Compre um curso ou assista aos gratuitos para começar!</p>
-                            <a href="cursos.html" class="btn-curso">Explorar Cursos</a>
-                        </div>
-                    `;
+                if (error) {
+                    console.error('[SCHEILA] Erro ao buscar cursos:', error);
+                    grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Erro ao carregar cursos. Tente novamente.</p>';
                     return;
-                } else {
-                    document.getElementById('sem-cursos-alerta').style.display = 'none';
                 }
 
-                // Buscar progresso
-                let progressoMap = {};
+                if (!cursos || cursos.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Nenhum curso disponível no momento.</p>';
+                    return;
+                }
+
+                // Verificar quais cursos o usuário já comprou
+                let compras = [];
                 try {
-                    const { data: progressos } = await supabaseClient
-                        .from('progresso_aulas')
-                        .select('aula_id, concluida')
-                        .eq('usuario_id', userId);
-
-                    (progressos || []).forEach(p => {
-                        progressoMap[p.aula_id] = p.concluida;
-                    });
+                    const auth = await requireAuth();
+                    if (auth && auth.user) {
+                        const { data: comprasData } = await supabaseClient
+                            .from('compras_cursos')
+                            .select('curso_id, status')
+                            .eq('usuario_id', auth.user.id)
+                            .eq('status', 'pago');
+                        compras = comprasData || [];
+                    }
                 } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar progresso:', e.message);
+                    console.log('[SCHEILA] Usuário não logado ou erro ao buscar compras:', e.message);
                 }
+
+                const cursosComprados = compras.map(c => c.curso_id);
 
                 grid.innerHTML = cursos.map(curso => {
-                    const totalAulas = curso.total_aulas || 1;
-                    const aulasConcluidas = Object.keys(progressoMap).filter(aulaId => progressoMap[aulaId]).length;
-                    const percentual = Math.round((aulasConcluidas / totalAulas) * 100);
+                    const jaComprou = cursosComprados.includes(curso.id);
+                    const isGratuito = curso.gratuito === true;
+                    const preco = curso.preco || 0;
+                    const precoFormatado = preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                    let btnText = '';
+                    let btnClass = '';
+                    let btnHref = '';
+                    let btnOnclick = '';
+
+                    if (jaComprou) {
+                        btnText = '▶ Assistir';
+                        btnClass = 'btn-curso';
+                        btnHref = `aula.html?curso=${curso.id}`;
+                    } else if (isGratuito) {
+                        btnText = '🎁 Acessar Grátis';
+                        btnClass = 'btn-curso btn-gratuito';
+                        btnHref = `aula.html?curso=${curso.id}`;
+                    } else {
+                        btnText = `💳 Comprar ${precoFormatado}`;
+                        btnClass = 'btn-curso btn-comprar';
+                        btnOnclick = `comprarCurso('${curso.id}', ${preco}, '${curso.titulo.replace(/'/g, "\'")}');return false`;
+                    }
 
                     return `
-                        <div class="meu-curso-card" onclick="location.href='aula.html?curso=${curso.id}'">
+                        <div class="curso-card">
                             <div class="curso-thumb">
                                 <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" 
                                      alt="${curso.titulo}" 
                                      loading="lazy"
                                      onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
+                                ${isGratuito ? '<span class="badge-gratuito">GRÁTIS</span>' : ''}
+                                ${jaComprou ? '<span class="badge-comprado">✅ ADQUIRIDO</span>' : ''}
                             </div>
                             <div class="curso-info">
                                 <h3>${curso.titulo}</h3>
-                                <p style="font-size:13px;color:var(--text-muted)">${curso.total_aulas || 0} aulas • ${curso.duracao_total || '0h'}</p>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width:${percentual}%"></div>
+                                <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${curso.descricao || ''}</p>
+                                <div class="curso-meta">
+                                    <span>📚 ${curso.total_aulas || 0} aulas</span>
+                                    <span>⏱️ ${curso.duracao_total || '0h'}</span>
                                 </div>
-                                <div class="progress-text">${percentual}% concluído</div>
+                                <div class="curso-preco">
+                                    ${isGratuito ? '<span class="preco-gratuito">GRATUITO</span>' : `<span class="preco">${precoFormatado}</span>`}
+                                </div>
+                                ${btnOnclick 
+                                    ? `<a href="#" class="${btnClass}" onclick="${btnOnclick}">${btnText}</a>`
+                                    : `<a href="${btnHref}" class="${btnClass}">${btnText}</a>`
+                                }
                             </div>
                         </div>
                     `;
                 }).join('');
 
             } catch (e) {
-                console.error('[SCHEILA] Erro cursos:', e);
-                grid.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar cursos.</p>';
+                console.error('[SCHEILA] Erro ao carregar cursos:', e);
+                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Erro ao carregar cursos. Tente novamente.</p>';
             }
         }
 
-        async function loadContinueWatching(userId) {
-            const grid = document.getElementById('continue-grid');
-            const section = document.getElementById('continue-section');
-
+        async function comprarCurso(cursoId, preco, titulo) {
             try {
-                // Buscar última aula assistida
-                let ultimoProgresso = null;
-                try {
-                    const { data } = await supabaseClient
-                        .from('progresso_aulas')
-                        .select('aula_id, curso_id, updated_at')
-                        .eq('usuario_id', userId)
-                        .order('updated_at', { ascending: false })
-                        .limit(1)
-                        .maybeSingle();
-                    ultimoProgresso = data;
-                } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar último progresso:', e.message);
-                }
-
-                if (!ultimoProgresso) {
-                    section.style.display = 'none';
+                const auth = await requireAuth();
+                if (!auth || !auth.user) {
+                    alert('Faça login para comprar este curso!');
+                    window.location.href = 'login.html';
                     return;
                 }
 
-                // Buscar dados da aula e curso
-                let aula = null;
-                try {
-                    const { data } = await supabaseClient
-                        .from('aulas')
-                        .select('*, cursos!inner(titulo, thumbnail)')
-                        .eq('id', ultimoProgresso.aula_id)
-                        .single();
-                    aula = data;
-                } catch (e) {
-                    console.log('[SCHEILA] Erro ao buscar aula:', e.message);
-                }
+                // Verificar se já comprou
+                const { data: compraExistente } = await supabaseClient
+                    .from('compras_cursos')
+                    .select('*')
+                    .eq('usuario_id', auth.user.id)
+                    .eq('curso_id', cursoId)
+                    .eq('status', 'pago')
+                    .maybeSingle();
 
-                if (!aula) {
-                    section.style.display = 'none';
+                if (compraExistente) {
+                    alert('Você já comprou este curso!');
+                    window.location.href = `aula.html?curso=${cursoId}`;
                     return;
                 }
 
-                grid.innerHTML = `
-                    <div class="meu-curso-card" onclick="location.href='aula.html?curso=${aula.curso_id}&aula=${aula.id}'">
-                        <div class="curso-thumb" style="position:relative">
-                            <img src="${aula.cursos.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(aula.cursos.titulo)}" 
-                                 alt="${aula.cursos.titulo}" 
-                                 loading="lazy"
-                                 onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${aula.cursos.titulo}')">
-                            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center">
-                                <div class="play-btn">▶</div>
-                            </div>
-                        </div>
-                        <div class="curso-info">
-                            <h3>${aula.cursos.titulo}</h3>
-                            <p style="font-size:14px;color:var(--text-muted);margin-bottom:4px">Aula ${aula.ordem}: ${aula.titulo}</p>
-                            <p style="font-size:12px;color:var(--primary);font-weight:500">▶ Continuar assistindo</p>
-                        </div>
-                    </div>
-                `;
+                // Redirecionar para página de pagamento
+                window.location.href = `pagamento.html?curso=${cursoId}&valor=${preco}&titulo=${encodeURIComponent(titulo)}`;
 
             } catch (e) {
-                section.style.display = 'none';
-                console.error('[SCHEILA] Erro continue:', e);
+                console.error('[SCHEILA] Erro ao comprar curso:', e);
+                alert('Erro ao processar compra. Tente novamente.');
             }
         }
     </script>
@@ -417,18 +189,15 @@
             var links = document.querySelectorAll('a');
             links.forEach(function(link) {
                 var href = link.getAttribute('href') || '';
-                // Remover target="_blank" de todos os links (internos e externos)
                 if (link.getAttribute('target') === '_blank') {
                     link.removeAttribute('target');
                 }
-                // Para links internos, garantir que não abram em nova aba
                 if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('mailto:') && !href.startsWith('tel:') && !href.startsWith('javascript:')) {
                     link.removeAttribute('target');
                 }
             });
         }
 
-        // Executar imediatamente e em múltiplos momentos
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
                 removeAllBlankTargets();
@@ -445,7 +214,6 @@
             setTimeout(removeAllBlankTargets, 2000);
         }
 
-        // Observar mudanças no DOM para remover target="_blank" de novos links
         if (window.MutationObserver) {
             var observer = new MutationObserver(function(mutations) {
                 removeAllBlankTargets();
@@ -453,7 +221,6 @@
             observer.observe(document.body, { childList: true, subtree: true });
         }
 
-        // Interceptar cliques em links
         document.addEventListener('click', function(e) {
             var link = e.target.closest('a');
             if (link && link.getAttribute('target') === '_blank') {
