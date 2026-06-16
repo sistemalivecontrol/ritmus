@@ -1213,5 +1213,44 @@
             }
         });
     </script>
+
+    <!-- PROTEÇÃO: Garantir que links internos abram na mesma aba -->
+    <script>
+    (function() {
+        // Remover target="_blank" de todos os links internos do site
+        document.addEventListener('DOMContentLoaded', function() {
+            // Função para corrigir links
+            function fixLinks() {
+                const links = document.querySelectorAll('a');
+                links.forEach(function(link) {
+                    const href = link.getAttribute('href') || '';
+                    // Se for link interno (não começa com http ou é do mesmo domínio)
+                    if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+                        link.removeAttribute('target');
+                        // Prevenir que JS externo adicione target="_blank"
+                        link.addEventListener('click', function(e) {
+                            link.removeAttribute('target');
+                        }, true);
+                    }
+                });
+            }
+
+            // Executar imediatamente e também após um delay (caso outros scripts modifiquem)
+            fixLinks();
+            setTimeout(fixLinks, 100);
+            setTimeout(fixLinks, 500);
+            setTimeout(fixLinks, 1000);
+
+            // Observar mudanças no DOM
+            if (window.MutationObserver) {
+                const observer = new MutationObserver(function(mutations) {
+                    fixLinks();
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        });
+    })();
+    </script>
+
 </body>
 </html>
