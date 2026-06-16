@@ -121,19 +121,24 @@
             const container = document.getElementById('cursos-container');
 
             try {
-                // Verificar assinatura (se logado)
+                // Verificar assinatura (se logado) - usar .maybeSingle() para evitar erro 406
                 let assinatura = { ativa: false };
                 if (currentUser) {
                     try {
-                        const { data: assinaturaData } = await supabaseClient
+                        const { data: assinaturaData, error: assinaturaError } = await supabaseClient
                             .from('assinaturas')
                             .select('status')
                             .eq('usuario_id', currentUser.id)
                             .eq('status', 'ativa')
-                            .single();
+                            .maybeSingle();
+
+                        if (assinaturaError) {
+                            console.warn('[SCHEILA] Erro ao verificar assinatura:', assinaturaError.message);
+                        }
+
                         assinatura = { ativa: !!assinaturaData };
                     } catch (e) {
-                        console.warn('[SCHEILA] Erro ao verificar assinatura:', e);
+                        console.warn('[SCHEILA] Erro ao verificar assinatura:', e.message || e);
                     }
                 }
 
@@ -161,14 +166,19 @@
                 let cursosComprados = [];
                 if (currentUser && !assinatura.ativa) {
                     try {
-                        const { data: compras } = await supabaseClient
+                        const { data: compras, error: comprasError } = await supabaseClient
                             .from('compras_cursos')
                             .select('curso_id')
                             .eq('usuario_id', currentUser.id)
                             .eq('status', 'pago');
+
+                        if (comprasError) {
+                            console.warn('[SCHEILA] Erro ao buscar compras:', comprasError.message);
+                        }
+
                         cursosComprados = (compras || []).map(c => c.curso_id);
                     } catch (e) {
-                        console.warn('[SCHEILA] Erro ao buscar compras:', e);
+                        console.warn('[SCHEILA] Erro ao buscar compras:', e.message || e);
                     }
                 }
 
