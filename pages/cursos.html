@@ -3,128 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursos - Scheila Almeida</title>
+    <title>Cursos - Ritmus</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
-    <style>
-        /* CSS do Navbar - garantir que o menu apareça */
-        .navbar {
-            background: #1a1a2e;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #fff;
-            font-weight: 700;
-            font-size: 18px;
-        }
-        .logo-icon {
-            font-size: 24px;
-        }
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .nav-links a {
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: #fff;
-            background: rgba(255,107,53,0.2);
-        }
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-        }
-        .menu-toggle span {
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: #fff;
-            margin: 5px 0;
-            border-radius: 2px;
-            transition: all 0.3s;
-        }
-        @media (max-width: 768px) {
-            .menu-toggle {
-                display: block;
-            }
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 64px;
-                left: 0;
-                right: 0;
-                background: #1a1a2e;
-                flex-direction: column;
-                padding: 16px;
-                gap: 4px;
-                border-bottom: 1px solid rgba(255,255,255,0.1);
-            }
-            .nav-links.active {
-                display: flex;
-            }
-            .nav-links a {
-                width: 100%;
-                text-align: center;
-            }
-        }
-    </style>
 <base target="_blank">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="../index.html" class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></a>
-            <div class="nav-links" id="nav-links">
+            <a href="../index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+            <div class="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
                 <a href="cursos.html" class="active">Cursos</a>
-                <a href="admin.html" id="nav-admin" style="display:none">⚙️ Admin</a>
                 <a href="#" onclick="logout();return false">Sair</a>
             </div>
-            <button class="menu-toggle" onclick="toggleMenu()" aria-label="Menu">
+            <button class="menu-toggle" onclick="toggleMenu()">
                 <span></span><span></span><span></span>
             </button>
         </div>
     </nav>
 
-    <div class="cursos-page">
+    <div class="dashboard-page">
         <div class="container">
-            <div class="cursos-header">
-                <h1>🎬 Nossos Cursos</h1>
-                <p>Escolha seu curso e comece a treinar hoje mesmo!</p>
+            <div class="dashboard-header">
+                <h1>🎬 Todos os Cursos</h1>
+                <p>Explore nossos cursos e comece a treinar</p>
             </div>
 
-            <div id="cursos-grid" class="cursos-grid">
-                <!-- Preenchido via JS -->
+            <div class="dashboard-grid">
+                <aside class="sidebar">
+                    <div class="sidebar-user">
+                        <div class="sidebar-avatar" id="user-avatar">👤</div>
+                        <div>
+                            <div class="sidebar-name" id="sidebar-name">Carregando...</div>
+                            <div class="sidebar-email" id="sidebar-email">...</div>
+                        </div>
+                    </div>
+                    <ul class="sidebar-menu">
+                        <li><a href="dashboard.html"><span class="menu-icon">📊</span> Meu Painel</a></li>
+                        <li><a href="cursos.html" class="active"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
+                        <li><a href="assinatura.html"><span class="menu-icon">💳</span> Assinatura</a></li>
+                        <li><a href="#" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
+                    </ul>
+                </aside>
+
+                <main class="main-content">
+                    <div id="cursos-container">
+                        <!-- Cursos preenchidos via JS -->
+                    </div>
+                </main>
             </div>
         </div>
     </div>
@@ -132,10 +64,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
-        // Função toggleMenu global
-        function toggleMenu() {
-            document.getElementById('nav-links').classList.toggle('active');
-        }
+        let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -144,188 +73,165 @@
         });
 
         async function initCursos() {
-            const grid = document.getElementById('cursos-grid');
-            grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Carregando cursos...</p>';
+            const auth = await checkAuth();
+            if (auth) {
+                currentUser = auth.user;
+                document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
+                document.getElementById('sidebar-email').textContent = auth.user.email;
+                document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+            } else {
+                document.getElementById('sidebar-name').textContent = 'Visitante';
+                document.getElementById('sidebar-email').textContent = 'Faça login para mais recursos';
+                document.getElementById('user-avatar').textContent = '👤';
+            }
+
+            await loadCursosPage();
+        }
+
+        async function loadCursosPage() {
+            const container = document.getElementById('cursos-container');
 
             try {
+                // Verificar assinatura (se logado)
+                let assinatura = { ativa: false };
+                if (currentUser) {
+                    assinatura = await checkAssinaturaStatus();
+                }
+
+                // Buscar todos os cursos
                 const { data: cursos, error } = await supabaseClient
                     .from('cursos')
-                    .select('*')
+                    .select('id, titulo, descricao, thumbnail, preco, total_aulas, duracao_total, total_alunos, avaliacao, ordem, ativo, gratuito, created_at')
                     .eq('ativo', true)
-                    .order('ordem');
+                    .order('ordem', { ascending: true });
 
-                if (error) {
-                    console.error('[SCHEILA] Erro ao buscar cursos:', error);
-                    grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Erro ao carregar cursos. Tente novamente.</p>';
-                    return;
-                }
+                if (error) throw error;
 
                 if (!cursos || cursos.length === 0) {
-                    grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Nenhum curso disponível no momento.</p>';
-                    return;
-                }
-
-                // Verificar quais cursos o usuário já comprou
-                let compras = [];
-                try {
-                    const auth = await requireAuth();
-                    if (auth && auth.user) {
-                        const { data: comprasData } = await supabaseClient
-                            .from('compras_cursos')
-                            .select('curso_id, status')
-                            .eq('usuario_id', auth.user.id)
-                            .eq('status', 'pago');
-                        compras = comprasData || [];
-                    }
-                } catch (e) {
-                    console.log('[SCHEILA] Usuário não logado ou erro ao buscar compras:', e.message);
-                }
-
-                const cursosComprados = compras.map(c => c.curso_id);
-
-                grid.innerHTML = cursos.map(curso => {
-                    const jaComprou = cursosComprados.includes(curso.id);
-                    const isGratuito = curso.gratuito === true;
-                    const preco = curso.preco || 0;
-                    const precoFormatado = preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-                    let btnText = '';
-                    let btnClass = '';
-                    let btnHref = '';
-                    let btnOnclick = '';
-
-                    if (jaComprou) {
-                        btnText = '▶ Assistir';
-                        btnClass = 'btn-curso';
-                        btnHref = `aula.html?curso=${curso.id}`;
-                    } else if (isGratuito) {
-                        btnText = '🎁 Acessar Grátis';
-                        btnClass = 'btn-curso btn-gratuito';
-                        btnHref = `aula.html?curso=${curso.id}`;
-                    } else {
-                        btnText = `💳 Comprar ${precoFormatado}`;
-                        btnClass = 'btn-curso btn-comprar';
-                        btnOnclick = `comprarCurso('${curso.id}', ${preco}, '${curso.titulo.replace(/'/g, "\'")}');return false`;
-                    }
-
-                    return `
-                        <div class="curso-card">
-                            <div class="curso-thumb">
-                                <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" 
-                                     alt="${curso.titulo}" 
-                                     loading="lazy"
-                                     onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
-                                ${isGratuito ? '<span class="badge-gratuito">GRÁTIS</span>' : ''}
-                                ${jaComprou ? '<span class="badge-comprado">✅ ADQUIRIDO</span>' : ''}
-                            </div>
-                            <div class="curso-info">
-                                <h3>${curso.titulo}</h3>
-                                <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${curso.descricao || ''}</p>
-                                <div class="curso-meta">
-                                    <span>📚 ${curso.total_aulas || 0} aulas</span>
-                                    <span>⏱️ ${curso.duracao_total || '0h'}</span>
-                                </div>
-                                <div class="curso-preco">
-                                    ${isGratuito ? '<span class="preco-gratuito">GRATUITO</span>' : `<span class="preco">${precoFormatado}</span>`}
-                                </div>
-                                ${btnOnclick 
-                                    ? `<a href="#" class="${btnClass}" onclick="${btnOnclick}">${btnText}</a>`
-                                    : `<a href="${btnHref}" class="${btnClass}">${btnText}</a>`
-                                }
-                            </div>
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:60px 20px">
+                            <div style="font-size:48px;margin-bottom:16px">🎬</div>
+                            <h3 style="font-size:18px;margin-bottom:8px">Nenhum curso disponível</h3>
+                            <p style="color:var(--text-muted)">Volte em breve para novidades!</p>
                         </div>
                     `;
-                }).join('');
-
-            } catch (e) {
-                console.error('[SCHEILA] Erro ao carregar cursos:', e);
-                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">Erro ao carregar cursos. Tente novamente.</p>';
-            }
-        }
-
-        async function comprarCurso(cursoId, preco, titulo) {
-            try {
-                const auth = await requireAuth();
-                if (!auth || !auth.user) {
-                    alert('Faça login para comprar este curso!');
-                    window.location.href = 'login.html';
                     return;
                 }
 
-                // Verificar se já comprou
-                const { data: compraExistente } = await supabaseClient
-                    .from('compras_cursos')
-                    .select('*')
-                    .eq('usuario_id', auth.user.id)
-                    .eq('curso_id', cursoId)
-                    .eq('status', 'pago')
-                    .maybeSingle();
-
-                if (compraExistente) {
-                    alert('Você já comprou este curso!');
-                    window.location.href = `aula.html?curso=${cursoId}`;
-                    return;
+                // Buscar cursos comprados (se logado)
+                let cursosComprados = [];
+                if (currentUser && !assinatura.ativa) {
+                    const { data: compras } = await supabaseClient
+                        .from('compras_cursos')
+                        .select('curso_id')
+                        .eq('usuario_id', currentUser.id)
+                        .eq('status', 'pago');
+                    cursosComprados = (compras || []).map(c => c.curso_id);
                 }
 
-                // Redirecionar para página de pagamento
-                window.location.href = `pagamento.html?curso=${cursoId}&valor=${preco}&titulo=${encodeURIComponent(titulo)}`;
+                // Buscar aulas gratuitas por curso
+                const { data: aulasFree } = await supabaseClient
+                    .from('aulas')
+                    .select('curso_id')
+                    .eq('gratuito', true)
+                    .eq('ativo', true);
+
+                const aulasFreeMap = {};
+                (aulasFree || []).forEach(a => {
+                    aulasFreeMap[a.curso_id] = true;
+                });
+
+                // Buscar progresso (se logado)
+                let progressoMap = {};
+                if (currentUser) {
+                    const { data: progressos } = await supabaseClient
+                        .from('progresso_aulas')
+                        .select('aula_id, concluida')
+                        .eq('usuario_id', currentUser.id);
+
+                    (progressos || []).forEach(p => {
+                        progressoMap[p.aula_id] = p.concluida;
+                    });
+                }
+
+                // Renderizar cursos
+                container.innerHTML = `
+                    <div class="cursos-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+                        ${cursos.map(curso => {
+                            // VERIFICAÇÃO DE ACESSO
+                            const temAcesso = assinatura.ativa || cursosComprados.includes(curso.id);
+                            const temAulasFree = aulasFreeMap[curso.id] || false;
+
+                            // VERIFICAR SE CURSO É GRATUITO (robusto para diferentes formatos)
+                            let isCursoFree = false;
+                            if (curso.gratuito === true || curso.gratuito === 'true' || curso.gratuito === 't' || curso.gratuito === 1 || curso.gratuito === '1') {
+                                isCursoFree = true;
+                            }
+
+                            // Se preço é 0, também considerar gratuito
+                            if (curso.preco === 0 || curso.preco === '0' || curso.preco === '0.00') {
+                                isCursoFree = true;
+                            }
+
+                            const podeAssistir = temAcesso || temAulasFree || isCursoFree;
+
+                            // DEBUG: mostrar no console
+                            console.log('[RITMUS] Curso:', curso.titulo, '| gratuito:', curso.gratuito, '| preco:', curso.preco, '| isCursoFree:', isCursoFree, '| podeAssistir:', podeAssistir);
+
+                            return `
+                                <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
+                                    <div class="curso-thumb" style="position:relative">
+                                        <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy">
+                                        ${podeAssistir ? `
+                                            <div class="curso-play">
+                                                <div class="play-btn">▶</div>
+                                            </div>
+                                        ` : `
+                                            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center">
+                                                <div style="text-align:center">
+                                                    <div style="font-size:32px;margin-bottom:8px">🔒</div>
+                                                    <div style="font-size:13px;color:white;font-weight:600">Bloqueado</div>
+                                                </div>
+                                            </div>
+                                        `}
+                                        ${isCursoFree ? `
+                                            <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#F7C948,#D97706);color:white;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:600">🎁 CURSO GRATUITO</div>
+                                        ` : (temAulasFree ? `
+                                            <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--success),#059669);color:white;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:600">🎁 TEM AULAS FREE</div>
+                                        ` : '')}
+                                        <div class="curso-badge">${curso.total_aulas || 0} aulas</div>
+                                    </div>
+                                    <div class="curso-info">
+                                        <h3>${curso.titulo}</h3>
+                                        <p>${curso.descricao || 'Curso completo com aulas gravadas.'}</p>
+                                        <div class="curso-meta">
+                                            <span>⏱️ ${curso.duracao_total || '0h'}</span>
+                                            <span>👥 ${curso.total_alunos || 0} alunos</span>
+                                        </div>
+                                        ${podeAssistir ? `
+                                            <div style="margin-top:16px">
+                                                <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
+                                                    ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcesso ? '🎁 Assistir Aulas Free' : 'Assistir Aulas')}
+                                                </a>
+                                            </div>
+                                        ` : `
+                                            <div class="curso-footer" style="margin-top:12px">
+                                                <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
+                                                <a href="../index.html#precos" class="btn-curso">Comprar</a>
+                                            </div>
+                                        `}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
 
             } catch (e) {
-                console.error('[SCHEILA] Erro ao comprar curso:', e);
-                alert('Erro ao processar compra. Tente novamente.');
+                console.error('Erro:', e);
+                container.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar cursos.</p>';
             }
         }
     </script>
-
-    <!-- PROTEÇÃO: Garantir que TODOS os links internos abram na mesma aba -->
-    <script>
-    (function() {
-        function removeAllBlankTargets() {
-            var links = document.querySelectorAll('a');
-            links.forEach(function(link) {
-                var href = link.getAttribute('href') || '';
-                if (link.getAttribute('target') === '_blank') {
-                    link.removeAttribute('target');
-                }
-                if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('mailto:') && !href.startsWith('tel:') && !href.startsWith('javascript:')) {
-                    link.removeAttribute('target');
-                }
-            });
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                removeAllBlankTargets();
-                setTimeout(removeAllBlankTargets, 100);
-                setTimeout(removeAllBlankTargets, 500);
-                setTimeout(removeAllBlankTargets, 1000);
-                setTimeout(removeAllBlankTargets, 2000);
-            });
-        } else {
-            removeAllBlankTargets();
-            setTimeout(removeAllBlankTargets, 100);
-            setTimeout(removeAllBlankTargets, 500);
-            setTimeout(removeAllBlankTargets, 1000);
-            setTimeout(removeAllBlankTargets, 2000);
-        }
-
-        if (window.MutationObserver) {
-            var observer = new MutationObserver(function(mutations) {
-                removeAllBlankTargets();
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
-
-        document.addEventListener('click', function(e) {
-            var link = e.target.closest('a');
-            if (link && link.getAttribute('target') === '_blank') {
-                e.preventDefault();
-                link.removeAttribute('target');
-                window.location.href = link.getAttribute('href');
-            }
-        }, true);
-    })();
-    </script>
-
 </body>
 </html>
