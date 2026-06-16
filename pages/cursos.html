@@ -8,19 +8,109 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+    <style>
+        /* CSS do Navbar - garantir que o menu apareça */
+        .navbar {
+            background: #1a1a2e;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .logo-icon {
+            font-size: 24px;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(255,107,53,0.2);
+        }
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .menu-toggle span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #fff;
+            margin: 5px 0;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: #1a1a2e;
+                flex-direction: column;
+                padding: 16px;
+                gap: 4px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .nav-links a {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
 <base target="_blank">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <a href="../index.html" class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></a>
-            <div class="nav-links">
+            <div class="nav-links" id="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
                 <a href="cursos.html" class="active">Cursos</a>
                 <a href="admin.html" id="nav-admin" style="display:none">⚙️ Admin</a>
                 <a href="#" onclick="logout();return false">Sair</a>
             </div>
-            <button class="menu-toggle" onclick="toggleMenu()">
+            <button class="menu-toggle" onclick="toggleMenu()" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
         </div>
@@ -42,6 +132,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
+        // Função toggleMenu global
+        function toggleMenu() {
+            document.getElementById('nav-links').classList.toggle('active');
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
                 initCursos();
