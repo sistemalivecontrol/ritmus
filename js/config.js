@@ -86,6 +86,46 @@ function showToast(title, message, type) {
     console.log(`[RITMUS] Toast [${type}]: ${title} - ${message}`);
 }
 
+
+// Função requireAuth - redireciona para login se não autenticado
+async function requireAuth() {
+    if (!supabaseClient) {
+        console.warn('[RITMUS] Supabase não inicializado para requireAuth');
+        window.location.href = 'login.html';
+        return false;
+    }
+    try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error || !session) {
+            console.log('[RITMUS] Usuário não autenticado, redirecionando...');
+            window.location.href = 'login.html';
+            return false;
+        }
+        return true;
+    } catch (e) {
+        console.error('[RITMUS] Erro em requireAuth:', e);
+        window.location.href = 'login.html';
+        return false;
+    }
+}
+
+// Função logout - encerra sessão
+async function logout() {
+    if (!supabaseClient) {
+        console.warn('[RITMUS] Supabase não inicializado para logout');
+        window.location.href = 'login.html';
+        return;
+    }
+    try {
+        await supabaseClient.auth.signOut();
+        console.log('[RITMUS] Logout realizado');
+        window.location.href = 'login.html';
+    } catch (e) {
+        console.error('[RITMUS] Erro no logout:', e);
+        window.location.href = 'login.html';
+    }
+}
+
 // Inicializar automaticamente se Supabase já estiver disponível
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
