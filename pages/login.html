@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - Ritmus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="logo">
+                        <span class="logo-icon">💪</span>
+                        <span class="logo-text">Ritmus</span>
+                    </div>
+                    <h1>Bem-vindo de volta!</h1>
+                    <p>Acesse suas aulas e continue treinando</p>
+                </div>
+
+                <form id="form-login">
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="senha">Senha</label>
+                        <input type="password" id="senha" required placeholder="Sua senha">
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);cursor:pointer">
+                            <input type="checkbox" id="lembrar" style="width:auto">
+                            Lembrar-me
+                        </label>
+                        <a href="recuperar-senha.html" style="font-size:13px;color:var(--primary);text-decoration:none">Esqueceu a senha?</a>
+                    </div>
+                    <button type="submit" class="btn-submit" id="btn-login">
+                        Entrar
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    Ainda não tem conta? <a href="cadastro.html">Criar conta</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                initLogin();
+            });
+        });
+
+        function initLogin() {
+            // Verificar se já está logado
+            checkAuth().then(auth => {
+                if (auth) {
+                    window.location.href = 'dashboard.html';
+                }
+            });
+
+            document.getElementById('form-login').addEventListener('submit', handleLogin);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            btn.disabled = true;
+            btn.textContent = 'Entrando...';
+            showLoading('Verificando credenciais...');
+
+            try {
+                const email = document.getElementById('email').value.trim().toLowerCase();
+                const senha = document.getElementById('senha').value;
+                const lembrar = document.getElementById('lembrar').checked;
+
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: senha
+                });
+
+                if (error) throw error;
+
+                // Verificar status do usuário
+                const { data: userData } = await supabaseClient
+                    .from('usuarios')
+                    .select('status, nome')
+                    .eq('auth_id', data.user.id)
+                    .single();
+
+                hideLoading();
+
+                if (userData && userData.status === 'bloqueado') {
+                    await supabaseClient.auth.signOut();
+                    showToast('Acesso Negado', 'Sua conta está bloqueada. Entre em contato com o suporte.', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Entrar';
+                    return;
+                }
+
+                showToast('Sucesso!', `Bem-vindo, ${userData?.nome || 'de volta'}!`, 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+
+            } catch (error) {
+                hideLoading();
+                btn.disabled = false;
+                btn.textContent = 'Entrar';
+                console.error('[RITMUS] Erro login:', error);
+
+                let msg = 'E-mail ou senha incorretos.';
+                if (error.message.includes('Email not confirmed')) {
+                    msg = 'E-mail não confirmado. Verifique sua caixa de entrada.';
+                }
+                showToast('Erro', msg, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
