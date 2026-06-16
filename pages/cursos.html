@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../images/favicon-scheila.png">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -59,6 +61,7 @@
     <script src="../js/config.js"></script>
     <script>
         let currentUser = null;
+        let currentSession = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -67,16 +70,48 @@
         });
 
         async function initCursos() {
-            const auth = await checkAuth();
-            if (auth) {
-                currentUser = auth.user;
-                document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
-                document.getElementById('sidebar-email').textContent = auth.user.email;
-                document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
-            } else {
+            try {
+                // Obter sessão atual
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+                if (sessionError) {
+                    console.error('[SCHEILA] Erro ao obter sessão:', sessionError);
+                }
+
+                if (session && session.user) {
+                    currentSession = session;
+                    currentUser = session.user;
+
+                    // Buscar dados do perfil do usuário na tabela usuarios
+                    const { data: userData, error: userError } = await supabaseClient
+                        .from('usuarios')
+                        .select('nome, email')
+                        .eq('auth_id', session.user.id)
+                        .single();
+
+                    if (userError) {
+                        console.warn('[SCHEILA] Erro ao buscar dados do usuário:', userError);
+                    }
+
+                    const nome = userData?.nome || session.user.user_metadata?.nome || session.user.email?.split('@')[0] || 'Aluno';
+                    const email = userData?.email || session.user.email || '';
+
+                    document.getElementById('sidebar-name').textContent = nome;
+                    document.getElementById('sidebar-email').textContent = email;
+                    document.getElementById('user-avatar').textContent = nome.charAt(0).toUpperCase();
+
+                    console.log('[SCHEILA] Usuário logado:', nome);
+                } else {
+                    document.getElementById('sidebar-name').textContent = 'Visitante';
+                    document.getElementById('sidebar-email').textContent = 'Faça login para mais recursos';
+                    document.getElementById('user-avatar').textContent = '👤';
+                    console.log('[SCHEILA] Usuário não logado');
+                }
+            } catch (e) {
+                console.error('[SCHEILA] Erro em initCursos:', e);
                 document.getElementById('sidebar-name').textContent = 'Visitante';
-                document.getElementById('sidebar-email').textContent = 'Faça login para mais recursos';
-                document.getElementById('user-avatar').textContent = '👤';
+                document.getElementById('sidebar-email').textContent = 'Erro ao carregar dados';
+                document.getElementById('user-avatar').textContent = '⚠️';
             }
 
             await loadCursosPage();
@@ -89,7 +124,17 @@
                 // Verificar assinatura (se logado)
                 let assinatura = { ativa: false };
                 if (currentUser) {
-                    assinatura = await checkAssinaturaStatus();
+                    try {
+                        const { data: assinaturaData } = await supabaseClient
+                            .from('assinaturas')
+                            .select('status')
+                            .eq('usuario_id', currentUser.id)
+                            .eq('status', 'ativa')
+                            .single();
+                        assinatura = { ativa: !!assinaturaData };
+                    } catch (e) {
+                        console.warn('[SCHEILA] Erro ao verificar assinatura:', e);
+                    }
                 }
 
                 // Buscar todos os cursos
@@ -115,37 +160,49 @@
                 // Buscar cursos comprados (se logado)
                 let cursosComprados = [];
                 if (currentUser && !assinatura.ativa) {
-                    const { data: compras } = await supabaseClient
-                        .from('compras_cursos')
-                        .select('curso_id')
-                        .eq('usuario_id', currentUser.id)
-                        .eq('status', 'pago');
-                    cursosComprados = (compras || []).map(c => c.curso_id);
+                    try {
+                        const { data: compras } = await supabaseClient
+                            .from('compras_cursos')
+                            .select('curso_id')
+                            .eq('usuario_id', currentUser.id)
+                            .eq('status', 'pago');
+                        cursosComprados = (compras || []).map(c => c.curso_id);
+                    } catch (e) {
+                        console.warn('[SCHEILA] Erro ao buscar compras:', e);
+                    }
                 }
 
                 // Buscar aulas gratuitas por curso
-                const { data: aulasFree } = await supabaseClient
-                    .from('aulas')
-                    .select('curso_id')
-                    .eq('gratuito', true)
-                    .eq('ativo', true);
+                let aulasFreeMap = {};
+                try {
+                    const { data: aulasFree } = await supabaseClient
+                        .from('aulas')
+                        .select('curso_id')
+                        .eq('gratuito', true)
+                        .eq('ativo', true);
 
-                const aulasFreeMap = {};
-                (aulasFree || []).forEach(a => {
-                    aulasFreeMap[a.curso_id] = true;
-                });
+                    (aulasFree || []).forEach(a => {
+                        aulasFreeMap[a.curso_id] = true;
+                    });
+                } catch (e) {
+                    console.warn('[SCHEILA] Erro ao buscar aulas free:', e);
+                }
 
                 // Buscar progresso (se logado)
                 let progressoMap = {};
                 if (currentUser) {
-                    const { data: progressos } = await supabaseClient
-                        .from('progresso_aulas')
-                        .select('aula_id, concluida')
-                        .eq('usuario_id', currentUser.id);
+                    try {
+                        const { data: progressos } = await supabaseClient
+                            .from('progresso_aulas')
+                            .select('aula_id, concluida')
+                            .eq('usuario_id', currentUser.id);
 
-                    (progressos || []).forEach(p => {
-                        progressoMap[p.aula_id] = p.concluida;
-                    });
+                        (progressos || []).forEach(p => {
+                            progressoMap[p.aula_id] = p.concluida;
+                        });
+                    } catch (e) {
+                        console.warn('[SCHEILA] Erro ao buscar progresso:', e);
+                    }
                 }
 
                 // Renderizar cursos
@@ -168,9 +225,6 @@
                             }
 
                             const podeAssistir = temAcesso || temAulasFree || isCursoFree;
-
-                            // DEBUG: mostrar no console
-                            console.log('[SCHEILA] Curso:', curso.titulo, '| gratuito:', curso.gratuito, '| preco:', curso.preco, '| isCursoFree:', isCursoFree, '| podeAssistir:', podeAssistir);
 
                             return `
                                 <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
@@ -222,8 +276,8 @@
                 `;
 
             } catch (e) {
-                console.error('Erro:', e);
-                container.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar cursos.</p>';
+                console.error('[SCHEILA] Erro ao carregar cursos:', e);
+                container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px">Erro ao carregar cursos. Tente recarregar a página.</p>';
             }
         }
     </script>
