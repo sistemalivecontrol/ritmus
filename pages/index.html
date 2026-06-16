@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ritmus - Plataforma de Aulas Fitness Online</title>
+    <title>Scheila Almeida - Cursos Fitness Online</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">
-                <span class="logo-icon">💪</span>
-                <span class="logo-text">Ritmus</span>
-            </a>
+            <a href="index.html" class="logo"><img src="images/logo-scheila-horizontal.png" alt="Scheila Almeida Cursos Fitness" class="logo-img" style="height:42px;max-width:200px;object-fit:contain"></a>
             <div class="nav-links">
                 <a href="#cursos">Cursos</a>
                 <a href="#como-funciona">Como Funciona</a>
@@ -143,11 +140,8 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <div class="logo">
-                        <span class="logo-icon">💪</span>
-                        <span class="logo-text">Ritmus</span>
-                    </div>
-                    <p>Plataforma de aulas fitness online. Treine quando quiser, onde quiser.</p>
+                    <div class="logo"><img src="images/logo-scheila-horizontal.png" alt="Scheila Almeida Cursos Fitness" class="logo-img" style="height:48px;max-width:220px;object-fit:contain"></div>
+                    <p>Cursos fitness online com Scheila Almeida. Treine quando quiser, onde quiser.</p>
                 </div>
                 <div class="footer-links">
                     <h4>Links</h4>
@@ -159,12 +153,12 @@
                 </div>
                 <div class="footer-links">
                     <h4>Contato</h4>
-                    <p>📧 suporte@ritmus.fit</p>
+                    <p>📧 contato@scheilaalmeida.com.br</p>
                     <p>💬 WhatsApp</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>© 2026 Ritmus. Todos os direitos reservados.</p>
+                <p>© 2026 Scheila Almeida Cursos Fitness. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
@@ -198,16 +192,16 @@
 
                 if (!error && cursos && cursos.length > 0) {
                     renderCursos(cursos);
-                    console.log('[RITMUS] Cursos carregados do Supabase:', cursos.length);
+                    console.log('[SCHEILA] Cursos carregados do Supabase:', cursos.length);
                     return;
                 }
 
                 // Fallback: usar hardcoded
-                console.log('[RITMUS] Usando cursos hardcoded como fallback');
+                console.log('[SCHEILA] Usando cursos hardcoded como fallback');
                 renderCursos(CURSOS_HARDCODED);
 
             } catch (e) {
-                console.error('[RITMUS] Erro ao carregar cursos:', e);
+                console.error('[SCHEILA] Erro ao carregar cursos:', e);
                 renderCursos(CURSOS_HARDCODED);
             }
         }
@@ -280,7 +274,7 @@
                 renderPrecosCursos(cursos);
 
             } catch (e) {
-                console.error('[RITMUS] Erro ao carregar preços:', e);
+                console.error('[SCHEILA] Erro ao carregar preços:', e);
             }
         }
 

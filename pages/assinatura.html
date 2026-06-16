@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assinatura - Ritmus</title>
+    <title>Assinatura - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="../index.html" class="logo">
-                <span class="logo-icon">💪</span>
-                <span class="logo-text">Ritmus</span>
-            </a>
+            <a href="../index.html" class="logo"><img src="../images/logo-scheila-horizontal.png" alt="Scheila Almeida Cursos Fitness" class="logo-img" style="height:42px;max-width:200px;object-fit:contain"></a>
             <div class="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
                 <a href="cursos.html">Cursos</a>
@@ -176,7 +173,7 @@
                     `;
                 }
             } catch (e) {
-                console.error('[RITMUS] Erro ao carregar status:', e);
+                console.error('[SCHEILA] Erro ao carregar status:', e);
                 container.innerHTML = `
                     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 32px">
                         <p style="color:var(--text-muted)">Erro ao carregar status da assinatura.</p>
@@ -216,7 +213,7 @@
                 }).join('');
 
             } catch (e) {
-                console.error('[RITMUS] Erro ao carregar histórico:', e);
+                console.error('[SCHEILA] Erro ao carregar histórico:', e);
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Erro ao carregar histórico.</td></tr>';
             }
         }
@@ -254,7 +251,7 @@
 
             } catch (error) {
                 hideLoading();
-                console.error('[RITMUS] Erro ao assinar:', error);
+                console.error('[SCHEILA] Erro ao assinar:', error);
                 showToast('Erro', error.message || 'Erro ao processar pagamento. Tente novamente.', 'error');
             }
         }

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagamento Confirmado - Ritmus</title>
+    <title>Pagamento Confirmado - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
     <style>
         .success-page {
             min-height: 100vh;
@@ -127,6 +127,14 @@
             font-weight: 600;
             margin-bottom: 16px;
         }
+        .logo-img {
+            display: inline-block;
+            vertical-align: middle;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover .logo-img {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -186,7 +194,7 @@
                 document.getElementById('btn-assistir').href = 'aula.html?curso=' + cursoId;
 
             } catch (e) {
-                console.error('[RITMUS] Erro:', e);
+                console.error('[SCHEILA] Erro:', e);
             }
         }
     </script>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula - Ritmus</title>
+    <title>Aula - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
@@ -11,10 +11,7 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="../index.html" class="logo">
-                <span class="logo-icon">💪</span>
-                <span class="logo-text">Ritmus</span>
-            </a>
+            <a href="../index.html" class="logo"><img src="../images/logo-scheila-horizontal.png" alt="Scheila Almeida Cursos Fitness" class="logo-img" style="height:42px;max-width:200px;object-fit:contain"></a>
             <div class="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
                 <a href="cursos.html">Cursos</a>
@@ -469,7 +466,7 @@ function renderAulaLista(progressoMap) {
                     .maybeSingle();
 
                 if (compra) {
-                    console.log('[RITMUS] Acesso liberado - curso comprado:', cursoId);
+                    console.log('[SCHEILA] Acesso liberado - curso comprado:', cursoId);
                     return true;
                 }
 
@@ -481,15 +478,15 @@ function renderAulaLista(progressoMap) {
                     .single();
 
                 if (curso && curso.gratuito) {
-                    console.log('[RITMUS] Acesso liberado - curso gratuito:', cursoId);
+                    console.log('[SCHEILA] Acesso liberado - curso gratuito:', cursoId);
                     return true;
                 }
 
-                console.log('[RITMUS] Acesso negado - curso não comprado:', cursoId);
+                console.log('[SCHEILA] Acesso negado - curso não comprado:', cursoId);
                 return false;
 
             } catch (e) {
-                console.error('[RITMUS] Erro ao verificar acesso:', e);
+                console.error('[SCHEILA] Erro ao verificar acesso:', e);
                 return false;
             }
         }

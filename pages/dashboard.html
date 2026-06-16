@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Painel - Ritmus</title>
+    <title>Meu Painel - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="../index.html" class="logo">
-                <span class="logo-icon">💪</span>
-                <span class="logo-text">Ritmus</span>
-            </a>
+            <a href="../index.html" class="logo"><img src="../images/logo-scheila-horizontal.png" alt="Scheila Almeida Cursos Fitness" class="logo-img" style="height:42px;max-width:200px;object-fit:contain"></a>
             <div class="nav-links">
                 <a href="dashboard.html" class="active">Meu Painel</a>
                 <a href="cursos.html">Cursos</a>
@@ -143,10 +140,10 @@
                     const sidebarAdmin = document.getElementById('sidebar-admin');
                     if (navAdmin) navAdmin.style.display = 'inline-flex';
                     if (sidebarAdmin) sidebarAdmin.style.display = 'block';
-                    console.log('[RITMUS] Usuário é admin - menu exibido');
+                    console.log('[SCHEILA] Usuário é admin - menu exibido');
                 }
             } catch (e) {
-                console.log('[RITMUS] Erro ao verificar admin:', e.message);
+                console.log('[SCHEILA] Erro ao verificar admin:', e.message);
             }
 
             // Verificar cursos comprados
@@ -159,7 +156,7 @@
                     .eq('status', 'pago');
                 cursosComprados = count || 0;
             } catch (e) {
-                console.log('[RITMUS] Erro ao verificar compras:', e.message);
+                console.log('[SCHEILA] Erro ao verificar compras:', e.message);
             }
 
             if (cursosComprados > 0) {
@@ -187,7 +184,7 @@
                         .eq('status', 'pago');
                     cursosCount = count || 0;
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar compras:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar compras:', e.message);
                 }
 
                 // Cursos gratuitos
@@ -200,7 +197,7 @@
                         .eq('gratuito', true);
                     cursosFree = count || 0;
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar cursos gratuitos:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar cursos gratuitos:', e.message);
                 }
 
                 document.getElementById('stat-cursos').textContent = cursosCount + cursosFree;
@@ -215,7 +212,7 @@
                         .eq('concluida', true);
                     progressos = data || [];
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar progresso:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar progresso:', e.message);
                 }
 
                 document.getElementById('stat-aulas').textContent = progressos.length || 0;
@@ -228,7 +225,7 @@
                 document.getElementById('stat-streak').textContent = progressos.length > 0 ? '1' : '0';
 
             } catch (e) {
-                console.error('[RITMUS] Erro stats:', e);
+                console.error('[SCHEILA] Erro stats:', e);
             }
         }
 
@@ -256,7 +253,7 @@
                         cursos = cursosData || [];
                     }
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar cursos comprados:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar cursos comprados:', e.message);
                 }
 
                 // Buscar cursos gratuitos também
@@ -278,7 +275,7 @@
                         });
                     }
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar cursos gratuitos:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar cursos gratuitos:', e.message);
                 }
 
                 // Mostrar alerta se não tem cursos
@@ -309,7 +306,7 @@
                         progressoMap[p.aula_id] = p.concluida;
                     });
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar progresso:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar progresso:', e.message);
                 }
 
                 grid.innerHTML = cursos.map(curso => {
@@ -338,7 +335,7 @@
                 }).join('');
 
             } catch (e) {
-                console.error('[RITMUS] Erro cursos:', e);
+                console.error('[SCHEILA] Erro cursos:', e);
                 grid.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar cursos.</p>';
             }
         }
@@ -360,7 +357,7 @@
                         .maybeSingle();
                     ultimoProgresso = data;
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar último progresso:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar último progresso:', e.message);
                 }
 
                 if (!ultimoProgresso) {
@@ -378,7 +375,7 @@
                         .single();
                     aula = data;
                 } catch (e) {
-                    console.log('[RITMUS] Erro ao buscar aula:', e.message);
+                    console.log('[SCHEILA] Erro ao buscar aula:', e.message);
                 }
 
                 if (!aula) {
@@ -407,7 +404,7 @@
 
             } catch (e) {
                 section.style.display = 'none';
-                console.error('[RITMUS] Erro continue:', e);
+                console.error('[SCHEILA] Erro continue:', e);
             }
         }
     </script>

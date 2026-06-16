@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursos - Ritmus</title>
+    <title>Cursos - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
@@ -11,10 +11,7 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="../index.html" class="logo">
-                <span class="logo-icon">💪</span>
-                <span class="logo-text">Ritmus</span>
-            </a>
+            <a href="../index.html" class="logo"><img src="../images/logo-scheila-horizontal.png" alt="Scheila Almeida Cursos Fitness" class="logo-img" style="height:42px;max-width:200px;object-fit:contain"></a>
             <div class="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
                 <a href="cursos.html" class="active">Cursos</a>
@@ -173,7 +170,7 @@
                             const podeAssistir = temAcesso || temAulasFree || isCursoFree;
 
                             // DEBUG: mostrar no console
-                            console.log('[RITMUS] Curso:', curso.titulo, '| gratuito:', curso.gratuito, '| preco:', curso.preco, '| isCursoFree:', isCursoFree, '| podeAssistir:', podeAssistir);
+                            console.log('[SCHEILA] Curso:', curso.titulo, '| gratuito:', curso.gratuito, '| preco:', curso.preco, '| isCursoFree:', isCursoFree, '| podeAssistir:', podeAssistir);
 
                             return `
                                 <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
