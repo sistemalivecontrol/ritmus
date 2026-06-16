@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
-<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -51,7 +50,6 @@
                 </aside>
 
                 <main class="main-content">
-                    <!-- Stats -->
                     <div class="stats-row">
                         <div class="stat-card">
                             <div class="stat-icon">🎬</div>
@@ -75,7 +73,6 @@
                         </div>
                     </div>
 
-                    <!-- Aviso: Sem cursos comprados -->
                     <div id="sem-cursos-alerta" style="display:none;margin-bottom:24px">
                         <div style="background:linear-gradient(135deg,rgba(255,107,53,0.1),rgba(255,107,53,0.05));border:1px solid rgba(255,107,53,0.3);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:16px">
                             <span style="font-size:32px">🎬</span>
@@ -87,23 +84,17 @@
                         </div>
                     </div>
 
-                    <!-- Continue Assistindo -->
                     <div id="continue-section" style="margin-bottom:32px">
                         <h2 style="font-size:20px;font-weight:700;margin-bottom:16px">▶️ Continue Assistindo</h2>
-                        <div id="continue-grid" class="meus-cursos-grid">
-                            <!-- Preenchido via JS -->
-                        </div>
+                        <div id="continue-grid" class="meus-cursos-grid"></div>
                     </div>
 
-                    <!-- Meus Cursos -->
                     <div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
                             <h2 style="font-size:20px;font-weight:700">📚 Meus Cursos</h2>
                             <a href="cursos.html" style="color:var(--primary);font-size:14px;text-decoration:none;font-weight:500">Ver todos →</a>
                         </div>
-                        <div id="meus-cursos-grid" class="meus-cursos-grid">
-                            <!-- Preenchido via JS -->
-                        </div>
+                        <div id="meus-cursos-grid" class="meus-cursos-grid"></div>
                     </div>
                 </main>
             </div>
@@ -127,13 +118,11 @@
 
             currentUser = auth.user;
 
-            // Preencher dados do usuário
             document.getElementById('user-name').textContent = auth.user.nome || 'Aluno';
             document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
             document.getElementById('sidebar-email').textContent = auth.user.email;
             document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
 
-            // Verificar se é admin e mostrar menu
             try {
                 const isAdmin = await checkAdmin();
                 if (isAdmin) {
@@ -147,7 +136,6 @@
                 console.log('[SCHEILA] Erro ao verificar admin:', e.message);
             }
 
-            // Verificar cursos comprados
             let cursosComprados = 0;
             try {
                 const { count } = await supabaseClient
@@ -167,7 +155,6 @@
                 document.getElementById('user-status').innerHTML = '<span style="color:var(--text-muted)">Explore nossos cursos e comece a treinar!</span>';
             }
 
-            // Carregar estatísticas e cursos
             await loadStats(auth.user.id);
             await loadMeusCursos(auth.user.id);
             await loadContinueWatching(auth.user.id);
@@ -175,7 +162,6 @@
 
         async function loadStats(userId) {
             try {
-                // Cursos comprados (pagos)
                 let cursosCount = 0;
                 try {
                     const { count } = await supabaseClient
@@ -188,7 +174,6 @@
                     console.log('[SCHEILA] Erro ao buscar compras:', e.message);
                 }
 
-                // Cursos gratuitos
                 let cursosFree = 0;
                 try {
                     const { count } = await supabaseClient
@@ -203,7 +188,6 @@
 
                 document.getElementById('stat-cursos').textContent = cursosCount + cursosFree;
 
-                // Aulas assistidas
                 let progressos = [];
                 try {
                     const { data } = await supabaseClient
@@ -217,12 +201,8 @@
                 }
 
                 document.getElementById('stat-aulas').textContent = progressos.length || 0;
-
-                // Horas (estimativa: 30 min por aula)
                 const horas = Math.round(((progressos.length || 0) * 30) / 60);
                 document.getElementById('stat-horas').textContent = horas + 'h';
-
-                // Streak (simplificado)
                 document.getElementById('stat-streak').textContent = progressos.length > 0 ? '1' : '0';
 
             } catch (e) {
@@ -236,7 +216,6 @@
             try {
                 let cursos = [];
 
-                // Buscar cursos comprados (pagos)
                 try {
                     const { data: compras } = await supabaseClient
                         .from('compras_cursos')
@@ -257,7 +236,6 @@
                     console.log('[SCHEILA] Erro ao buscar cursos comprados:', e.message);
                 }
 
-                // Buscar cursos gratuitos também
                 try {
                     const { data: cursosFree } = await supabaseClient
                         .from('cursos')
@@ -267,7 +245,6 @@
                         .order('ordem');
 
                     if (cursosFree && cursosFree.length > 0) {
-                        // Adicionar cursos gratuitos que ainda não estão na lista
                         const existingIds = cursos.map(c => c.id);
                         cursosFree.forEach(cf => {
                             if (!existingIds.includes(cf.id)) {
@@ -279,7 +256,6 @@
                     console.log('[SCHEILA] Erro ao buscar cursos gratuitos:', e.message);
                 }
 
-                // Mostrar alerta se não tem cursos
                 if (cursos.length === 0) {
                     document.getElementById('sem-cursos-alerta').style.display = 'block';
                     grid.innerHTML = `
@@ -295,7 +271,6 @@
                     document.getElementById('sem-cursos-alerta').style.display = 'none';
                 }
 
-                // Buscar progresso
                 let progressoMap = {};
                 try {
                     const { data: progressos } = await supabaseClient
@@ -346,7 +321,6 @@
             const section = document.getElementById('continue-section');
 
             try {
-                // Buscar última aula assistida
                 let ultimoProgresso = null;
                 try {
                     const { data } = await supabaseClient
@@ -366,7 +340,6 @@
                     return;
                 }
 
-                // Buscar dados da aula e curso
                 let aula = null;
                 try {
                     const { data } = await supabaseClient
