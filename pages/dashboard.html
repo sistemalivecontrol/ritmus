@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -408,5 +409,61 @@
             }
         }
     </script>
+
+    <!-- PROTEÇÃO: Garantir que TODOS os links internos abram na mesma aba -->
+    <script>
+    (function() {
+        function removeAllBlankTargets() {
+            var links = document.querySelectorAll('a');
+            links.forEach(function(link) {
+                var href = link.getAttribute('href') || '';
+                // Remover target="_blank" de todos os links (internos e externos)
+                if (link.getAttribute('target') === '_blank') {
+                    link.removeAttribute('target');
+                }
+                // Para links internos, garantir que não abram em nova aba
+                if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('mailto:') && !href.startsWith('tel:') && !href.startsWith('javascript:')) {
+                    link.removeAttribute('target');
+                }
+            });
+        }
+
+        // Executar imediatamente e em múltiplos momentos
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                removeAllBlankTargets();
+                setTimeout(removeAllBlankTargets, 100);
+                setTimeout(removeAllBlankTargets, 500);
+                setTimeout(removeAllBlankTargets, 1000);
+                setTimeout(removeAllBlankTargets, 2000);
+            });
+        } else {
+            removeAllBlankTargets();
+            setTimeout(removeAllBlankTargets, 100);
+            setTimeout(removeAllBlankTargets, 500);
+            setTimeout(removeAllBlankTargets, 1000);
+            setTimeout(removeAllBlankTargets, 2000);
+        }
+
+        // Observar mudanças no DOM para remover target="_blank" de novos links
+        if (window.MutationObserver) {
+            var observer = new MutationObserver(function(mutations) {
+                removeAllBlankTargets();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        // Interceptar cliques em links
+        document.addEventListener('click', function(e) {
+            var link = e.target.closest('a');
+            if (link && link.getAttribute('target') === '_blank') {
+                e.preventDefault();
+                link.removeAttribute('target');
+                window.location.href = link.getAttribute('href');
+            }
+        }, true);
+    })();
+    </script>
+
 </body>
 </html>
