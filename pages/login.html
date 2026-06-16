@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -39,7 +40,7 @@
                             <input type="checkbox" id="lembrar" style="width:auto">
                             Lembrar-me
                         </label>
-                        <a href="recuperar-senha.html" style="font-size:13px;color:var(--primary);text-decoration:none">Esqueceu a senha?</a>
+                        <a href="recuperar-senha.html" style="font-size:13px;color:var(--primary);text-decoration:none" onclick="window.location.href='recuperar-senha.html'; return false;">Esqueceu a senha?</a>
                     </div>
                     <button type="submit" class="btn-submit" id="btn-login">
                         Entrar
@@ -47,7 +48,7 @@
                 </form>
 
                 <div class="auth-footer">
-                    Ainda não tem conta? <a href="cadastro.html">Criar conta</a>
+                    Ainda não tem conta? <a href="cadastro.html" onclick="window.location.href='cadastro.html'; return false;">Criar conta</a>
                 </div>
             </div>
         </div>
@@ -128,5 +129,34 @@
             }
         }
     </script>
+
+    <!-- PROTEÇÃO: Garantir que links internos abram na mesma aba -->
+    <script>
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            function fixLinks() {
+                var links = document.querySelectorAll('a');
+                links.forEach(function(link) {
+                    var href = link.getAttribute('href') || '';
+                    if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+                        link.removeAttribute('target');
+                        link.addEventListener('click', function(e) {
+                            link.removeAttribute('target');
+                        }, true);
+                    }
+                });
+            }
+            fixLinks();
+            setTimeout(fixLinks, 100);
+            setTimeout(fixLinks, 500);
+            setTimeout(fixLinks, 1000);
+            if (window.MutationObserver) {
+                var observer = new MutationObserver(function() { fixLinks(); });
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        });
+    })();
+    </script>
+
 </body>
 </html>
