@@ -1,26 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <script>
-    // REMOVER base target="_blank" se existir - executa ANTES de qualquer outro script
-    (function() {
-        var bases = document.querySelectorAll('base');
-        bases.forEach(function(b) { if(b.target) b.remove(); });
-
-        // Interceptar todos os cliques em links
-        document.addEventListener('click', function(e) {
-            var link = e.target.closest('a');
-            if (link) {
-                link.removeAttribute('target');
-            }
-        }, true);
-
-        // Remover target="_blank" de todos os links existentes
-        document.querySelectorAll('a[target="_blank"]').forEach(function(a) {
-            a.removeAttribute('target');
-        });
-    })();
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Painel - Scheila Almeida</title>
@@ -28,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
-
 <base target="_blank">
 </head>
 <body>
@@ -39,7 +18,7 @@
                 <a href="dashboard.html" class="active">Meu Painel</a>
                 <a href="cursos.html">Cursos</a>
                 <a href="admin.html" id="nav-admin" style="display:none">⚙️ Admin</a>
-                <a href="" onclick="logout();return false">Sair</a>
+                <a href="#" onclick="logout();return false">Sair</a>
             </div>
             <button class="menu-toggle" onclick="toggleMenu()">
                 <span></span><span></span><span></span>
@@ -67,7 +46,7 @@
                         <li><a href="dashboard.html" class="active"><span class="menu-icon">📊</span> Meu Painel</a></li>
                         <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
                         <li id="sidebar-admin" style="display:none"><a href="admin.html"><span class="menu-icon">⚙️</span> Admin</a></li>
-                        <li><a href="" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
+                        <li><a href="#" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
                     </ul>
                 </aside>
 
