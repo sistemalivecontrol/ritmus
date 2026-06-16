@@ -4,13 +4,10 @@
     <!-- SCRIPT ANTI-BLANK: Intercepta TODOS os cliques antes de tudo -->
     <script>
     (function() {
-        // Interceptar cliques no documento inteiro
         document.addEventListener('click', function(e) {
             var link = e.target.closest('a');
             if (link) {
-                // Remover target="_blank" imediatamente
                 link.removeAttribute('target');
-                // Se o href é interno (não começa com http), forçar mesma aba
                 var href = link.getAttribute('href') || '';
                 if (href && !href.match(/^https?:\/\//) && !href.match(/^mailto:/) && !href.match(/^tel:/)) {
                     link.removeAttribute('target');
@@ -25,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
 <base target="_blank">
 </head>
 <body>
