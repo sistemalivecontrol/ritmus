@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento - Ritmus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <style>
+        .payment-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; background: linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 100%); }
+        .payment-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 900px; width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; }
+        .payment-summary { border-right: 1px solid var(--border); padding-right: 40px; }
+        .payment-summary h2 { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+        .course-preview { display: flex; gap: 16px; margin-bottom: 24px; padding: 16px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius); border: 1px solid var(--border); }
+        .course-preview img { width: 120px; height: 80px; object-fit: cover; border-radius: var(--radius-sm); }
+        .course-preview-info h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .course-preview-info p { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .course-price { font-size: 24px; font-weight: 700; color: var(--primary); }
+        .payment-details { display: flex; flex-direction: column; gap: 16px; }
+        .payment-details h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .total-section { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+        .total-row.total { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+        .btn-pay { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 20px; }
+        .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3); }
+        .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .test-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #F7C948, #D97706); color: white; padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+        .debug-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-top: 16px; font-size: 12px; color: #fca5a5; font-family: monospace; white-space: pre-wrap; display: none; }
+        .debug-box.visible { display: block; }
+        @media (max-width: 768px) {
+            .payment-container { grid-template-columns: 1fr; padding: 24px; }
+            .payment-summary { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <span class="logo-icon">💪</span>
+                <span class="logo-text">Ritmus</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="payment-page">
+        <div class="payment-container">
+            <div class="payment-summary">
+                <div class="test-badge">🧪 Ambiente de Teste (Sandbox)</div>
+                <h2>📚 Resumo da Compra</h2>
+                <div class="course-preview" id="course-preview">
+                    <img id="curso-thumb" src="" alt="Curso">
+                    <div class="course-preview-info">
+                        <h3 id="curso-titulo">Carregando...</h3>
+                        <p id="curso-desc">...</p>
+                        <div class="course-price" id="curso-preco">R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="total-section">
+                    <div class="total-row"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
+                    <div class="total-row"><span>Taxa de processamento</span><span style="color:var(--success)">Grátis</span></div>
+                    <div class="total-row total"><span>Total</span><span id="total-final">R$ 0,00</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-sm);font-size:13px;color:var(--success);margin-top:auto;">
+                    <span>🔒</span><span>Pagamento processado com segurança pelo Asaas</span>
+                </div>
+            </div>
+            <div class="payment-details">
+                <h2>💳 Forma de Pagamento</h2>
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
+                    Você será redirecionado para o checkout seguro do Asaas onde poderá escolher entre PIX, Boleto ou Cartão de Crédito.
+                </p>
+                <div style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+                    <p style="font-size:13px;color:var(--text-muted);margin:0;line-height:1.6">
+                        <strong style="color:var(--primary)">💡 Informações:</strong><br>
+                        • Pagamento único - acesso vitalício ao curso<br>
+                        • Após a confirmação, o curso será liberado automaticamente<br>
+                        • Você receberá acesso imediato após o pagamento<br>
+                        • Ambiente de teste - use dados fictícios
+                    </p>
+                </div>
+                <div id="user-info" style="margin-bottom:16px">
+                    <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">
+                        <strong>Comprando como:</strong> <span id="user-email">...</span>
+                    </p>
+                </div>
+                <button class="btn-pay" id="btn-pagar" onclick="iniciarPagamento()">Pagar Agora</button>
+                <div id="debug-log" class="debug-box"></div>
+                <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:12px">
+                    Ao clicar em "Pagar Agora", você concorda com os <a href="termos.html" target="_blank" style="color:var(--primary)">Termos de Uso</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        let cursoData = null;
+        let currentUser = null;
+
+        function logDebug(msg) {
+            console.log('[RITMUS PAGAMENTO]', msg);
+            const debugBox = document.getElementById('debug-log');
+            debugBox.textContent += msg + '\n';
+            debugBox.classList.add('visible');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            logDebug('DOM carregado. Iniciando...');
+            waitForSupabase(() => {
+                logDebug('Supabase inicializado');
+                initPagamento();
+            });
+        });
+
+        async function initPagamento() {
+            logDebug('Verificando autenticação...');
+
+            const auth = await checkAuth();
+            if (!auth) {
+                logDebug('Usuário não autenticado. Redirecionando para login...');
+                localStorage.setItem('ritmus_redirect_after_login', window.location.href);
+                showToast('Atenção', 'Faça login para continuar a compra', 'warning');
+                setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+                return;
+            }
+
+            currentUser = auth.user;
+            document.getElementById('user-email').textContent = auth.user.email;
+            logDebug('Usuário autenticado: ' + auth.user.email);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const cursoId = urlParams.get('curso');
+            logDebug('Curso ID da URL: ' + cursoId);
+
+            if (!cursoId) {
+                logDebug('ERRO: Curso não especificado na URL');
+                showToast('Erro', 'Curso não especificado', 'error');
+                setTimeout(() => { window.location.href = 'cursos.html'; }, 2000);
+                return;
+            }
+
+            await carregarCurso(cursoId);
+        }
+
+        async function carregarCurso(cursoId) {
+            logDebug('Carregando curso: ' + cursoId);
+            try {
+                const { data: curso, error } = await supabaseClient
+                    .from('cursos')
+                    .select('*')
+                    .eq('id', cursoId)
+                    .eq('ativo', true)
+                    .single();
+
+                if (error || !curso) {
+                    logDebug('ERRO ao carregar curso: ' + (error?.message || 'Curso não encontrado'));
+                    throw new Error('Curso não encontrado');
+                }
+
+                cursoData = curso;
+                logDebug('Curso carregado: ' + curso.titulo + ' - R$ ' + curso.preco);
+
+                document.getElementById('curso-titulo').textContent = curso.titulo;
+                document.getElementById('curso-desc').textContent = curso.descricao || 'Curso completo com aulas gravadas.';
+                document.getElementById('curso-thumb').src = curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo);
+
+                const precoFormatado = 'R$ ' + parseFloat(curso.preco).toFixed(2).replace('.', ',');
+                document.getElementById('curso-preco').textContent = precoFormatado;
+                document.getElementById('subtotal').textContent = precoFormatado;
+                document.getElementById('total-final').textContent = precoFormatado;
+
+                // Verificar se já comprou
+                logDebug('Verificando se já comprou este curso...');
+                const { data: compra } = await supabaseClient
+                    .from('compras_cursos')
+                    .select('*')
+                    .eq('usuario_id', currentUser.id)
+                    .eq('curso_id', cursoId)
+                    .eq('status', 'pago')
+                    .maybeSingle();
+
+                if (compra) {
+                    logDebug('Usuário JÁ comprou este curso!');
+                    document.getElementById('btn-pagar').textContent = '✅ Você já possui este curso';
+                    document.getElementById('btn-pagar').disabled = true;
+                    document.getElementById('btn-pagar').onclick = () => { window.location.href = 'aula.html?curso=' + cursoId; };
+                    document.getElementById('btn-pagar').style.background = 'linear-gradient(135deg, #10B981, #059669)';
+                    return;
+                }
+
+                // Se for gratuito
+                if (curso.gratuito || curso.preco === 0) {
+                    logDebug('Curso é gratuito! Redirecionando...');
+                    showToast('Gratuito!', 'Este curso é gratuito! Redirecionando...', 'success');
+                    setTimeout(() => { window.location.href = 'aula.html?curso=' + cursoId; }, 1500);
+                    return;
+                }
+
+                logDebug('Tudo pronto para pagamento!');
+
+            } catch (e) {
+                logDebug('ERRO: ' + e.message);
+                console.error('[RITMUS] Erro ao carregar curso:', e);
+                showToast('Erro', 'Erro ao carregar curso', 'error');
+            }
+        }
+
+        async function iniciarPagamento() {
+            if (!cursoData || !currentUser) {
+                logDebug('ERRO: cursoData ou currentUser não definidos');
+                return;
+            }
+
+            const btn = document.getElementById('btn-pagar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Processando...';
+
+            logDebug('Iniciando criação de cobrança no Asaas...');
+            logDebug('Dados: nome=' + (currentUser.nome || currentUser.email) + ', email=' + currentUser.email + ', valor=' + cursoData.preco);
+
+            try {
+                const functionUrl = `${SUPABASE_URL}/functions/v1/ritmus-criar-cobranca-curso`;
+                logDebug('Chamando Edge Function: ' + functionUrl);
+
+                const requestBody = {
+                    nome: currentUser.nome || currentUser.email,
+                    email: currentUser.email,
+                    telefone: currentUser.telefone || '',
+                    cpf: currentUser.cpf || '',
+                    curso_id: cursoData.id,
+                    curso_titulo: cursoData.titulo,
+                    valor: parseFloat(cursoData.preco),
+                    usuario_id: currentUser.id,
+                };
+                logDebug('Request body: ' + JSON.stringify(requestBody, null, 2));
+
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                logDebug('Response status: ' + response.status);
+                logDebug('Response statusText: ' + response.statusText);
+
+                const result = await response.json();
+                logDebug('Response body: ' + JSON.stringify(result, null, 2));
+
+                if (!response.ok || !result.success) {
+                    logDebug('ERRO na resposta: ' + (result.error || 'Erro desconhecido'));
+                    throw new Error(result.error || `Erro ${response.status}: ${response.statusText}`);
+                }
+
+                logDebug('Cobrança criada com sucesso! ID: ' + result.payment_id);
+
+                if (result.invoiceUrl) {
+                    logDebug('Redirecionando para checkout: ' + result.invoiceUrl);
+                    showToast('Sucesso!', 'Redirecionando para o checkout seguro...', 'success');
+                    setTimeout(() => { window.location.href = result.invoiceUrl; }, 1500);
+                } else {
+                    throw new Error('URL de pagamento não gerada');
+                }
+
+            } catch (error) {
+                logDebug('ERRO CATCH: ' + error.message);
+                console.error('[RITMUS] Erro no pagamento:', error);
+                btn.disabled = false;
+                btn.innerHTML = 'Pagar Agora';
+                showToast('Erro', error.message || 'Erro ao processar pagamento', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
