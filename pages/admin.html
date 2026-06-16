@@ -206,6 +206,7 @@
             border-radius: var(--radius-sm);
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -561,7 +562,6 @@
 
         // ========== FALLBACK: Usa supabaseClient direto (sem CORS) ==========
         async function callEdgeFunction(action, data, id) {
-            // Tenta Edge Function primeiro
             try {
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
                     method: 'POST',
@@ -580,13 +580,12 @@
                 return await response.json();
             } catch (edgeError) {
                 console.warn('[ADMIN] Edge Function falhou, usando fallback direto:', edgeError.message);
-                
-                // FALLBACK: Usa supabaseClient.from() diretamente (não tem CORS!)
+
                 switch (action) {
                     case 'insert_curso':
                         const { data: newCurso, error: err1 } = await supabaseClient
                             .from('cursos')
-                            .insert([{ ...data, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }])
+                            .insert([{ ...data, created_at: new Date().toISOString() }])
                             .select()
                             .single();
                         if (err1) throw err1;
@@ -595,7 +594,7 @@
                     case 'update_curso':
                         const { data: updCurso, error: err2 } = await supabaseClient
                             .from('cursos')
-                            .update({ ...data, updated_at: new Date().toISOString() })
+                            .update(data)
                             .eq('id', id)
                             .select()
                             .single();
@@ -611,7 +610,7 @@
                     case 'insert_aula':
                         const { data: newAula, error: err4 } = await supabaseClient
                             .from('aulas')
-                            .insert([{ ...data, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }])
+                            .insert([{ ...data, created_at: new Date().toISOString() }])
                             .select()
                             .single();
                         if (err4) throw err4;
@@ -808,7 +807,7 @@
             try {
                 showLoading('Excluindo...');
                 const result = await callEdgeFunction('delete_curso', {}, id);
-                
+
                 if (!result.success) throw new Error(result.error || 'Erro ao excluir');
 
                 hideLoading();
@@ -904,7 +903,7 @@
             try {
                 showLoading('Excluindo...');
                 const result = await callEdgeFunction('delete_aula', {}, id);
-                
+
                 if (!result.success) throw new Error(result.error || 'Erro ao excluir');
 
                 hideLoading();
