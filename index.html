@@ -6,14 +6,940 @@
     <title>Scheila Almeida - Cursos Fitness Online</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
+    <link rel="icon" type="image/png" href="images/favicon-scheila.png">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-light: #FF8C5A;
+            --primary-dark: #E55A2B;
+            --secondary: #1A1A2E;
+            --bg-dark: #0F0F1A;
+            --bg-card: #1A1A2E;
+            --bg-card-hover: #252540;
+            --text: #FFFFFF;
+            --text-muted: #A0A0B8;
+            --text-light: #E0E0E8;
+            --border: rgba(255,255,255,0.08);
+            --success: #10B981;
+            --warning: #F7C948;
+            --gradient-1: #FF6B35;
+            --gradient-2: #F7C948;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: rgba(15, 15, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2));
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after { width: 100%; }
+
+        .btn-login {
+            color: var(--text-light) !important;
+            padding: 8px 20px !important;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            transition: all 0.3s !important;
+        }
+
+        .btn-login:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            color: white !important;
+            padding: 10px 24px !important;
+            border-radius: 50px;
+            font-weight: 600 !important;
+            transition: all 0.3s !important;
+            box-shadow: 0 4px 15px rgba(255,107,53,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,107,53,0.4);
+        }
+
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .menu-toggle span {
+            width: 24px; height: 2px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 24px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(255,107,53,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(247,201,72,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255,107,53,0.08) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-left {
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,107,53,0.15);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary-light);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            max-width: 480px;
+            line-height: 1.7;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 36px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero {
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            color: white;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 30px rgba(255,107,53,0.35);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(255,107,53,0.45);
+        }
+
+        .btn-ghost {
+            color: var(--text-light);
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .hero-note {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ===== HERO CARDS (VISUAL RIGHT) ===== */
+        .hero-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+            position: relative;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, rgba(26,26,46,0.9), rgba(37,37,64,0.8));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,107,53,0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hero-card:hover {
+            transform: translateX(-8px) scale(1.02);
+            border-color: rgba(255,107,53,0.3);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+
+        .hero-card:hover::before { opacity: 1; }
+
+        .card-1 { animation: slideInRight 0.6s ease 0.3s both; }
+        .card-2 { animation: slideInRight 0.6s ease 0.5s both; margin-left: 30px; }
+        .card-3 { animation: slideInRight 0.6s ease 0.7s both; margin-left: 60px; }
+
+        .card-icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(247,201,72,0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-icon-wrap img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(255,107,53,0.3));
+        }
+
+        .card-info { flex: 1; position: relative; z-index: 1; }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .card-duration {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .card-arrow {
+            color: var(--primary);
+            font-size: 1.2rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s;
+        }
+
+        .hero-card:hover .card-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* ===== SECTIONS COMMON ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,107,53,0.1);
+            border: 1px solid rgba(255,107,53,0.2);
+            color: var(--primary-light);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== CURSOS ===== */
+        .cursos-section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .cursos-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .cursos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .curso-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .curso-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,107,53,0.3);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .curso-thumb {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .curso-thumb img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .curso-card:hover .curso-thumb img { transform: scale(1.08); }
+
+        .curso-play {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px; height: 60px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+
+        .play-btn {
+            color: white;
+            font-size: 1.4rem;
+            margin-left: 4px;
+        }
+
+        .curso-card:hover .curso-play {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .curso-badge {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .curso-free-badge {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: linear-gradient(135deg, #F7C948, #D97706);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(247,201,72,0.3);
+        }
+
+        .curso-info { padding: 24px; }
+
+        .curso-info h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .curso-info p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .curso-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .curso-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .curso-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .curso-price {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .btn-curso {
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-curso:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255,107,53,0.4);
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-section {
+            padding: 100px 0;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(26,26,46,0.5) 50%, var(--bg-dark) 100%);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .step-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,107,53,0.2);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .step-card:hover::before { opacity: 1; }
+
+        .step-number {
+            position: absolute;
+            top: 20px; right: 20px;
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(255,107,53,0.08);
+            line-height: 1;
+        }
+
+        .step-icon {
+            width: 72px; height: 72px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(247,201,72,0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== PRICING ===== */
+        .pricing-section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .pricing-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 50% 100%, rgba(255,107,53,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,107,53,0.3);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pricing-card.featured {
+            border-color: rgba(255,107,53,0.4);
+            background: linear-gradient(180deg, rgba(255,107,53,0.08), var(--bg-card));
+        }
+
+        .pricing-card.featured::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2));
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            color: white;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .pricing-header { margin-bottom: 32px; }
+
+        .pricing-header h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .pricing-price {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+            margin-bottom: 8px;
+        }
+
+        .pricing-price .currency {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .pricing-price .amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .pricing-price .period {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .pricing-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .pricing-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pricing-features li:last-child { border-bottom: none; }
+
+        .btn-pricing {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-featured {
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            color: white;
+            box-shadow: 0 8px 25px rgba(255,107,53,0.3);
+        }
+
+        .btn-featured:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(255,107,53,0.4);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: linear-gradient(180deg, var(--bg-dark), rgba(10,10,20,1));
+            border-top: 1px solid var(--border);
+            padding: 80px 0 40px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            margin-top: 16px;
+            line-height: 1.7;
+            max-width: 300px;
+        }
+
+        .footer-links h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .footer-links a, .footer-links p {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: var(--primary); }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ===== LOADING ===== */
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255,107,53,0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 968px) {
+            .hero-content { grid-template-columns: 1fr; gap: 40px; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero-visual { order: -1; }
+            .card-2, .card-3 { margin-left: 0; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 70px; left: 0; right: 0;
+                background: rgba(15,15,26,0.98);
+                flex-direction: column;
+                padding: 24px;
+                gap: 16px;
+                transform: translateY(-100%);
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.3s;
+                border-bottom: 1px solid var(--border);
+            }
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: all;
+            }
+            .menu-toggle { display: flex; }
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 24px; }
+            .stat-number { font-size: 1.5rem; }
+            .hero-cta { flex-direction: column; }
+            .btn-hero, .btn-ghost { width: 100%; justify-content: center; }
+            .section-header h2 { font-size: 1.8rem; }
+            .cursos-grid, .pricing-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+<base target="_blank">
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></a>
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🏋️‍♀️</div>
+                <span class="logo-text">Scheila Almeida</span>
+            </a>
             <div class="nav-links">
                 <a href="#cursos">Cursos</a>
                 <a href="#como-funciona">Como Funciona</a>
@@ -31,44 +957,64 @@
     <section class="hero">
         <div class="hero-bg"></div>
         <div class="hero-content">
-            <div class="hero-badge">🎯 Novo</div>
-            <h1>Transforme seu Corpo com <span class="gradient-text">Aulas Fitness Online</span></h1>
-            <p class="hero-subtitle">Acesse vídeos exclusivos de Jump, Dança, Funcional e muito mais. Treine quando quiser, onde quiser.</p>
-            <div class="hero-stats">
-                <div class="stat">
-                    <span class="stat-number">50+</span>
-                    <span class="stat-label">Aulas</span>
+            <div class="hero-left">
+                <div class="hero-badge">🎯 Novo</div>
+                <h1>Transforme seu Corpo com <span class="gradient-text">Aulas Fitness Online</span></h1>
+                <p class="hero-subtitle">Acesse vídeos exclusivos de Jump, Dança, Funcional e muito mais. Treine quando quiser, onde quiser.</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Aulas</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">10k+</span>
+                        <span class="stat-label">Alunos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">4.9</span>
+                        <span class="stat-label">Avaliação</span>
+                    </div>
                 </div>
-                <div class="stat">
-                    <span class="stat-number">10k+</span>
-                    <span class="stat-label">Alunos</span>
+                <div class="hero-cta">
+                    <a href="pages/cadastro.html" class="btn-hero">Começar 7 Dias Grátis</a>
+                    <a href="#cursos" class="btn-ghost">Ver Cursos</a>
                 </div>
-                <div class="stat">
-                    <span class="stat-number">4.9</span>
-                    <span class="stat-label">Avaliação</span>
+                <p class="hero-note">💳 Pagamento via Asaas • Cancelamento a qualquer momento</p>
+            </div>
+            <div class="hero-visual">
+                <!-- Card 1: Jump -->
+                <div class="hero-card card-1" onclick="location.href='pages/cadastro.html?curso=jump-fitness'">
+                    <div class="card-icon-wrap">
+                        <img src="images/logo-scheila.png" alt="Jump Fitness">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Jump</div>
+                        <div class="card-duration">45 min</div>
+                    </div>
+                    <div class="card-arrow">→</div>
                 </div>
-            </div>
-            <div class="hero-cta">
-                <a href="pages/cadastro.html" class="btn-hero">Começar 7 Dias Grátis</a>
-                <a href="#cursos" class="btn-ghost">Ver Cursos</a>
-            </div>
-            <p class="hero-note">💳 Pagamento via Asaas • Cancelamento a qualquer momento</p>
-        </div>
-        <div class="hero-visual">
-            <div class="hero-card card-1">
-                <div class="card-icon">🏃‍♀️</div>
-                <div class="card-title">Jump</div>
-                <div class="card-duration">45 min</div>
-            </div>
-            <div class="hero-card card-2">
-                <div class="card-icon">💃</div>
-                <div class="card-title">Dança</div>
-                <div class="card-duration">30 min</div>
-            </div>
-            <div class="hero-card card-3">
-                <div class="card-icon">🍑</div>
-                <div class="card-title">Glúteos</div>
-                <div class="card-duration">25 min</div>
+                <!-- Card 2: Dança -->
+                <div class="hero-card card-2" onclick="location.href='pages/cadastro.html?curso=danca-fitness'">
+                    <div class="card-icon-wrap">
+                        <img src="images/logo-scheila.png" alt="Dança Fitness">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Dança</div>
+                        <div class="card-duration">30 min</div>
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+                <!-- Card 3: Glúteos -->
+                <div class="hero-card card-3" onclick="location.href='pages/cadastro.html?curso=empina-bumbum'">
+                    <div class="card-icon-wrap">
+                        <img src="images/logo-scheila.png" alt="Glúteos">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Glúteos</div>
+                        <div class="card-duration">25 min</div>
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
             </div>
         </div>
     </section>
@@ -82,7 +1028,10 @@
                 <p>Cursos completos com aulas gravadas em vídeo. Acesso ilimitado após a compra.</p>
             </div>
             <div class="cursos-grid" id="cursos-grid">
-                <!-- Cursos carregados via JS -->
+                <div style="grid-column:1/-1;text-align:center;padding:40px">
+                    <div class="loading-spinner" style="margin:0 auto"></div>
+                    <p style="margin-top:16px;color:var(--text-muted)">Carregando cursos...</p>
+                </div>
             </div>
         </div>
     </section>
@@ -126,7 +1075,6 @@
                 <p>Pagamento único - acesso vitalício ao curso comprado</p>
             </div>
             <div class="pricing-grid" id="precos-grid">
-                <!-- Cursos com preços carregados via JS -->
                 <div style="grid-column:1/-1;text-align:center;padding:40px">
                     <div class="loading-spinner" style="margin:0 auto"></div>
                     <p style="margin-top:16px;color:var(--text-muted)">Carregando cursos...</p>
@@ -140,7 +1088,10 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <div class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></div>
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">🏋️‍♀️</div>
+                        <span class="logo-text">Scheila Almeida</span>
+                    </a>
                     <p>Cursos fitness online com Scheila Almeida. Treine quando quiser, onde quiser.</p>
                 </div>
                 <div class="footer-links">
@@ -174,8 +1125,6 @@
             { id: 'funcional-total', titulo: 'Funcional Total', descricao: 'Treinamento funcional para todo o corpo, sem equipamentos. Fortaleça e defina!', preco: 39.90, total_aulas: 8, duracao_total: '5h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Funcional+Total' }
         ];
 
-
-
         async function loadCursosLanding() {
             const grid = document.getElementById('cursos-grid');
             if (!grid) return;
@@ -183,7 +1132,6 @@
             grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px"><div class="loading-spinner" style="margin:0 auto"></div><p style="margin-top:16px;color:var(--text-muted)">Carregando cursos...</p></div>';
 
             try {
-                // Buscar cursos do Supabase
                 const { data: cursos, error } = await supabaseClient
                     .from('cursos')
                     .select('id, titulo, descricao, thumbnail, preco, total_aulas, duracao_total, total_alunos, avaliacao, ordem, ativo, gratuito')
@@ -196,7 +1144,6 @@
                     return;
                 }
 
-                // Fallback: usar hardcoded
                 console.log('[SCHEILA] Usando cursos hardcoded como fallback');
                 renderCursos(CURSOS_HARDCODED);
 
@@ -220,7 +1167,7 @@
                                 <div class="play-btn">▶</div>
                             </div>
                             ${isFree ? `
-                                <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#F7C948,#D97706);color:white;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:600">🎁 GRATUITO</div>
+                                <div class="curso-free-badge">🎁 GRATUITO</div>
                             ` : `
                                 <div class="curso-badge">${curso.total_aulas || 0} aulas</div>
                             `}
@@ -247,7 +1194,6 @@
             }).join('');
         }
 
-        // Carregar preços dos cursos na seção de preços
         async function loadPrecosCursos() {
             const grid = document.getElementById('precos-grid');
             if (!grid) return;
@@ -260,7 +1206,6 @@
                     .order('ordem', { ascending: true });
 
                 if (error || !cursos || cursos.length === 0) {
-                    // Fallback com cursos hardcoded
                     const cursosFallback = [
                         { id: 'jump-fitness', titulo: 'Jump Fitness', descricao: 'Curso completo de jump com técnicas avançadas.', preco: 49.90, total_aulas: 12, duracao_total: '8h', thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Jump+Fitness', gratuito: false },
                         { id: 'danca-fitness', titulo: 'Dança Fitness', descricao: 'Aulas de dança para queimar calorias e se divertir.', preco: 49.90, total_aulas: 15, duracao_total: '10h', thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Danca+Fitness', gratuito: false },
@@ -313,7 +1258,6 @@
             }).join('');
         }
 
-        // Chamar após carregar cursos
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
                 loadCursosLanding();
@@ -321,13 +1265,11 @@
             });
         });
 
-        // Toggle menu mobile
         function toggleMenu() {
             const navLinks = document.querySelector('.nav-links');
             navLinks.classList.toggle('active');
         }
 
-        // Navbar scroll effect
         window.addEventListener('scroll', () => {
             const navbar = document.querySelector('.navbar');
             if (window.scrollY > 50) {
