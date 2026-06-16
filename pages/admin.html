@@ -819,6 +819,7 @@
                             </a>
                         </td>
                         <td>
+                            <button class="btn-small btn-edit" onclick="abrirEditarAula('${a.id}')">Editar</button>
                             <button class="btn-small btn-delete" onclick="excluirAula('${a.id}')">Excluir</button>
                         </td>
                     </tr>
@@ -871,6 +872,77 @@
             } catch (e) {
                 hideLoading();
                 showToast('Erro', e.message || 'Erro ao salvar aula', 'error');
+            }
+        });
+
+        // ========== EDITAR AULA ==========
+        function abrirEditarAula(id) {
+            const aula = aulasCache.find(a => a.id === id);
+            if (!aula) {
+                showToast('Erro', 'Aula não encontrada', 'error');
+                return;
+            }
+
+            document.getElementById('edit-aula-id').value = aula.id;
+            document.getElementById('edit-aula-titulo').value = aula.titulo;
+            document.getElementById('edit-aula-descricao').value = aula.descricao || '';
+            document.getElementById('edit-aula-video').value = aula.video_url || '';
+            document.getElementById('edit-aula-duracao').value = aula.duracao || '';
+            document.getElementById('edit-aula-ordem').value = aula.ordem || 1;
+            document.getElementById('edit-aula-ativo').checked = aula.ativo;
+            document.getElementById('edit-aula-gratuito').checked = aula.gratuito || false;
+
+            // Preencher select de cursos
+            const select = document.getElementById('edit-aula-curso');
+            select.innerHTML = '<option value="">Selecione o curso</option>';
+            cursosCache.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.titulo}</option>`;
+            });
+            select.value = aula.curso_id;
+
+            openModal('editar-aula');
+        }
+
+        // ATUALIZAR AULA via Edge Function
+        document.getElementById('form-editar-aula').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showLoading('Atualizando aula...');
+
+            try {
+                const id = document.getElementById('edit-aula-id').value;
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-admin-cursos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        action: 'update_aula',
+                        id: id,
+                        data: {
+                            curso_id: document.getElementById('edit-aula-curso').value,
+                            titulo: document.getElementById('edit-aula-titulo').value,
+                            descricao: document.getElementById('edit-aula-descricao').value,
+                            video_url: document.getElementById('edit-aula-video').value,
+                            duracao: document.getElementById('edit-aula-duracao').value,
+                            ordem: parseInt(document.getElementById('edit-aula-ordem').value) || 1,
+                            ativo: document.getElementById('edit-aula-ativo').checked,
+                            gratuito: document.getElementById('edit-aula-gratuito').checked
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Erro ao atualizar');
+
+                hideLoading();
+                closeModal('editar-aula');
+                showToast('Sucesso!', 'Aula atualizada com sucesso!', 'success');
+                await loadAulasAdmin();
+
+            } catch (e) {
+                hideLoading();
+                showToast('Erro', e.message || 'Erro ao atualizar aula', 'error');
             }
         });
 
@@ -1046,5 +1118,59 @@
             }
         }
     </script>
+
+    <!-- MODAL EDITAR AULA -->
+    <div class="modal-overlay" id="modal-editar-aula">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('editar-aula')">×</button>
+            <h2>✏️ Editar Aula</h2>
+            <form id="form-editar-aula">
+                <input type="hidden" id="edit-aula-id">
+                <div class="form-group">
+                    <label>Curso *</label>
+                    <select id="edit-aula-curso" required>
+                        <option value="">Selecione o curso</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Título da Aula *</label>
+                    <input type="text" id="edit-aula-titulo" required placeholder="Ex: Aula 1 - Introdução">
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="edit-aula-descricao" rows="2" placeholder="Descrição da aula..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>URL do Vídeo (YouTube) *</label>
+                        <input type="url" id="edit-aula-video" required placeholder="https://youtube.com/watch?v=... ou https://youtu.be/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Duração</label>
+                        <input type="text" id="edit-aula-duracao" placeholder="Ex: 30:00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ordem</label>
+                    <input type="number" id="edit-aula-ordem" value="1">
+                </div>
+                <div style="display:flex;gap:24px;margin-bottom:16px">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <input type="checkbox" id="edit-aula-ativo" style="width:auto">
+                        <label for="edit-aula-ativo" style="margin-bottom:0">Aula ativa</label>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <input type="checkbox" id="edit-aula-gratuito" style="width:auto">
+                        <label for="edit-aula-gratuito" style="margin-bottom:0;color:var(--success);font-weight:500">🎁 Aula Gratuita (Free)</label>
+                    </div>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:24px">
+                    <button type="submit" class="btn-submit">Atualizar Aula</button>
+                    <button type="button" class="btn-ghost" onclick="closeModal('editar-aula')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>
