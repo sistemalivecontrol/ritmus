@@ -5,19 +5,28 @@ const SUPABASE_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MjA5MjUsImV4cCI6MjA5NjQ5NjkyNX0.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
 
 let supabaseClient = null;
+let supabaseInitialized = false;
 
 function initSupabase() {
+    if (supabaseInitialized && supabaseClient) {
+        return true;
+    }
     try {
+        let createClient = null;
+
         if (typeof supabase !== 'undefined' && supabase.createClient) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            createClient = supabase.createClient;
+        } else if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+            createClient = window.supabase.createClient;
+        }
+
+        if (createClient) {
+            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseInitialized = true;
             console.log('[RITMUS] Supabase inicializado');
             return true;
         }
-        if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('[RITMUS] Supabase inicializado (window)');
-            return true;
-        }
+
         console.warn('[RITMUS] Supabase não disponível ainda');
         return false;
     } catch (e) {
@@ -27,6 +36,11 @@ function initSupabase() {
 }
 
 function waitForSupabase(callback, maxRetries = 20) {
+    if (supabaseInitialized && supabaseClient) {
+        callback();
+        return;
+    }
+
     let retries = 0;
     const interval = setInterval(() => {
         retries++;
@@ -38,6 +52,38 @@ function waitForSupabase(callback, maxRetries = 20) {
             console.error('[RITMUS] Timeout aguardando Supabase');
         }
     }, 300);
+}
+
+// Função checkAuth - verifica se usuário está autenticado
+async function checkAuth() {
+    if (!supabaseClient) {
+        console.warn('[RITMUS] Supabase não inicializado para checkAuth');
+        return false;
+    }
+    try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) {
+            console.error('[RITMUS] Erro checkAuth:', error);
+            return false;
+        }
+        return !!session;
+    } catch (e) {
+        console.error('[RITMUS] Erro em checkAuth:', e);
+        return false;
+    }
+}
+
+// Funções utilitárias
+function showLoading(msg) {
+    console.log('[RITMUS] Loading:', msg);
+}
+
+function hideLoading() {
+    console.log('[RITMUS] Loading hidden');
+}
+
+function showToast(title, message, type) {
+    console.log(`[RITMUS] Toast [${type}]: ${title} - ${message}`);
 }
 
 // Inicializar automaticamente se Supabase já estiver disponível
