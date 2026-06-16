@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursos - Ritmus</title>
+    <title>Cursos - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <a href="../index.html" class="logo">
-                <span class="logo-icon">💪</span>
-                <span class="logo-text">Ritmus</span>
+                <span class="logo-icon">🏋️‍♀️</span>
+                <span class="logo-text">Scheila Almeida</span>
             </a>
             <div class="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
@@ -180,7 +181,10 @@
                             return `
                                 <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
                                     <div class="curso-thumb" style="position:relative">
-                                        <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy">
+                                        <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" 
+                                             alt="${curso.titulo}" 
+                                             loading="lazy"
+                                             onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
                                         ${podeAssistir ? `
                                             <div class="curso-play">
                                                 <div class="play-btn">▶</div>
