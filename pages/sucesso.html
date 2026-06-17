@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Confirmado - Scheila Almeida</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
+    <style>
+        .success-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 100%);
+        }
+        .success-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+        }
+        .success-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--success);
+        }
+        .success-message {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        .course-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        .course-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .course-info p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .btn-primary {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            margin: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+        .btn-secondary {
+            display: inline-block;
+            padding: 16px 32px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            margin: 8px;
+        }
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--success);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status-pending {
+            color: #F7C948;
+        }
+        .status-paid {
+            color: var(--success);
+        }
+        @media (max-width: 768px) {
+            .success-container {
+                padding: 32px 24px;
+            }
+            .success-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></a>
+        </div>
+    </nav>
+
+    <div class="success-page">
+        <div class="success-container">
+            <div id="loading-state">
+                <div class="loading-spinner"></div>
+                <p style="margin-top:16px;color:var(--text-muted)">Verificando status do pagamento...</p>
+            </div>
+
+            <div id="success-state" style="display:none">
+                <div class="success-icon">🎉</div>
+                <h1 class="success-title">Pagamento Confirmado!</h1>
+                <p class="success-message">
+                    Seu pagamento foi processado com sucesso. O curso já está liberado e você pode começar a assistir agora mesmo!
+                </p>
+
+                <div class="course-info" id="course-info">
+                    <h3 id="curso-titulo">Carregando...</h3>
+                    <p id="curso-desc">...</p>
+                </div>
+
+                <a href="cursos.html" class="btn-primary">📚 Meus Cursos</a>
+                <a href="../index.html" class="btn-secondary">🏠 Voltar para Home</a>
+            </div>
+
+            <div id="pending-state" style="display:none">
+                <div class="success-icon status-pending">⏳</div>
+                <h1 class="success-title status-pending">Pagamento em Processamento</h1>
+                <p class="success-message">
+                    Seu pagamento está sendo processado. Assim que for confirmado, o curso será liberado automaticamente.
+                </p>
+                <a href="cursos.html" class="btn-primary">📚 Ver Meus Cursos</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                verificarStatus();
+            });
+        });
+
+        async function verificarStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cursoId = urlParams.get('curso');
+
+            if (!cursoId) {
+                mostrarErro('Curso não especificado');
+                return;
+            }
+
+            try {
+                // Buscar dados do curso
+                const { data: curso, error: cursoError } = await supabaseClient
+                    .from('cursos')
+                    .select('*')
+                    .eq('id', cursoId)
+                    .single();
+
+                if (curso) {
+                    document.getElementById('curso-titulo').textContent = curso.titulo;
+                    document.getElementById('curso-desc').textContent = curso.descricao || 'Curso completo com aulas gravadas.';
+                }
+
+                // Verificar autenticação
+                const auth = await checkAuth();
+                if (!auth) {
+                    mostrarErro('Faça login para ver o status do pagamento');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+
+                // Verificar compra
+                const { data: compra, error: compraError } = await supabaseClient
+                    .from('compras_cursos')
+                    .select('*')
+                    .eq('usuario_id', auth.user.id)
+                    .eq('curso_id', cursoId)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                document.getElementById('loading-state').style.display = 'none';
+
+                if (compra && compra.status === 'pago') {
+                    document.getElementById('success-state').style.display = 'block';
+                } else if (compra && compra.status === 'pendente') {
+                    document.getElementById('pending-state').style.display = 'block';
+                } else {
+                    // Se não achou compra, pode ter vindo do callback do Asaas
+                    // Mostrar sucesso genérico
+                    document.getElementById('success-state').style.display = 'block';
+                }
+
+            } catch (e) {
+                console.error('[SUCESSO] Erro:', e);
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('success-state').style.display = 'block';
+            }
+        }
+
+        function mostrarErro(msg) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.querySelector('.success-container').innerHTML = `
+                <div class="success-icon">❌</div>
+                <h1 class="success-title" style="color:#EF4444">Erro</h1>
+                <p class="success-message">${msg}</p>
+                <a href="cursos.html" class="btn-primary">📚 Ver Cursos</a>
+            `;
+        }
+    </script>
+</body>
+</html>
