@@ -95,6 +95,7 @@
             to { transform: translateX(100%); opacity: 0; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -221,7 +222,6 @@
         }
 
         function iniciarAutoRefresh() {
-            // Verificar a cada 10 segundos se há compras pendentes que podem ter sido pagas
             autoRefreshInterval = setInterval(async () => {
                 if (!currentAuthId) return;
 
@@ -311,7 +311,7 @@
                 <div class="cursos-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
                     ${cursosCache.map(curso => {
                         const compra = comprasCache.find(c => c.curso_id === curso.id);
-                        const temAcessoCompra = !!compra;
+                        const temAcessoCompra = !!compra && compra.status === 'pago'; // SÓ LIBERA SE STATUS === 'pago'
                         const compraStatus = compra?.status || '';
                         const temAulasFree = aulasFreeMap[curso.id] || false;
 
@@ -361,6 +361,12 @@
                                     </div>
                                     ${podeAssistir ? `
                                         <div style="margin-top:16px">
+                                            <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
+                                                ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcessoCompra ? '🎁 Assistir Aulas Free' : '▶️ Assistir Aulas')}
+                                            </a>
+                                        </div>
+                                    ` : `
+                                        <div style="margin-top:16px">
                                             ${isPending ? `
                                                 <div class="pending-badge">
                                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -369,22 +375,15 @@
                                                     </svg>
                                                     Aguardando Pagamento
                                                 </div>
-                                                <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
-                                                    ▶️ Assistir Aulas
-                                                </a>
                                                 <div class="pending-info">
-                                                    ⏳ Pagamento em processamento. O acesso já está liberado!
+                                                    ⏳ Seu pagamento está sendo processado. Assim que for confirmado, o curso será liberado automaticamente.
                                                 </div>
                                             ` : `
-                                                <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
-                                                    ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcessoCompra ? '🎁 Assistir Aulas Free' : '▶️ Assistir Aulas')}
-                                                </a>
+                                                <div class="curso-footer" style="margin-top:12px">
+                                                    <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
+                                                    <a href="pagamento.html?curso=${curso.id}" class="btn-curso">Comprar</a>
+                                                </div>
                                             `}
-                                        </div>
-                                    ` : `
-                                        <div class="curso-footer" style="margin-top:12px">
-                                            <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
-                                            <a href="pagamento.html?curso=${curso.id}" class="btn-curso">Comprar</a>
                                         </div>
                                     `}
                                 </div>
@@ -408,7 +407,6 @@
             }, 4000);
         }
 
-        // Limpar intervalos ao sair
         window.addEventListener('beforeunload', () => {
             if (autoRefreshInterval) clearInterval(autoRefreshInterval);
             if (realtimeChannel) realtimeChannel.unsubscribe();
