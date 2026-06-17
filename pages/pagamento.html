@@ -602,22 +602,57 @@
                         window.location.href = 'aula.html?curso=' + cursoData.id;
                     };
 
-                    // Redirecionar para página de sucesso imediatamente (com cache-busting)
+                    // Redirecionar para página de sucesso - MÚLTIPLAS TÉCNICAS ROBUSTAS
                     const timestamp = new Date().getTime();
                     const redirectUrl = 'pagamento-sucesso.html?curso=' + (cursoData?.id || '') + '&payment=' + (compra?.asaas_payment_id || '') + '&t=' + timestamp;
-                    console.log('[SCHEILA] Redirecionando para:', redirectUrl);
+                    console.log('[SCHEILA] ============================================');
+                    console.log('[SCHEILA] REDIRECIONANDO PARA:', redirectUrl);
+                    console.log('[SCHEILA] ============================================');
 
-                    // Forçar recarregamento sem cache (múltiplas técnicas)
-                    // Técnica 1: location.href com timestamp
-                    window.location.href = redirectUrl;
+                    // TÉCNICA 1: location.assign (mais moderno que href)
+                    try {
+                        window.location.assign(redirectUrl);
+                    } catch(e) {
+                        console.log('[SCHEILA] location.assign falhou:', e);
+                    }
 
-                    // Técnica 2: Forçar reload se a página não mudar
+                    // TÉCNICA 2: location.href (fallback clássico)
                     setTimeout(() => {
-                        if (window.location.href.indexOf('pagamento-sucesso') === -1) {
-                            console.log('[SCHEILA] Forçando reload...');
+                        if (!window.location.href.includes('pagamento-sucesso')) {
+                            console.log('[SCHEILA] Tentando location.href...');
+                            window.location.href = redirectUrl;
+                        }
+                    }, 100);
+
+                    // TÉCNICA 3: location.replace (não mantém histórico)
+                    setTimeout(() => {
+                        if (!window.location.href.includes('pagamento-sucesso')) {
+                            console.log('[SCHEILA] Tentando location.replace...');
+                            window.location.replace(redirectUrl);
+                        }
+                    }, 300);
+
+                    // TÉCNICA 4: Forçar reload completo (último recurso)
+                    setTimeout(() => {
+                        if (!window.location.href.includes('pagamento-sucesso')) {
+                            console.log('[SCHEILA] Último recurso: reload forçado...');
+                            // Criar um link e clicar nele programaticamente
+                            const link = document.createElement('a');
+                            link.href = redirectUrl;
+                            link.style.display = 'none';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }
+                    }, 600);
+
+                    // TÉCNICA 5: Reload absoluto (se nada mais funcionar)
+                    setTimeout(() => {
+                        if (!window.location.href.includes('pagamento-sucesso')) {
+                            console.log('[SCHEILA] FORÇANDO RELOAD ABSOLUTO');
                             window.location.reload(true);
                         }
-                    }, 500);
+                    }, 1000);
 
                     return;
                 }
