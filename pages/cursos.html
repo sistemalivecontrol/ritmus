@@ -65,6 +65,27 @@
             margin-top: 8px;
             text-align: center;
         }
+        .btn-continue-payment {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #F7C948, #D97706);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+        .btn-continue-payment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(247, 201, 72, 0.3);
+        }
         .toast-container {
             position: fixed;
             top: 20px;
@@ -271,9 +292,10 @@
 
                 comprasCache = [];
                 if (currentAuthId) {
+                    // Buscar compras com asaas_invoice_url para continuar pagamento
                     const { data: compras, error: comprasError } = await supabaseClient
                         .from('compras_cursos')
-                        .select('curso_id, status')
+                        .select('curso_id, status, asaas_invoice_url')
                         .eq('usuario_id', currentAuthId)
                         .in('status', ['pago', 'pendente']);
 
@@ -310,8 +332,9 @@
                 <div class="cursos-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
                     ${cursosCache.map(curso => {
                         const compra = comprasCache.find(c => c.curso_id === curso.id);
-                        const temAcessoCompra = !!compra && compra.status === 'pago'; // SÓ LIBERA SE STATUS === 'pago'
+                        const temAcessoCompra = !!compra && compra.status === 'pago';
                         const compraStatus = compra?.status || '';
+                        const asaasInvoiceUrl = compra?.asaas_invoice_url || '';
                         const temAulasFree = aulasFreeMap[curso.id] || false;
 
                         let isCursoFree = false;
@@ -366,7 +389,21 @@
                                         </div>
                                     ` : `
                                         <div style="margin-top:16px">
-                                            ${isPending ? `
+                                            ${isPending && asaasInvoiceUrl ? `
+                                                <div class="pending-badge">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                                    </svg>
+                                                    Aguardando Pagamento
+                                                </div>
+                                                <a href="${asaasInvoiceUrl}" target="_blank" class="btn-continue-payment">
+                                                    💳 Continuar Pagamento
+                                                </a>
+                                                <div class="pending-info">
+                                                    ⏳ Seu pagamento está pendente. Clique acima para continuar e pagar.
+                                                </div>
+                                            ` : isPending ? `
                                                 <div class="pending-badge">
                                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                         <circle cx="12" cy="12" r="10"></circle>
@@ -375,7 +412,7 @@
                                                     Aguardando Pagamento
                                                 </div>
                                                 <div class="pending-info">
-                                                    ⏳ Seu pagamento está sendo processado. Assim que for confirmado, o curso será liberado automaticamente.
+                                                    ⏳ Seu pagamento está sendo processado. Aguarde a confirmação.
                                                 </div>
                                             ` : `
                                                 <div class="curso-footer" style="margin-top:12px">
