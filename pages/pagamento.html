@@ -404,7 +404,12 @@
 
         // Gerar CPF válido para testes (sandbox)
         function gerarCPFTeste() {
-            const n = (Math.random() * 999999999).toString().padStart(9, '0');
+            // Gerar 9 dígitos aleatórios (inteiros, sem decimais)
+            let n = '';
+            for (let i = 0; i < 9; i++) {
+                n += Math.floor(Math.random() * 10).toString();
+            }
+
             let d1 = 0, d2 = 0;
             for (let i = 0; i < 9; i++) {
                 d1 += parseInt(n.charAt(i)) * (10 - i);
