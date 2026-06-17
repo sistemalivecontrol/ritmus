@@ -262,12 +262,323 @@
             margin-bottom: 20px;
         }
 
+        /* ===== CERTIFICADO VISUAL EM TELA ===== */
+        .cert-viewer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .cert-viewer-overlay.active {
+            display: flex;
+        }
+
+        .cert-viewer-container {
+            position: relative;
+            max-width: 900px;
+            width: 100%;
+            animation: certFadeIn 0.4s ease;
+        }
+
+        @keyframes certFadeIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .cert-viewer-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .cert-viewer-close:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .cert-viewer-actions {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .cert-viewer-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cert-viewer-btn-download {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .cert-viewer-btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .cert-viewer-btn-share {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .cert-viewer-btn-share:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== CERTIFICADO FÍSICO ===== */
+        .certificado-fisico {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border: 3px solid;
+            border-image: linear-gradient(135deg, #FF6B35, #F7C948, #FF6B35) 1;
+            border-radius: var(--radius-lg);
+            padding: 60px 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .certificado-fisico::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(247, 201, 72, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .certificado-fisico::after {
+            content: '';
+            position: absolute;
+            inset: 15px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: calc(var(--radius-lg) - 10px);
+            pointer-events: none;
+        }
+
+        .cert-header-visual {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 30px;
+        }
+
+        .cert-logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .cert-logo-icon {
+            font-size: 48px;
+        }
+
+        .cert-logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cert-titulo-principal {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-subtitulo {
+            font-size: 16px;
+            color: var(--accent);
+            font-weight: 500;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-divider {
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+            margin: 24px auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-texto-concedemos {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-nome-aluno {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 16px 0;
+            padding: 12px 24px;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-texto-completou {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin: 16px 0;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-nome-curso {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 12px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-detalhes {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 24px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-detalhe-item {
+            text-align: center;
+        }
+
+        .cert-detalhe-label {
+            font-size: 11px;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .cert-detalhe-valor {
+            font-size: 15px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .cert-footer-visual {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 107, 53, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-assinatura-area {
+            text-align: center;
+        }
+
+        .cert-assinatura-linha {
+            width: 160px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--text-muted), transparent);
+            margin: 0 auto 8px;
+        }
+
+        .cert-assinatura-nome {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .cert-assinatura-cargo {
+            font-size: 11px;
+            color: var(--text-dark);
+        }
+
+        .cert-selo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-codigo {
+            font-size: 11px;
+            color: var(--text-dark);
+            margin-top: 16px;
+            font-family: monospace;
+            position: relative;
+            z-index: 1;
+        }
+
         /* Toast */
         .toast-container {
             position: fixed;
             top: 88px;
             right: 24px;
-            z-index: 9999;
+            z-index: 99999;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -313,6 +624,34 @@
             }
             .cert-footer {
                 flex-direction: column;
+            }
+            .certificado-fisico {
+                padding: 40px 24px;
+            }
+            .cert-titulo-principal {
+                font-size: 24px;
+            }
+            .cert-nome-aluno {
+                font-size: 22px;
+            }
+            .cert-detalhes {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .cert-footer-visual {
+                flex-direction: column;
+                gap: 24px;
+                align-items: center;
+            }
+            .cert-viewer-actions {
+                position: static;
+                margin-bottom: 16px;
+                justify-content: center;
+            }
+            .cert-viewer-close {
+                top: 10px;
+                right: 10px;
+                background: rgba(15, 15, 26, 0.9);
             }
         }
     </style>
@@ -368,12 +707,31 @@
         </div>
     </div>
 
+    <!-- VISUALIZADOR DE CERTIFICADO EM TELA -->
+    <div class="cert-viewer-overlay" id="cert-viewer-overlay">
+        <div class="cert-viewer-container">
+            <div class="cert-viewer-actions">
+                <button class="cert-viewer-btn cert-viewer-btn-download" onclick="downloadCertificadoPDF()">
+                    📥 Baixar PDF
+                </button>
+                <button class="cert-viewer-btn cert-viewer-btn-share" onclick="shareCertificado()">
+                    🔗 Compartilhar
+                </button>
+            </div>
+            <button class="cert-viewer-close" onclick="closeCertViewer()">✕</button>
+            <div id="certificado-content">
+                <!-- Certificado inserido via JS -->
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
         let currentUser = null;
+        let currentCertificado = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -476,12 +834,12 @@
                 try {
                     const { data: progressos } = await supabaseClient
                         .from('progresso_aulas')
-                        .select('aula_id, concluida')
+                        .select('aula_id, concluida, updated_at')
                         .eq('usuario_id', currentUser.id)
                         .eq('concluida', true);
 
                     (progressos || []).forEach(p => {
-                        progressoMap[p.aula_id] = true;
+                        progressoMap[p.aula_id] = p;
                     });
                 } catch (e) {
                     console.log('[CERTIFICADOS] Erro ao buscar progresso:', e.message);
@@ -491,12 +849,13 @@
                 try {
                     const { data: aulas } = await supabaseClient
                         .from('aulas')
-                        .select('id, curso_id, ativo')
-                        .eq('ativo', true);
+                        .select('id, curso_id, ativo, ordem')
+                        .eq('ativo', true)
+                        .order('ordem', { ascending: true });
 
                     (aulas || []).forEach(a => {
                         if (!aulasPorCurso[a.curso_id]) aulasPorCurso[a.curso_id] = [];
-                        aulasPorCurso[a.curso_id].push(a.id);
+                        aulasPorCurso[a.curso_id].push(a);
                     });
                 } catch (e) {
                     console.log('[CERTIFICADOS] Erro ao buscar aulas:', e.message);
@@ -506,10 +865,19 @@
                 const cursosComStatus = cursos.map(curso => {
                     const todasAulas = aulasPorCurso[curso.id] || [];
                     const totalAulas = todasAulas.length || curso.total_aulas || 0;
-                    const aulasConcluidas = todasAulas.filter(aulaId => progressoMap[aulaId]).length;
+                    const aulasConcluidas = todasAulas.filter(aula => progressoMap[aula.id]).length;
                     const percentual = totalAulas > 0 ? Math.round((aulasConcluidas / totalAulas) * 100) : 0;
                     const concluido = percentual >= 100 && totalAulas > 0;
                     const emAndamento = percentual > 0 && percentual < 100;
+
+                    // Encontrar data da última aula concluída
+                    let dataConclusao = null;
+                    if (concluido) {
+                        const ultimaAula = todasAulas[totalAulas - 1];
+                        if (ultimaAula && progressoMap[ultimaAula.id]) {
+                            dataConclusao = progressoMap[ultimaAula.id].updated_at;
+                        }
+                    }
 
                     return {
                         ...curso,
@@ -517,7 +885,9 @@
                         aulasConcluidas,
                         percentual,
                         concluido,
-                        emAndamento
+                        emAndamento,
+                        dataConclusao,
+                        cargaHoraria: curso.duracao_total || '8h'
                     };
                 });
 
@@ -527,7 +897,7 @@
 
                 let html = '';
 
-                // Seção: Concluídos
+                // Seção: Concluídos (com botão VER CERTIFICADO)
                 if (concluidos.length > 0) {
                     html += `
                         <div class="cert-section">
@@ -587,9 +957,10 @@
             const statusText = isCompleted ? 'Concluído' : (isInProgress ? 'Em Andamento' : 'Não Iniciado');
             const statusClass = status;
 
-            const btnPrimaryText = isCompleted ? '📥 Baixar Certificado' : (isInProgress ? '▶️ Continuar Curso' : '🔓 Iniciar Curso');
+            // Botão primário: VER CERTIFICADO para concluídos, CONTINUAR para em andamento
+            const btnPrimaryText = isCompleted ? '🏆 Ver Certificado' : (isInProgress ? '▶️ Continuar Curso' : '🔓 Iniciar Curso');
             const btnPrimaryAction = isCompleted 
-                ? `onclick="downloadCertificado('${curso.id}', '${curso.titulo}')"` 
+                ? `onclick="visualizarCertificado('${curso.id}', '${encodeURIComponent(curso.titulo)}', '${encodeURIComponent(curso.cargaHoraria)}', '${curso.dataConclusao || ''}')"` 
                 : `onclick="location.href='aula.html?curso=${curso.id}'"`;
 
             return `
@@ -635,21 +1006,234 @@
             `;
         }
 
-        async function downloadCertificado(cursoId, titulo) {
-            showToast('Gerando...', 'Preparando seu certificado de conclusão.', 'warning');
+        // ===== VISUALIZAR CERTIFICADO EM TELA =====
+        function visualizarCertificado(cursoId, tituloEncoded, cargaHorariaEncoded, dataConclusao) {
+            const titulo = decodeURIComponent(tituloEncoded);
+            const cargaHoraria = decodeURIComponent(cargaHorariaEncoded);
+            const nomeAluno = currentUser?.nome || currentUser?.email?.split('@')[0] || 'Aluno';
 
-            // Simular geração de certificado (substituir por lógica real)
-            setTimeout(() => {
-                showToast('Pronto!', `Certificado de "${titulo}" gerado com sucesso!`, 'success');
+            // Formatar data de conclusão
+            let dataFormatada = '---';
+            if (dataConclusao) {
+                const d = new Date(dataConclusao);
+                dataFormatada = d.toLocaleDateString('pt-BR', { 
+                    day: '2-digit', month: 'long', year: 'numeric' 
+                });
+            }
 
-                // Aqui você pode implementar:
-                // 1. Gerar PDF do certificado
-                // 2. Abrir em nova aba
-                // 3. Fazer download automático
+            // Gerar código único do certificado
+            const codigoCert = 'SC-' + Date.now().toString(36).toUpperCase() + '-' + cursoId.substring(0, 4).toUpperCase();
 
-                // Exemplo: abrir página de certificado
-                // window.open(`certificado-view.html?curso=${cursoId}`, '_blank');
-            }, 1500);
+            currentCertificado = {
+                cursoId, titulo, nomeAluno, dataFormatada, cargaHoraria, codigoCert
+            };
+
+            const certificadoHTML = `
+                <div class="certificado-fisico" id="certificado-pdf">
+                    <div class="cert-header-visual">
+                        <div class="cert-logo-area">
+                            <span class="cert-logo-icon">🏋️‍♀️</span>
+                            <span class="cert-logo-text">Scheila Almeida</span>
+                        </div>
+                        <h1 class="cert-titulo-principal">Certificado</h1>
+                        <p class="cert-subtitulo">de Conclusão</p>
+                        <div class="cert-divider"></div>
+                    </div>
+
+                    <p class="cert-texto-concedemos">
+                        Concedemos este certificado a
+                    </p>
+
+                    <div class="cert-nome-aluno">${nomeAluno}</div>
+
+                    <p class="cert-texto-completou">
+                        por ter completado com sucesso o curso online de
+                    </p>
+
+                    <div class="cert-nome-curso">${titulo}</div>
+
+                    <div class="cert-detalhes">
+                        <div class="cert-detalhe-item">
+                            <div class="cert-detalhe-label">Carga Horária</div>
+                            <div class="cert-detalhe-valor">${cargaHoraria}</div>
+                        </div>
+                        <div class="cert-detalhe-item">
+                            <div class="cert-detalhe-label">Data de Conclusão</div>
+                            <div class="cert-detalhe-valor">${dataFormatada}</div>
+                        </div>
+                        <div class="cert-detalhe-item">
+                            <div class="cert-detalhe-label">Modalidade</div>
+                            <div class="cert-detalhe-valor">Online</div>
+                        </div>
+                    </div>
+
+                    <div class="cert-footer-visual">
+                        <div class="cert-assinatura-area">
+                            <div class="cert-assinatura-linha"></div>
+                            <div class="cert-assinatura-nome">Scheila Almeida</div>
+                            <div class="cert-assinatura-cargo">Instrutora e Fundadora</div>
+                        </div>
+
+                        <div class="cert-selo">🏆</div>
+
+                        <div class="cert-assinatura-area">
+                            <div class="cert-assinatura-linha"></div>
+                            <div class="cert-assinatura-nome">Certificado Digital</div>
+                            <div class="cert-assinatura-cargo">Validação Online</div>
+                        </div>
+                    </div>
+
+                    <div class="cert-codigo">Código de Validação: ${codigoCert}</div>
+                </div>
+            `;
+
+            document.getElementById('certificado-content').innerHTML = certificadoHTML;
+            document.getElementById('cert-viewer-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            showToast('Certificado Pronto!', 'Visualize seu certificado de conclusão.', 'success');
+        }
+
+        function closeCertViewer() {
+            document.getElementById('cert-viewer-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+            currentCertificado = null;
+        }
+
+        // Fechar ao clicar fora
+        document.getElementById('cert-viewer-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCertViewer();
+            }
+        });
+
+        // Fechar com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCertViewer();
+            }
+        });
+
+        // ===== BAIXAR CERTIFICADO COMO PDF =====
+        async function downloadCertificadoPDF() {
+            if (!currentCertificado) return;
+
+            showToast('Gerando PDF...', 'Aguarde enquanto preparamos seu certificado.', 'warning');
+
+            try {
+                // Usar html2pdf.js ou window.print para gerar PDF
+                // Por enquanto, usamos a API de impressão do navegador
+                const certElement = document.getElementById('certificado-pdf');
+
+                // Criar uma janela de impressão otimizada
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Certificado - ${currentCertificado.titulo}</title>
+                        <style>
+                            @page { size: A4 landscape; margin: 0; }
+                            * { margin: 0; padding: 0; box-sizing: border-box; }
+                            body { 
+                                font-family: 'Poppins', Arial, sans-serif; 
+                                background: #1a1a2e;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                min-height: 100vh;
+                                padding: 20px;
+                            }
+                            .certificado-fisico {
+                                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                                border: 3px solid #FF6B35;
+                                border-radius: 16px;
+                                padding: 50px 40px;
+                                text-align: center;
+                                width: 100%;
+                                max-width: 900px;
+                                color: white;
+                                position: relative;
+                            }
+                            .cert-logo-area { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; }
+                            .cert-logo-icon { font-size: 48px; }
+                            .cert-logo-text { font-size: 28px; font-weight: 800; color: #FF6B35; }
+                            .cert-titulo-principal { font-size: 36px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
+                            .cert-subtitulo { font-size: 16px; color: #F7C948; letter-spacing: 2px; }
+                            .cert-divider { width: 120px; height: 3px; background: linear-gradient(90deg, transparent, #FF6B35, #F7C948, transparent); margin: 24px auto; }
+                            .cert-texto-concedemos { font-size: 15px; color: #A0A0B0; margin-bottom: 16px; }
+                            .cert-nome-aluno { font-size: 32px; font-weight: 700; padding: 12px 24px; border-bottom: 2px solid #FF6B35; display: inline-block; margin: 16px 0; }
+                            .cert-texto-completou { font-size: 15px; color: #A0A0B0; margin: 16px 0; }
+                            .cert-nome-curso { font-size: 22px; font-weight: 700; color: #FF6B35; margin: 12px 0; }
+                            .cert-detalhes { display: flex; justify-content: center; gap: 40px; margin: 24px 0; }
+                            .cert-detalhe-item { text-align: center; }
+                            .cert-detalhe-label { font-size: 11px; color: #6B6B7B; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+                            .cert-detalhe-valor { font-size: 15px; font-weight: 600; }
+                            .cert-footer-visual { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255, 107, 53, 0.2); }
+                            .cert-assinatura-area { text-align: center; }
+                            .cert-assinatura-linha { width: 160px; height: 1px; background: linear-gradient(90deg, transparent, #A0A0B0, transparent); margin: 0 auto 8px; }
+                            .cert-assinatura-nome { font-size: 14px; font-weight: 600; }
+                            .cert-assinatura-cargo { font-size: 11px; color: #6B6B7B; }
+                            .cert-selo { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #FF6B35, #F7C948); display: flex; align-items: center; justify-content: center; font-size: 36px; }
+                            .cert-codigo { font-size: 11px; color: #6B6B7B; margin-top: 16px; font-family: monospace; }
+                            @media print {
+                                body { background: white; }
+                                .certificado-fisico { 
+                                    border: 3px solid #FF6B35 !important; 
+                                    -webkit-print-color-adjust: exact !important; 
+                                    print-color-adjust: exact !important;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${document.getElementById('certificado-pdf').outerHTML}
+                        <script>
+                            setTimeout(() => { window.print(); }, 500);
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+
+                showToast('PDF Gerado!', 'A janela de impressão foi aberta. Salve como PDF.', 'success');
+
+            } catch (e) {
+                console.error('[CERTIFICADOS] Erro ao gerar PDF:', e);
+                showToast('Erro', 'Não foi possível gerar o PDF. Tente novamente.', 'error');
+            }
+        }
+
+        // ===== COMPARTILHAR CERTIFICADO =====
+        async function shareCertificado() {
+            if (!currentCertificado) return;
+
+            const texto = `🏆 Acabei de concluir o curso "${currentCertificado.titulo}" com Scheila Almeida!
+
+Certificado válido: ${currentCertificado.codigoCert}
+
+#ScheilaAlmeida #Certificado #Fitness`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Meu Certificado - Scheila Almeida',
+                        text: texto,
+                        url: window.location.href
+                    });
+                    showToast('Compartilhado!', 'Certificado compartilhado com sucesso!', 'success');
+                } catch (e) {
+                    // Usuário cancelou
+                }
+            } else {
+                // Fallback: copiar para clipboard
+                try {
+                    await navigator.clipboard.writeText(texto);
+                    showToast('Copiado!', 'Texto do certificado copiado para a área de transferência.', 'success');
+                } catch (e) {
+                    showToast('Erro', 'Não foi possível copiar. Tente manualmente.', 'error');
+                }
+            }
         }
 
         function showToast(title, message, type = 'success') {
