@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -63,6 +64,7 @@
     <script src="../js/config.js"></script>
     <script>
         let currentUser = null;
+        let currentAuthId = null; // auth.uid() do Supabase
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -74,6 +76,7 @@
             const auth = await checkAuth();
             if (auth) {
                 currentUser = auth.user;
+                currentAuthId = auth.user.id; // Este é o auth.uid()
                 document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
                 document.getElementById('sidebar-email').textContent = auth.user.email;
                 document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
@@ -90,13 +93,7 @@
             const container = document.getElementById('cursos-container');
 
             try {
-                // Verificar assinatura (se logado)
-                let assinatura = { ativa: false };
-                if (currentUser) {
-                    assinatura = await checkAssinaturaStatus();
-                }
-
-                // Buscar todos os cursos
+                // Buscar todos os cursos ativos
                 const { data: cursos, error } = await supabaseClient
                     .from('cursos')
                     .select('id, titulo, descricao, thumbnail, preco, total_aulas, duracao_total, total_alunos, avaliacao, ordem, ativo, gratuito, created_at')
@@ -116,15 +113,23 @@
                     return;
                 }
 
-                // Buscar cursos comprados (se logado)
+                // Buscar cursos comprados pelo usuario_id (que é o auth_id no Supabase)
                 let cursosComprados = [];
-                if (currentUser && !assinatura.ativa) {
-                    const { data: compras } = await supabaseClient
+                if (currentAuthId) {
+                    console.log('[RITMUS] Buscando compras para usuario_id:', currentAuthId);
+
+                    const { data: compras, error: comprasError } = await supabaseClient
                         .from('compras_cursos')
-                        .select('curso_id')
-                        .eq('usuario_id', currentUser.id)
-                        .eq('status', 'pago');
-                    cursosComprados = (compras || []).map(c => c.curso_id);
+                        .select('curso_id, status')
+                        .eq('usuario_id', currentAuthId)
+                        .in('status', ['pago', 'pendente']); // Inclui pendente também (enquanto webhook não funciona)
+
+                    if (comprasError) {
+                        console.error('[RITMUS] Erro ao buscar compras:', comprasError);
+                    } else {
+                        console.log('[RITMUS] Compras encontradas:', compras);
+                        cursosComprados = (compras || []).map(c => c.curso_id);
+                    }
                 }
 
                 // Buscar aulas gratuitas por curso
@@ -139,42 +144,26 @@
                     aulasFreeMap[a.curso_id] = true;
                 });
 
-                // Buscar progresso (se logado)
-                let progressoMap = {};
-                if (currentUser) {
-                    const { data: progressos } = await supabaseClient
-                        .from('progresso_aulas')
-                        .select('aula_id, concluida')
-                        .eq('usuario_id', currentUser.id);
-
-                    (progressos || []).forEach(p => {
-                        progressoMap[p.aula_id] = p.concluida;
-                    });
-                }
-
                 // Renderizar cursos
                 container.innerHTML = `
                     <div class="cursos-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
                         ${cursos.map(curso => {
                             // VERIFICAÇÃO DE ACESSO
-                            const temAcesso = assinatura.ativa || cursosComprados.includes(curso.id);
+                            const temAcessoCompra = cursosComprados.includes(curso.id);
                             const temAulasFree = aulasFreeMap[curso.id] || false;
 
-                            // VERIFICAR SE CURSO É GRATUITO (robusto para diferentes formatos)
+                            // VERIFICAR SE CURSO É GRATUITO
                             let isCursoFree = false;
                             if (curso.gratuito === true || curso.gratuito === 'true' || curso.gratuito === 't' || curso.gratuito === 1 || curso.gratuito === '1') {
                                 isCursoFree = true;
                             }
-
-                            // Se preço é 0, também considerar gratuito
                             if (curso.preco === 0 || curso.preco === '0' || curso.preco === '0.00') {
                                 isCursoFree = true;
                             }
 
-                            const podeAssistir = temAcesso || temAulasFree || isCursoFree;
+                            const podeAssistir = temAcessoCompra || temAulasFree || isCursoFree;
 
-                            // DEBUG: mostrar no console
-                            console.log('[RITMUS] Curso:', curso.titulo, '| gratuito:', curso.gratuito, '| preco:', curso.preco, '| isCursoFree:', isCursoFree, '| podeAssistir:', podeAssistir);
+                            console.log('[RITMUS] Curso:', curso.titulo, '| comprado:', temAcessoCompra, '| gratuito:', isCursoFree, '| podeAssistir:', podeAssistir);
 
                             return `
                                 <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
@@ -212,13 +201,13 @@
                                         ${podeAssistir ? `
                                             <div style="margin-top:16px">
                                                 <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
-                                                    ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcesso ? '🎁 Assistir Aulas Free' : 'Assistir Aulas')}
+                                                    ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcessoCompra ? '🎁 Assistir Aulas Free' : (temAcessoCompra ? '▶️ Assistir Aulas' : '▶️ Assistir Aulas'))}
                                                 </a>
                                             </div>
                                         ` : `
                                             <div class="curso-footer" style="margin-top:12px">
                                                 <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
-                                                <a href="../index.html#precos" class="btn-curso">Comprar</a>
+                                                <a href="pagamento.html?curso=${curso.id}" class="btn-curso">Comprar</a>
                                             </div>
                                         `}
                                     </div>
