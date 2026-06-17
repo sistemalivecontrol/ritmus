@@ -607,8 +607,17 @@
                     const redirectUrl = 'pagamento-sucesso.html?curso=' + (cursoData?.id || '') + '&payment=' + (compra?.asaas_payment_id || '') + '&t=' + timestamp;
                     console.log('[SCHEILA] Redirecionando para:', redirectUrl);
 
-                    // Forçar recarregamento sem cache
+                    // Forçar recarregamento sem cache (múltiplas técnicas)
+                    // Técnica 1: location.href com timestamp
                     window.location.href = redirectUrl;
+
+                    // Técnica 2: Forçar reload se a página não mudar
+                    setTimeout(() => {
+                        if (window.location.href.indexOf('pagamento-sucesso') === -1) {
+                            console.log('[SCHEILA] Forçando reload...');
+                            window.location.reload(true);
+                        }
+                    }, 500);
 
                     return;
                 }
