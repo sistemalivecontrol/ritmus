@@ -964,43 +964,50 @@
     </footer>
 
     <script>
-        // ===== SUPABASE CONFIG =====
+        // ===== SUPABASE CONFIG - CHAVE ATUALIZADA =====
         const SUPABASE_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTk0MDEsImV4cCI6MjA5MTgzNTQwMX0.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MDUzODcsImV4cCI6MjA5NzA4MTM4N30.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
         
         let supabaseClient = null;
 
         // Inicializar Supabase
         function initSupabase() {
             try {
+                // Tentar várias formas de acessar o Supabase
+                let supabaseLib = null;
+                
                 if (typeof supabase !== 'undefined' && supabase.createClient) {
-                    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                    console.log('[INDEX] Supabase inicializado com sucesso');
-                    return true;
+                    supabaseLib = supabase;
                 } else if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                    console.log('[INDEX] Supabase inicializado via window.supabase');
+                    supabaseLib = window.supabase;
+                }
+                
+                if (supabaseLib) {
+                    supabaseClient = supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    console.log('[INDEX] ✅ Supabase inicializado com sucesso');
                     return true;
                 }
+                
+                console.log('[INDEX] ⚠️ Biblioteca Supabase não disponível ainda');
                 return false;
             } catch (e) {
-                console.error('[INDEX] Erro ao inicializar Supabase:', e);
+                console.error('[INDEX] ❌ Erro ao inicializar Supabase:', e);
                 return false;
             }
         }
 
         // Aguardar Supabase carregar
-        function waitForSupabase(callback, retries = 20) {
+        function waitForSupabase(callback, retries = 30) {
             if (initSupabase()) {
                 callback();
                 return;
             }
             if (retries > 0) {
-                console.log(`[INDEX] Aguardando Supabase... (${retries} tentativas restantes)`);
+                console.log(`[INDEX] ⏳ Aguardando Supabase... (${retries} tentativas restantes)`);
                 setTimeout(() => waitForSupabase(callback, retries - 1), 300);
             } else {
-                console.error('[INDEX] Supabase não carregou após todas as tentativas');
-                showCursosError('Não foi possível conectar ao servidor. Tente recarregar a página.');
+                console.error('[INDEX] ❌ Supabase não carregou após todas as tentativas');
+                showCursosError('Não foi possível conectar ao servidor. Verifique sua conexão e tente recarregar a página (Ctrl+Shift+R).');
             }
         }
 
@@ -1014,7 +1021,7 @@
             }
 
             try {
-                console.log('[INDEX] Buscando cursos do Supabase...');
+                console.log('[INDEX] 🔍 Buscando cursos do Supabase...');
                 
                 // Buscar cursos ativos da tabela 'cursos'
                 const { data: cursos, error } = await supabaseClient
@@ -1024,28 +1031,30 @@
                     .order('ordem', { ascending: true });
 
                 if (error) {
-                    console.error('[INDEX] Erro ao buscar cursos:', error);
+                    console.error('[INDEX] ❌ Erro ao buscar cursos:', error);
                     showCursosError('Erro ao carregar cursos: ' + error.message);
                     return;
                 }
 
                 if (!cursos || cursos.length === 0) {
-                    console.log('[INDEX] Nenhum curso encontrado');
+                    console.log('[INDEX] ℹ️ Nenhum curso encontrado na tabela');
                     showCursosEmpty();
                     return;
                 }
 
-                console.log(`[INDEX] ${cursos.length} cursos carregados com sucesso`);
+                console.log(`[INDEX] ✅ ${cursos.length} cursos carregados com sucesso!`, cursos);
                 
                 // Atualizar contador de aulas
                 const totalAulas = cursos.reduce((sum, c) => sum + (parseInt(c.total_aulas) || 0), 0);
-                document.getElementById('stat-aulas').textContent = totalAulas > 0 ? totalAulas + '+' : '50+';
+                if (totalAulas > 0) {
+                    document.getElementById('stat-aulas').textContent = totalAulas + '+';
+                }
 
                 // Renderizar cursos
                 renderizarCursos(cursos);
 
             } catch (err) {
-                console.error('[INDEX] Erro inesperado:', err);
+                console.error('[INDEX] ❌ Erro inesperado:', err);
                 showCursosError('Erro ao carregar cursos. Tente novamente.');
             }
         }
@@ -1066,12 +1075,12 @@
                     : `pages/pagamento.html?curso=${curso.id}`;
                 
                 // Imagem do curso (fallback para placeholder)
-                const imagem = curso.imagem_url || curso.thumbnail || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMUExQTJFIi8+PHN2ZyB4PSI1MCUiIHk9IjUwJSIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNGRjZCMzUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xMiwgLTEyKSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMmM0LjQxIDAgOCAzLjU5IDggOHMtMy41OSA4LTggOC04LTMuNTktOC04UzEzLjU5IDQgMTIgNHptLTEgM2gydjVoLTJ2LTV6bTAgNmgydjJoLTJ2LTJ6Ii8+PC9zdmc+PC9zdmc+';
+                const imagem = curso.imagem_url || curso.thumbnail || curso.imagem || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMUExQTJFIi8+PHN2ZyB4PSI1MCUiIHk9IjUwJSIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNGRjZCMzUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xMiwgLTEyKSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMmM0LjQxIDAgOCAzLjU5IDggOHMtMy41OSA4LTggOC04LTMuNTktOC04UzEzLjU5IDQgMTIgNHptLTEgM2gydjVoLTJ2LTV6bTAgNmgydjJoLTJ2LTJ6Ii8+PC9zdmc+PC9zdmc+';
                 
                 const duracao = curso.duracao || '4 semanas';
                 const nivel = curso.nivel || 'Todos os níveis';
-                const aulas = curso.total_aulas || '12';
-                const descricao = curso.descricao || 'Curso completo com aulas práticas e teóricas para você alcançar seus objetivos.';
+                const aulas = curso.total_aulas || curso.aulas || '12';
+                const descricao = curso.descricao || curso.descricao_curta || 'Curso completo com aulas práticas para você alcançar seus objetivos.';
 
                 return `
                     <div class="curso-card" onclick="window.location.href='${btnLink}'">
@@ -1147,7 +1156,7 @@
 
         // ===== INICIALIZAÇÃO =====
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[INDEX] DOM carregado. Iniciando...');
+            console.log('[INDEX] 📄 DOM carregado. Iniciando...');
             
             // Aguardar Supabase e carregar cursos
             waitForSupabase(() => {
@@ -1158,7 +1167,7 @@
         // Recarregar cursos quando a página voltar ao foco (para atualizações em tempo real)
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && supabaseClient) {
-                console.log('[INDEX] Página visível novamente, recarregando cursos...');
+                console.log('[INDEX] 👁️ Página visível novamente, recarregando cursos...');
                 carregarCursos();
             }
         });
