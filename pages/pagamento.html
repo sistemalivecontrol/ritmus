@@ -602,9 +602,12 @@
                         window.location.href = 'aula.html?curso=' + cursoData.id;
                     };
 
-                    // Redirecionar para página de sucesso imediatamente
-                    const redirectUrl = 'pagamento-sucesso.html?curso=' + (cursoData?.id || '') + '&payment=' + (compra?.asaas_payment_id || '');
+                    // Redirecionar para página de sucesso imediatamente (com cache-busting)
+                    const timestamp = new Date().getTime();
+                    const redirectUrl = 'pagamento-sucesso.html?curso=' + (cursoData?.id || '') + '&payment=' + (compra?.asaas_payment_id || '') + '&t=' + timestamp;
                     console.log('[SCHEILA] Redirecionando para:', redirectUrl);
+
+                    // Forçar recarregamento sem cache
                     window.location.href = redirectUrl;
 
                     return;
