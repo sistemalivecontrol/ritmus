@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -484,25 +485,40 @@ function renderAulaLista(progressoMap) {
             try {
                 const { data: existing } = await supabaseClient
                     .from('progresso_aulas')
-                    .select('id')
+                    .select('id, concluida')
                     .eq('usuario_id', currentUser.id)
                     .eq('aula_id', aulaId)
                     .maybeSingle();
 
                 if (existing) {
-                    await supabaseClient
-                        .from('progresso_aulas')
-                        .update({ concluida, updated_at: new Date().toISOString() })
-                        .eq('id', existing.id);
+                    // Se já existe registro, SÓ atualiza se estiver MARCANDO como concluída (true)
+                    // NÃO atualiza se for apenas visualização (false) - preserva status existente
+                    if (concluida === true) {
+                        await supabaseClient
+                            .from('progresso_aulas')
+                            .update({ concluida: true, updated_at: new Date().toISOString() })
+                            .eq('id', existing.id);
+                        console.log('[AULA] Aula marcada como concluída:', aulaId);
+                    } else {
+                        // Apenas visualização - NÃO altera o status concluida
+                        // Só atualiza updated_at para rastrear último acesso
+                        await supabaseClient
+                            .from('progresso_aulas')
+                            .update({ updated_at: new Date().toISOString() })
+                            .eq('id', existing.id);
+                        console.log('[AULA] Visualização registrada (status preservado):', aulaId, 'concluida=', existing.concluida);
+                    }
                 } else {
+                    // Primeira vez vendo aula - insere com o status passado
                     await supabaseClient
                         .from('progresso_aulas')
                         .insert({
                             usuario_id: currentUser.id,
                             aula_id: aulaId,
                             curso_id: currentCurso.id,
-                            concluida
+                            concluida: concluida
                         });
+                    console.log('[AULA] Primeira visualização registrada:', aulaId, 'concluida=', concluida);
                 }
             } catch (e) {
                 console.error('Erro progresso:', e);
