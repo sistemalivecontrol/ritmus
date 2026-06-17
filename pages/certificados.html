@@ -367,11 +367,13 @@
             border: 3px solid;
             border-image: linear-gradient(135deg, #FF6B35, #F7C948, #FF6B35) 1;
             border-radius: var(--radius-lg);
-            padding: 60px 50px;
+            padding: 40px 35px;
             text-align: center;
             position: relative;
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 700px;
+            margin: 0 auto;
         }
 
         .certificado-fisico::before {
@@ -424,18 +426,18 @@
         }
 
         .cert-titulo-principal {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 800;
             color: var(--text);
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             position: relative;
             z-index: 1;
         }
 
         .cert-subtitulo {
-            font-size: 16px;
+            font-size: 14px;
             color: var(--accent);
             font-weight: 500;
             letter-spacing: 2px;
@@ -461,11 +463,11 @@
         }
 
         .cert-nome-aluno {
-            font-size: 32px;
+            font-size: 26px;
             font-weight: 700;
             color: var(--text);
-            margin: 16px 0;
-            padding: 12px 24px;
+            margin: 10px 0;
+            padding: 8px 16px;
             border-bottom: 2px solid var(--primary);
             display: inline-block;
             position: relative;
@@ -475,14 +477,14 @@
         .cert-texto-completou {
             font-size: 15px;
             color: var(--text-muted);
-            margin: 16px 0;
+            margin: 10px 0;
             line-height: 1.6;
             position: relative;
             z-index: 1;
         }
 
         .cert-nome-curso {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--primary);
             margin: 12px 0;
@@ -494,7 +496,7 @@
             display: flex;
             justify-content: center;
             gap: 40px;
-            margin: 24px 0;
+            margin: 16px 0;
             position: relative;
             z-index: 1;
         }
@@ -521,8 +523,8 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-top: 40px;
-            padding-top: 30px;
+            margin-top: 24px;
+            padding-top: 20px;
             border-top: 1px solid rgba(255, 107, 53, 0.2);
             position: relative;
             z-index: 1;
@@ -551,14 +553,14 @@
         }
 
         .cert-selo {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
+            font-size: 28px;
             box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
             position: relative;
             z-index: 1;
@@ -591,7 +593,7 @@
         .cert-codigo {
             font-size: 11px;
             color: var(--text-dark);
-            margin-top: 16px;
+            margin-top: 10px;
             font-family: monospace;
             position: relative;
             z-index: 1;
@@ -656,7 +658,7 @@
                 font-size: 24px;
             }
             .cert-nome-aluno {
-                font-size: 22px;
+                font-size: 18px;
             }
             .cert-detalhes {
                 flex-direction: column;
@@ -679,7 +681,6 @@
             }
         }
     </style>
-<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -1093,19 +1094,65 @@
 
                     <div class="cert-footer-visual">
                         <div class="cert-assinatura-area">
-                            <div class="cert-assinatura-img-container">
-                                <img src="../images/assinatura-scheila.png" 
-                                     alt="Assinatura Scheila Almeida" 
-                                     class="cert-assinatura-img"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                <div class="cert-assinatura-fallback" style="display:none">
-                                    <svg viewBox="0 0 200 60" class="cert-assinatura-svg">
-                                        <path d="M10,45 Q30,10 50,35 T90,30 Q110,20 130,35 T170,25 Q185,20 190,30" 
-                                              stroke="#FF6B35" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                        <path d="M15,50 Q35,15 55,40 T95,35 Q115,25 135,40 T175,30 Q190,25 195,35" 
-                                              stroke="#F7C948" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>
-                                    </svg>
-                                </div>
+                            <div class="cert-assinatura-completa">
+                                <svg viewBox="0 0 220 70" class="cert-assinatura-svg" style="width:140px;height:45px">
+                                    <!-- Handwritten-style signature paths for "Scheila Almeida" -->
+                                    <defs>
+                                        <linearGradient id="sigGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" style="stop-color:#FF6B35"/>
+                                            <stop offset="50%" style="stop-color:#F7C948"/>
+                                            <stop offset="100%" style="stop-color:#FF6B35"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <!-- S -->
+                                    <path d="M8,35 Q8,25 18,25 Q25,25 25,32 Q25,38 15,38 Q8,38 8,45 Q8,52 20,52 Q28,52 32,48" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- c -->
+                                    <path d="M38,42 Q38,35 45,35 Q52,35 52,42" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <path d="M52,38 Q52,45 45,45 Q38,45 38,38" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <!-- h -->
+                                    <path d="M58,25 L58,48 M58,38 Q65,35 70,35 Q75,35 75,42 L75,48" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- e -->
+                                    <path d="M82,42 Q82,35 90,35 Q98,35 98,42 Q98,48 90,48 Q82,48 82,42 M82,42 L98,42" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- i -->
+                                    <path d="M105,30 L105,32 M105,38 L105,48" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <!-- l -->
+                                    <path d="M112,25 L112,48" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <!-- a -->
+                                    <path d="M125,42 Q125,35 132,35 Q140,35 140,42 L140,48 M140,42 Q140,48 132,48 Q125,48 125,42" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- Space -->
+                                    <!-- A -->
+                                    <path d="M155,48 L162,28 L169,48 M158,40 L166,40" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- l -->
+                                    <path d="M175,25 L175,48" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <!-- m -->
+                                    <path d="M182,48 L182,38 Q182,32 188,32 Q194,32 194,38 L194,48 M194,38 Q194,32 200,32 Q206,32 206,38 L206,48" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- e -->
+                                    <path d="M212,42 Q212,35 220,35 Q228,35 228,42 Q228,48 220,48 Q212,48 212,42 M212,42 L228,42" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- i -->
+                                    <path d="M235,30 L235,32 M235,38 L235,48" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <!-- d -->
+                                    <path d="M248,25 L248,48 M248,38 Q242,35 238,35 Q232,35 232,42 Q232,48 238,48 Q242,48 248,42" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- a -->
+                                    <path d="M258,42 Q258,35 265,35 Q273,35 273,42 L273,48 M273,42 Q273,48 265,48 Q258,48 258,42" 
+                                          stroke="url(#sigGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <!-- Decorative underline flourish -->
+                                    <path d="M5,58 Q60,65 140,58 Q180,55 200,60" 
+                                          stroke="url(#sigGrad)" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+                                </svg>
                             </div>
                             <div class="cert-assinatura-linha"></div>
                             <div class="cert-assinatura-nome">Scheila Almeida</div>
@@ -1116,16 +1163,16 @@
 
                         <div class="cert-assinatura-area">
                             <div class="cert-selo-digital">
-                                <svg viewBox="0 0 80 80" width="60" height="60">
-                                    <circle cx="40" cy="40" r="38" fill="none" stroke="url(#seloGrad)" stroke-width="2"/>
+                                <svg viewBox="0 0 60 60" width="45" height="45">
                                     <defs>
                                         <linearGradient id="seloGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                             <stop offset="0%" style="stop-color:#FF6B35"/>
                                             <stop offset="100%" style="stop-color:#F7C948"/>
                                         </linearGradient>
                                     </defs>
-                                    <text x="40" y="35" text-anchor="middle" fill="#FF6B35" font-size="10" font-weight="bold">VALIDADO</text>
-                                    <text x="40" y="50" text-anchor="middle" fill="#F7C948" font-size="8">DIGITAL</text>
+                                    <circle cx="30" cy="30" r="28" fill="none" stroke="url(#seloGrad)" stroke-width="2"/>
+                                    <text x="30" y="26" text-anchor="middle" fill="#FF6B35" font-size="8" font-weight="bold">VALIDADO</text>
+                                    <text x="30" y="38" text-anchor="middle" fill="#F7C948" font-size="7">DIGITAL</text>
                                 </svg>
                             </div>
                             <div class="cert-assinatura-linha"></div>
@@ -1209,26 +1256,26 @@
                             .cert-logo-area { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; }
                             .cert-logo-icon { font-size: 48px; }
                             .cert-logo-text { font-size: 28px; font-weight: 800; color: #FF6B35; }
-                            .cert-titulo-principal { font-size: 36px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
+                            .cert-titulo-principal { font-size: 28px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
                             .cert-subtitulo { font-size: 16px; color: #F7C948; letter-spacing: 2px; }
                             .cert-divider { width: 120px; height: 3px; background: linear-gradient(90deg, transparent, #FF6B35, #F7C948, transparent); margin: 24px auto; }
                             .cert-texto-concedemos { font-size: 15px; color: #A0A0B0; margin-bottom: 16px; }
-                            .cert-nome-aluno { font-size: 32px; font-weight: 700; padding: 12px 24px; border-bottom: 2px solid #FF6B35; display: inline-block; margin: 16px 0; }
-                            .cert-texto-completou { font-size: 15px; color: #A0A0B0; margin: 16px 0; }
-                            .cert-nome-curso { font-size: 22px; font-weight: 700; color: #FF6B35; margin: 12px 0; }
-                            .cert-detalhes { display: flex; justify-content: center; gap: 40px; margin: 24px 0; }
+                            .cert-nome-aluno { font-size: 26px; font-weight: 700; padding: 8px 16px; border-bottom: 2px solid #FF6B35; display: inline-block; margin: 10px 0; }
+                            .cert-texto-completou { font-size: 15px; color: #A0A0B0; margin: 10px 0; }
+                            .cert-nome-curso { font-size: 18px; font-weight: 700; color: #FF6B35; margin: 12px 0; }
+                            .cert-detalhes { display: flex; justify-content: center; gap: 40px; margin: 16px 0; }
                             .cert-detalhe-item { text-align: center; }
                             .cert-detalhe-label { font-size: 11px; color: #6B6B7B; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
                             .cert-detalhe-valor { font-size: 15px; font-weight: 600; }
-                            .cert-footer-visual { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255, 107, 53, 0.2); }
+                            .cert-footer-visual { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255, 107, 53, 0.2); }
                             .cert-assinatura-area { text-align: center; }
                             .cert-assinatura-linha { width: 160px; height: 1px; background: linear-gradient(90deg, transparent, #A0A0B0, transparent); margin: 0 auto 8px; }
                             .cert-assinatura-nome { font-size: 14px; font-weight: 600; }
                             .cert-assinatura-cargo { font-size: 11px; color: #6B6B7B; }
-                            .cert-selo { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #FF6B35, #F7C948); display: flex; align-items: center; justify-content: center; font-size: 36px; }
+                            .cert-selo { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #FF6B35, #F7C948); display: flex; align-items: center; justify-content: center; font-size: 28px; }
                             .cert-assinatura-img { max-height: 45px; max-width: 160px; }
                             .cert-assinatura-svg { width: 160px; height: 50px; }
-                            .cert-codigo { font-size: 11px; color: #6B6B7B; margin-top: 16px; font-family: monospace; }
+                            .cert-codigo { font-size: 11px; color: #6B6B7B; margin-top: 10px; font-family: monospace; }
                             @media print {
                                 body { background: white; }
                                 .certificado-fisico { 
