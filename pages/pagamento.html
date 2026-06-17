@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/svg+xml" href="images/favicon-scheila.png">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
     <style>
         .payment-page {
             min-height: 100vh;
@@ -275,7 +275,7 @@
                 </div>
 
                 <button class="btn-pay" id="btn-pagar" onclick="iniciarPagamento()">
-                    💳 Pagar Agora
+                    Pagar Agora
                 </button>
 
                 <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:12px">
@@ -426,36 +426,12 @@
                     throw new Error(result.error || 'Erro ao criar cobrança');
                 }
 
-                // Abrir checkout do Asaas em nova aba
+                // Redirecionar para o checkout do Asaas
                 if (result.invoiceUrl) {
-                    showToast('Sucesso!', 'Checkout aberto em nova aba. Complete o pagamento lá.', 'success');
-
-                    // Abrir em nova janela/aba
-                    const checkoutWindow = window.open(result.invoiceUrl, '_blank');
-
-                    // Verificar se popup foi bloqueado
-                    if (!checkoutWindow || checkoutWindow.closed || typeof checkoutWindow.closed === 'undefined') {
-                        showToast('Atenção', 'Popup bloqueado! Clique no link abaixo para abrir o checkout.', 'warning');
-
-                        // Mostrar link manual como fallback
-                        btn.disabled = false;
-                        btn.innerHTML = '🔗 Abrir Checkout';
-                        btn.onclick = function() {
-                            window.open(result.invoiceUrl, '_blank');
-                        };
-                    } else {
-                        // Resetar botão para permitir nova tentativa se necessário
-                        btn.disabled = false;
-                        btn.innerHTML = '🔄 Verificar Status';
-                        btn.onclick = function() {
-                            location.reload();
-                        };
-
-                        // Opcional: mostrar mensagem para usuário não fechar a aba
-                        setTimeout(() => {
-                            showToast('💡 Dica', 'Não feche esta aba! Após pagar, volte aqui para acessar seu curso.', 'info');
-                        }, 3000);
-                    }
+                    showToast('Sucesso!', 'Redirecionando para o checkout seguro...', 'success');
+                    setTimeout(() => {
+                        window.location.href = result.invoiceUrl;
+                    }, 1500);
                 } else {
                     throw new Error('URL de pagamento não gerada');
                 }
