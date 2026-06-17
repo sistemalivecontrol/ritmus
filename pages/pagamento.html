@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagamento - Scheila Almeida</title>
+    <title>Pagamento Confirmado - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
     <style>
-        .payment-page {
+        .success-page {
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -17,129 +17,53 @@
             padding: 40px 20px;
             background: linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 100%);
         }
-        .payment-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            max-width: 900px;
+        .success-container {
+            max-width: 600px;
             width: 100%;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 40px;
-        }
-        .payment-summary {
-            border-right: 1px solid var(--border);
-            padding-right: 40px;
-        }
-        .payment-summary h2 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 24px;
-        }
-        .course-preview {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-        }
-        .course-preview img {
-            width: 120px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: var(--radius-sm);
-        }
-        .course-preview-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .course-preview-info p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-        .course-price {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        .payment-details {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .payment-details h2 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .payment-methods {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .payment-method {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
+            padding: 48px;
             text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            background: transparent;
-            color: var(--text-muted);
-            font-family: var(--font);
-            font-size: 13px;
         }
-        .payment-method:hover, .payment-method.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(255, 107, 53, 0.1);
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
         }
-        .payment-method .method-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-            display: block;
-        }
-        .secure-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: var(--radius-sm);
-            font-size: 13px;
+        .success-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
             color: var(--success);
-            margin-top: auto;
         }
-        .total-section {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border);
+        .success-message {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            line-height: 1.6;
         }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
+        .course-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        .course-info h3 {
+            font-size: 18px;
+            font-weight: 600;
             margin-bottom: 8px;
+            color: var(--text);
+        }
+        .course-info p {
             font-size: 14px;
             color: var(--text-muted);
+            margin: 0;
         }
-        .total-row.total {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
-        }
-        .btn-pay {
-            width: 100%;
-            padding: 16px;
+        .btn-primary {
+            display: inline-block;
+            padding: 16px 32px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
@@ -149,51 +73,54 @@
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            margin-top: 20px;
+            text-decoration: none;
+            margin: 8px;
         }
-        .btn-pay:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
         }
-        .btn-pay:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .btn-secondary {
+            display: inline-block;
+            padding: 16px 32px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            margin: 8px;
+        }
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
         }
         .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--success);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .test-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #F7C948, #D97706);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 16px;
+        .status-pending {
+            color: #F7C948;
+        }
+        .status-paid {
+            color: var(--success);
         }
         @media (max-width: 768px) {
-            .payment-container {
-                grid-template-columns: 1fr;
-                padding: 24px;
+            .success-container {
+                padding: 32px 24px;
             }
-            .payment-summary {
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                padding-right: 0;
-                padding-bottom: 24px;
+            .success-title {
+                font-size: 22px;
             }
         }
     </style>
@@ -207,81 +134,36 @@
         </div>
     </nav>
 
-    <div class="payment-page">
-        <div class="payment-container">
-            <!-- Resumo do Curso -->
-            <div class="payment-summary">
-                <div class="test-badge">🧪 Ambiente de Teste (Sandbox)</div>
-                <h2>📚 Resumo da Compra</h2>
-
-                <div class="course-preview" id="course-preview">
-                    <img id="curso-thumb" src="" alt="Curso">
-                    <div class="course-preview-info">
-                        <h3 id="curso-titulo">Carregando...</h3>
-                        <p id="curso-desc">...</p>
-                        <div class="course-price" id="curso-preco">R$ 0,00</div>
-                    </div>
-                </div>
-
-                <div class="total-section">
-                    <div class="total-row">
-                        <span>Subtotal</span>
-                        <span id="subtotal">R$ 0,00</span>
-                    </div>
-                    <div class="total-row">
-                        <span>Taxa de processamento</span>
-                        <span style="color:var(--success)">Grátis</span>
-                    </div>
-                    <div class="total-row total">
-                        <span>Total</span>
-                        <span id="total-final">R$ 0,00</span>
-                    </div>
-                </div>
-
-                <div class="secure-badge">
-                    <span>🔒</span>
-                    <span>Pagamento processado com segurança pelo Asaas</span>
-                </div>
+    <div class="success-page">
+        <div class="success-container">
+            <div id="loading-state">
+                <div class="loading-spinner"></div>
+                <p style="margin-top:16px;color:var(--text-muted)">Verificando status do pagamento...</p>
             </div>
 
-            <!-- Detalhes do Pagamento -->
-            <div class="payment-details">
-                <h2>💳 Forma de Pagamento</h2>
-                <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
-                    Você será redirecionado para o checkout seguro do Asaas onde poderá escolher entre PIX, Boleto ou Cartão de Crédito.
+            <div id="success-state" style="display:none">
+                <div class="success-icon">🎉</div>
+                <h1 class="success-title">Pagamento Confirmado!</h1>
+                <p class="success-message">
+                    Seu pagamento foi processado com sucesso. O curso já está liberado e você pode começar a assistir agora mesmo!
                 </p>
 
-                <div class="payment-methods">
-                    <button class="payment-method active" data-method="UNDEFINED">
-                        <span class="method-icon">💳</span>
-                        <span>Escolher no Checkout</span>
-                    </button>
+                <div class="course-info" id="course-info">
+                    <h3 id="curso-titulo">Carregando...</h3>
+                    <p id="curso-desc">...</p>
                 </div>
 
-                <div style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
-                    <p style="font-size:13px;color:var(--text-muted);margin:0;line-height:1.6">
-                        <strong style="color:var(--primary)">💡 Informações:</strong><br>
-                        • Pagamento único - acesso vitalício ao curso<br>
-                        • Após a confirmação, o curso será liberado automaticamente<br>
-                        • Você receberá acesso imediato após o pagamento<br>
-                        • Ambiente de teste - use dados fictícios
-                    </p>
-                </div>
+                <a href="cursos.html" class="btn-primary" id="btn-cursos">📚 Meus Cursos</a>
+                <a href="../index.html" class="btn-secondary">🏠 Voltar para Home</a>
+            </div>
 
-                <div id="user-info" style="margin-bottom:16px">
-                    <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">
-                        <strong>Comprando como:</strong> <span id="user-email">...</span>
-                    </p>
-                </div>
-
-                <button class="btn-pay" id="btn-pagar" onclick="iniciarPagamento()">
-                    Pagar Agora
-                </button>
-
-                <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:12px">
-                    Ao clicar em "Pagar Agora", você concorda com os 
-                    <a href="termos.html" target="_blank" style="color:var(--primary)">Termos de Uso</a>
+            <div id="pending-state" style="display:none">
+                <div class="success-icon status-pending">⏳</div>
+                <h1 class="success-title status-pending">Pagamento em Processamento</h1>
+                <p class="success-message">
+                    Seu pagamento está sendo processado. Assim que for confirmado, o curso será liberado automaticamente.
                 </p>
+                <a href="cursos.html" class="btn-primary">📚 Ver Meus Cursos</a>
             </div>
         </div>
     </div>
@@ -289,263 +171,93 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
-        let cursoData = null;
-        let currentUser = null;
-        let billingType = 'UNDEFINED';
-
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
-                initPagamento();
+                verificarStatus();
             });
         });
 
-        async function initPagamento() {
-            // Verificar autenticação
-            const auth = await checkAuth();
-            if (!auth) {
-                // Salvar URL para redirecionar de volta após login
-                localStorage.setItem('scheilaalmeida_redirect_after_login', window.location.href);
-                showToast('Atenção', 'Faça login para continuar a compra', 'warning');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-                return;
-            }
-
-            currentUser = auth.user;
-            document.getElementById('user-email').textContent = auth.user.email;
-
-            // Pegar curso_id da URL
+        async function verificarStatus() {
             const urlParams = new URLSearchParams(window.location.search);
             const cursoId = urlParams.get('curso');
 
             if (!cursoId) {
-                showToast('Erro', 'Curso não especificado', 'error');
-                setTimeout(() => {
-                    window.location.href = 'cursos.html';
-                }, 2000);
+                mostrarErro('Curso não especificado');
                 return;
             }
 
-            await carregarCurso(cursoId);
-        }
-
-        async function carregarCurso(cursoId) {
             try {
-                const { data: curso, error } = await supabaseClient
+                // Buscar dados do curso
+                const { data: curso, error: cursoError } = await supabaseClient
                     .from('cursos')
                     .select('*')
                     .eq('id', cursoId)
-                    .eq('ativo', true)
                     .single();
 
-                if (error || !curso) {
-                    throw new Error('Curso não encontrado');
+                if (curso) {
+                    document.getElementById('curso-titulo').textContent = curso.titulo;
+                    document.getElementById('curso-desc').textContent = curso.descricao || 'Curso completo com aulas gravadas.';
                 }
 
-                cursoData = curso;
+                // Verificar autenticação
+                const auth = await checkAuth();
+                if (!auth) {
+                    mostrarErro('Faça login para ver o status do pagamento');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
 
-                // Preencher dados na tela
-                document.getElementById('curso-titulo').textContent = curso.titulo;
-                document.getElementById('curso-desc').textContent = curso.descricao || 'Curso completo com aulas gravadas.';
-                document.getElementById('curso-thumb').src = curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo);
-
-                const precoFormatado = 'R$ ' + parseFloat(curso.preco).toFixed(2).replace('.', ',');
-                document.getElementById('curso-preco').textContent = precoFormatado;
-                document.getElementById('subtotal').textContent = precoFormatado;
-                document.getElementById('total-final').textContent = precoFormatado;
-
-                // Verificar se já comprou
-                const { data: compra } = await supabaseClient
+                // Verificar compra
+                const { data: compra, error: compraError } = await supabaseClient
                     .from('compras_cursos')
                     .select('*')
-                    .eq('usuario_id', currentUser.id)
+                    .eq('usuario_id', auth.user.id)
                     .eq('curso_id', cursoId)
-                    .eq('status', 'pago')
-                    .maybeSingle();
-
-                if (compra) {
-                    document.getElementById('btn-pagar').textContent = '✅ Você já possui este curso';
-                    document.getElementById('btn-pagar').disabled = true;
-                    document.getElementById('btn-pagar').onclick = () => {
-                        window.location.href = 'aula.html?curso=' + cursoId;
-                    };
-                    document.getElementById('btn-pagar').style.background = 'linear-gradient(135deg, #10B981, #059669)';
-                    return;
-                }
-
-                // Se for gratuito, redirecionar direto
-                if (curso.gratuito || curso.preco === 0) {
-                    showToast('Gratuito!', 'Este curso é gratuito! Redirecionando...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'aula.html?curso=' + cursoId;
-                    }, 1500);
-                    return;
-                }
-
-            } catch (e) {
-                console.error('[SCHEILA] Erro ao carregar curso:', e);
-                showToast('Erro', 'Erro ao carregar curso', 'error');
-            }
-        }
-
-        async function iniciarPagamento() {
-            if (!cursoData || !currentUser) return;
-
-            const btn = document.getElementById('btn-pagar');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> Processando...';
-
-            try {
-                console.log('[SCHEILA] Criando cobrança no Asaas...');
-
-                // CORREÇÃO: Usar a função existente ritmus-criar-cobranca-curso
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/ritmus-criar-cobranca-curso`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify({
-                        nome: currentUser.nome || currentUser.email,
-                        email: currentUser.email,
-                        telefone: currentUser.telefone || '',
-                        cpf: currentUser.cpf || '',
-                        curso_id: cursoData.id,
-                        curso_titulo: cursoData.titulo,
-                        valor: parseFloat(cursoData.preco),
-                        usuario_id: currentUser.id,
-                        billingType: billingType
-                    })
-                });
-
-                const result = await response.json();
-                console.log('[SCHEILA] Resposta:', result);
-
-                if (!response.ok || !result.success) {
-                    throw new Error(result.error || 'Erro ao criar cobrança');
-                }
-
-                // Redirecionar para o checkout do Asaas
-                if (result.invoiceUrl) {
-                    showToast('Sucesso!', 'Redirecionando para o checkout seguro...', 'success');
-                    setTimeout(() => {
-                        window.location.href = result.invoiceUrl;
-                    }, 1500);
-                } else {
-                    throw new Error('URL de pagamento não gerada');
-                }
-
-            } catch (error) {
-                console.error('[SCHEILA] Erro no pagamento:', error);
-                btn.disabled = false;
-                btn.innerHTML = '💳 Pagar Agora';
-                showToast('Erro', error.message || 'Erro ao processar pagamento', 'error');
-            }
-        }
-
-        // ===== POLLING AUTOMÁTICO DE STATUS DO PAGAMENTO =====
-        let pollingInterval = null;
-        let pollingCount = 0;
-        const MAX_POLLING = 60; // 60 tentativas = 10 minutos (a cada 10s)
-
-        function iniciarPollingPagamento(paymentId) {
-            console.log('[SCHEILA] Iniciando polling para pagamento:', paymentId);
-            pollingCount = 0;
-
-            // Parar polling anterior se existir
-            if (pollingInterval) clearInterval(pollingInterval);
-
-            // Primeira verificação imediata
-            verificarStatusPagamento(paymentId);
-
-            // Verificar a cada 10 segundos
-            pollingInterval = setInterval(() => {
-                pollingCount++;
-                if (pollingCount >= MAX_POLLING) {
-                    console.log('[SCHEILA] Polling atingiu limite máximo');
-                    clearInterval(pollingInterval);
-                    showToast('⏰ Tempo esgotado', 'O pagamento não foi confirmado. Verifique manualmente em "Meus Cursos".', 'warning');
-                    return;
-                }
-                verificarStatusPagamento(paymentId);
-            }, 10000);
-        }
-
-        async function verificarStatusPagamento(paymentId) {
-            if (!currentUser || !cursoData) return;
-
-            try {
-                console.log('[SCHEILA] Verificando status do pagamento...');
-
-                // Verificar na tabela compras_cursos se status mudou para 'pago'
-                const { data: compra, error } = await supabaseClient
-                    .from('compras_cursos')
-                    .select('status, asaas_payment_id, asaas_invoice_url')
-                    .eq('usuario_id', currentUser.id)
-                    .eq('curso_id', cursoData.id)
                     .order('created_at', { ascending: false })
                     .limit(1)
-                    .maybeSingle();
+                    .single();
 
-                if (error) {
-                    console.log('[SCHEILA] Erro ao verificar status:', error.message);
-                    return;
-                }
+                document.getElementById('loading-state').style.display = 'none';
 
-                if (!compra) {
-                    console.log('[SCHEILA] Nenhuma compra encontrada ainda');
-                    return;
-                }
-
-                console.log('[SCHEILA] Status atual:', compra.status);
-
-                // Se pagamento confirmado
-                if (compra.status === 'pago') {
-                    console.log('[SCHEILA] PAGAMENTO CONFIRMADO!');
-                    clearInterval(pollingInterval);
-
-                    // Atualizar status na tela
-                    const statusDiv = document.getElementById('polling-status');
-                    if (statusDiv) {
-                        statusDiv.innerHTML = '<span style="color:var(--success)">✅ Pagamento confirmado! Redirecionando...</span>';
+                if (compra && compra.status === 'pago') {
+                    document.getElementById('success-state').style.display = 'block';
+                    // Atualizar link para assistir agora
+                    const btnAssistir = document.getElementById('btn-assistir');
+                    if (btnAssistir && cursoId) {
+                        btnAssistir.href = 'aula.html?curso=' + cursoId;
+                        btnAssistir.style.display = 'inline-block';
                     }
-
-                    // Mostrar sucesso e redirecionar
-                    showToast('🎉 Pagamento Confirmado!', 'Seu curso foi liberado! Redirecionando...', 'success');
-
-                    // Atualizar botão
-                    const btn = document.getElementById('btn-pagar');
-                    btn.innerHTML = '✅ Curso Liberado!';
-                    btn.style.background = 'linear-gradient(135deg, #10B981, #059669)';
-                    btn.disabled = false;
-                    btn.onclick = function() {
-                        window.location.href = 'aula.html?curso=' + cursoData.id;
-                    };
-
-                    // Redirecionar para página de sucesso após 2 segundos
-                    setTimeout(() => {
-                        window.location.href = 'pagamento-sucesso.html?curso=' + cursoData.id + '&payment=' + (compra.asaas_payment_id || '');
-                    }, 2000);
-
-                    return;
-                }
-
-                // Se ainda pendente, mostrar status
-                if (compra.status === 'pendente') {
-                    console.log('[SCHEILA] Pagamento ainda pendente...');
-                    // Silencioso, não incomodar usuário
+                } else if (compra && compra.status === 'pendente') {
+                    document.getElementById('pending-state').style.display = 'block';
+                } else {
+                    // Se não achou compra, pode ter vindo do callback do Asaas
+                    // Mostrar sucesso genérico
+                    document.getElementById('success-state').style.display = 'block';
+                    const btnAssistir = document.getElementById('btn-assistir');
+                    if (btnAssistir && cursoId) {
+                        btnAssistir.href = 'aula.html?curso=' + cursoId;
+                        btnAssistir.style.display = 'inline-block';
+                    }
                 }
 
             } catch (e) {
-                console.error('[SCHEILA] Erro ao verificar status:', e);
+                console.error('[SUCESSO] Erro:', e);
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('success-state').style.display = 'block';
             }
         }
 
-        // Limpar polling ao sair da página
-        window.addEventListener('beforeunload', () => {
-            if (pollingInterval) clearInterval(pollingInterval);
-        });
+        function mostrarErro(msg) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.querySelector('.success-container').innerHTML = `
+                <div class="success-icon">❌</div>
+                <h1 class="success-title" style="color:#EF4444">Erro</h1>
+                <p class="success-message">${msg}</p>
+                <a href="cursos.html" class="btn-primary">📚 Ver Cursos</a>
+            `;
+        }
     </script>
 </body>
 </html>
