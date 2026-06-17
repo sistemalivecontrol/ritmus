@@ -116,6 +116,8 @@
             to { transform: translateX(100%); opacity: 0; }
         }
     </style>
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -127,7 +129,6 @@
             <div class="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
                 <a href="cursos.html" class="active">Cursos</a>
-                <a href="certificados.html">Certificados</a>
                 <a href="#" onclick="logout();return false">Sair</a>
             </div>
             <button class="menu-toggle" onclick="toggleMenu()">
@@ -155,7 +156,6 @@
                     <ul class="sidebar-menu">
                         <li><a href="dashboard.html"><span class="menu-icon">📊</span> Meu Painel</a></li>
                         <li><a href="cursos.html" class="active"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
-                        <li><a href="certificados.html"><span class="menu-icon">🏆</span> Certificados</a></li>
                         <li><a href="#" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
                     </ul>
                 </aside>
@@ -405,7 +405,7 @@
                                     </div>
                                     ${podeAssistir ? `
                                         <div style="margin-top:16px">
-                                            <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
+                                            <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center" target="_self">
                                                 ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcessoCompra ? '🎁 Assistir Aulas Free' : '▶️ Assistir Aulas')}
                                             </a>
                                         </div>
@@ -434,7 +434,7 @@
                                             ` : `
                                                 <div class="curso-footer" style="margin-top:12px">
                                                     <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
-                                                    <a href="pagamento.html?curso=${curso.id}" class="btn-curso">Comprar</a>
+                                                    <a href="pagamento.html?curso=${curso.id}" class="btn-curso" target="_self">Comprar</a>
                                                 </div>
                                             `}
                                         </div>
