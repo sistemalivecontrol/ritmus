@@ -116,6 +116,7 @@
             to { transform: translateX(100%); opacity: 0; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -278,6 +279,7 @@
                 if (error) throw error;
 
                 cursosCache = cursos || [];
+                console.log('[CURSOS] Total cursos:', cursosCache.length);
 
                 if (cursosCache.length === 0) {
                     container.innerHTML = `
@@ -292,15 +294,22 @@
 
                 comprasCache = [];
                 if (currentAuthId) {
-                    // Buscar compras com asaas_invoice_url para continuar pagamento
+                    console.log('[CURSOS] Buscando compras para auth_id:', currentAuthId);
+
                     const { data: compras, error: comprasError } = await supabaseClient
                         .from('compras_cursos')
-                        .select('curso_id, status, asaas_invoice_url')
+                        .select('curso_id, status, asaas_invoice_url, asaas_payment_id')
                         .eq('usuario_id', currentAuthId)
                         .in('status', ['pago', 'pendente']);
 
-                    if (!comprasError) {
+                    if (comprasError) {
+                        console.error('[CURSOS] Erro ao buscar compras:', comprasError);
+                    } else {
                         comprasCache = compras || [];
+                        console.log('[CURSOS] Compras encontradas:', comprasCache.length);
+                        comprasCache.forEach((c, i) => {
+                            console.log(`[CURSOS] Compra ${i}: curso=${c.curso_id}, status=${c.status}, invoice_url=${c.asaas_invoice_url || 'VAZIO'}, payment_id=${c.asaas_payment_id || 'VAZIO'}`);
+                        });
                     }
                 }
 
@@ -335,7 +344,10 @@
                         const temAcessoCompra = !!compra && compra.status === 'pago';
                         const compraStatus = compra?.status || '';
                         const asaasInvoiceUrl = compra?.asaas_invoice_url || '';
+                        const asaasPaymentId = compra?.asaas_payment_id || '';
                         const temAulasFree = aulasFreeMap[curso.id] || false;
+
+                        console.log(`[RENDER] Curso: ${curso.titulo} | status: ${compraStatus} | invoice_url: ${asaasInvoiceUrl || 'VAZIO'} | temAcesso: ${temAcessoCompra}`);
 
                         let isCursoFree = false;
                         if (curso.gratuito === true || curso.gratuito === 'true' || curso.gratuito === 't' || curso.gratuito === 1 || curso.gratuito === '1') {
@@ -347,6 +359,15 @@
 
                         const podeAssistir = temAcessoCompra || temAulasFree || isCursoFree;
                         const isPending = compraStatus === 'pendente';
+
+                        // Construir URL de pagamento: preferir invoice_url, senão usar payment_id
+                        let paymentUrl = asaasInvoiceUrl;
+                        if (!paymentUrl && asaasPaymentId) {
+                            paymentUrl = `https://sandbox.asaas.com/i/${asaasPaymentId}`;
+                        }
+                        const hasPaymentUrl = !!paymentUrl;
+
+                        console.log(`[RENDER] Curso: ${curso.titulo} | isPending: ${isPending} | hasPaymentUrl: ${hasPaymentUrl} | url: ${paymentUrl || 'nenhuma'}`);
 
                         return `
                             <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
@@ -389,7 +410,7 @@
                                         </div>
                                     ` : `
                                         <div style="margin-top:16px">
-                                            ${isPending && asaasInvoiceUrl ? `
+                                            ${isPending ? `
                                                 <div class="pending-badge">
                                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                         <circle cx="12" cy="12" r="10"></circle>
@@ -397,22 +418,17 @@
                                                     </svg>
                                                     Aguardando Pagamento
                                                 </div>
-                                                <a href="${asaasInvoiceUrl}" target="_blank" class="btn-continue-payment">
-                                                    💳 Continuar Pagamento
-                                                </a>
+                                                ${hasPaymentUrl ? `
+                                                    <a href="${paymentUrl}" target="_blank" class="btn-continue-payment">
+                                                        💳 Continuar Pagamento
+                                                    </a>
+                                                ` : `
+                                                    <button class="btn-continue-payment" onclick="location.reload()">
+                                                        🔄 Verificar Status
+                                                    </button>
+                                                `}
                                                 <div class="pending-info">
-                                                    ⏳ Seu pagamento está pendente. Clique acima para continuar e pagar.
-                                                </div>
-                                            ` : isPending ? `
-                                                <div class="pending-badge">
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                        <circle cx="12" cy="12" r="10"></circle>
-                                                        <polyline points="12 6 12 12 16 14"></polyline>
-                                                    </svg>
-                                                    Aguardando Pagamento
-                                                </div>
-                                                <div class="pending-info">
-                                                    ⏳ Seu pagamento está sendo processado. Aguarde a confirmação.
+                                                    ⏳ Seu pagamento está pendente. ${hasPaymentUrl ? 'Clique acima para continuar e pagar.' : 'Aguarde a confirmação ou recarregue a página.'}
                                                 </div>
                                             ` : `
                                                 <div class="curso-footer" style="margin-top:12px">
