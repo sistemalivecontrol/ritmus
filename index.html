@@ -422,14 +422,17 @@
             z-index: 1;
         }
 
+        /* ===== LAYOUT COMPACTO DE CURSOS (Imagem 2) ===== */
         .curso-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 20px;
             overflow: hidden;
             transition: all 0.4s;
-            cursor: pointer;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
         }
 
         .curso-card:hover {
@@ -438,60 +441,16 @@
             box-shadow: var(--shadow-lg);
         }
 
-        .curso-thumb {
-            position: relative;
-            height: 200px;
-            overflow: hidden;
+        .curso-card.featured {
+            border-color: rgba(247,201,72,0.3);
+            box-shadow: 0 0 30px rgba(247,201,72,0.1);
         }
 
-        .curso-thumb img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s;
-        }
-
-        .curso-card:hover .curso-thumb img { transform: scale(1.08); }
-
-        .curso-play {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px; height: 60px;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid rgba(255,255,255,0.3);
-            transition: all 0.3s;
-        }
-
-        .play-btn {
-            color: white;
-            font-size: 1.4rem;
-            margin-left: 4px;
-        }
-
-        .curso-card:hover .curso-play {
-            background: var(--primary);
-            border-color: var(--primary);
-            transform: translate(-50%, -50%) scale(1.1);
+        .curso-card.featured:hover {
+            box-shadow: 0 0 40px rgba(247,201,72,0.2);
         }
 
         .curso-badge {
-            position: absolute;
-            top: 12px; right: 12px;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .curso-free-badge {
             position: absolute;
             top: 12px; right: 12px;
             background: linear-gradient(135deg, #F7C948, #D97706);
@@ -501,61 +460,87 @@
             font-size: 0.8rem;
             font-weight: 700;
             box-shadow: 0 4px 15px rgba(247,201,72,0.3);
+            z-index: 2;
         }
 
-        .curso-info { padding: 24px; }
+        .curso-info {
+            margin-bottom: 16px;
+        }
 
         .curso-info h3 {
             font-size: 1.2rem;
             font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .curso-preco {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
             margin-bottom: 8px;
         }
 
-        .curso-info p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 16px;
-            line-height: 1.6;
+        .curso-preco .currency {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
         }
 
-        .curso-meta {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 16px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .curso-meta span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .curso-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        .curso-price {
-            font-size: 1.3rem;
+        .curso-preco .amount {
+            font-size: 2rem;
             font-weight: 800;
             color: var(--primary);
+            line-height: 1;
+        }
+
+        .curso-preco .period {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .curso-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0;
+        }
+
+        .curso-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            flex-grow: 1;
+        }
+
+        .curso-lista li {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .curso-lista li:last-child {
+            border-bottom: none;
         }
 
         .btn-curso {
             background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
             color: white;
             border: none;
-            padding: 8px 20px;
+            padding: 12px 20px;
             border-radius: 50px;
             font-weight: 600;
             font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            width: 100%;
         }
 
         .btn-curso:hover {
@@ -563,193 +548,16 @@
             box-shadow: 0 4px 15px rgba(255,107,53,0.4);
         }
 
-        /* ===== HOW IT WORKS ===== */
-        .how-section {
-            padding: 100px 0;
-            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(26,26,46,0.5) 50%, var(--bg-dark) 100%);
+        .btn-featured {
+            background: linear-gradient(135deg, #F7C948, #D97706);
+            box-shadow: 0 4px 15px rgba(247,201,72,0.3);
         }
 
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
+        .btn-featured:hover {
+            box-shadow: 0 8px 25px rgba(247,201,72,0.4);
         }
-
-        .step-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px 32px;
-            text-align: center;
-            transition: all 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .step-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2));
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .step-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255,107,53,0.2);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .step-card:hover::before { opacity: 1; }
-
-        .step-number {
-            position: absolute;
-            top: 20px; right: 20px;
-            font-size: 4rem;
-            font-weight: 900;
-            color: rgba(255,107,53,0.08);
-            line-height: 1;
-        }
-
-        .step-icon {
-            width: 72px; height: 72px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(247,201,72,0.1));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 24px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .step-card h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .step-card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.7;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ===== FOOTER ===== */
-        .footer {
-            background: linear-gradient(180deg, var(--bg-dark), rgba(10,10,20,1));
-            border-top: 1px solid var(--border);
-            padding: 80px 0 40px;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 60px;
-        }
-
-        .footer-brand p {
-            color: var(--text-muted);
-            margin-top: 16px;
-            line-height: 1.7;
-            max-width: 300px;
-        }
-
-        .footer-links h4 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--text);
-        }
-
-        .footer-links a, .footer-links p {
-            display: block;
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover { color: var(--primary); }
-
-        .footer-bottom {
-            border-top: 1px solid var(--border);
-            padding-top: 24px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* ===== LOADING ===== */
-        .loading-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(255,107,53,0.2);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(40px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 968px) {
-            .hero-content { grid-template-columns: 1fr; gap: 40px; text-align: center; }
-            .hero h1 { font-size: 2.5rem; }
-            .hero-left { display: flex; flex-direction: column; align-items: center; }
-            .hero-subtitle { max-width: 100%; }
-            .hero-visual { order: -1; min-height: 280px; }
-            .hero-logo-img { max-width: 320px; }
-            .steps-grid { grid-template-columns: 1fr; }
-            .footer-grid { grid-template-columns: 1fr; gap: 40px; }
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                position: fixed;
-                top: 70px; left: 0; right: 0;
-                background: rgba(15,15,26,0.98);
-                flex-direction: column;
-                padding: 24px;
-                gap: 16px;
-                transform: translateY(-100%);
-                opacity: 0;
-                pointer-events: none;
-                transition: all 0.3s;
-                border-bottom: 1px solid var(--border);
-            }
-            .nav-links.active {
-                transform: translateY(0);
-                opacity: 1;
-                pointer-events: all;
-            }
-            .menu-toggle { display: flex; }
-            .hero h1 { font-size: 2rem; }
-            .hero-stats { gap: 24px; }
-            .stat-number { font-size: 1.5rem; }
-            .hero-cta { flex-direction: column; }
-            .btn-hero, .btn-ghost { width: 100%; justify-content: center; }
-            .section-header h2 { font-size: 1.8rem; }
-
-            .hero-logo-img { max-width: 260px; }
-        }
-    </style>
+</style>
+<base target="_blank">
 </head>
 <body>
     <!-- Navbar -->
@@ -897,75 +705,6 @@
             { id: 'funcional-total', titulo: 'Funcional Total', descricao: 'Treinamento funcional para todo o corpo, sem equipamentos. Fortaleça e defina!', preco: 39.90, total_aulas: 8, duracao_total: '5h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Funcional+Total' }
         ];
 
-        async function loadCursosLanding() {
-            const grid = document.getElementById('cursos-grid');
-            if (!grid) return;
-
-            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px"><div class="loading-spinner" style="margin:0 auto"></div><p style="margin-top:16px;color:var(--text-muted)">Carregando cursos...</p></div>';
-
-            try {
-                const { data: cursos, error } = await supabaseClient
-                    .from('cursos')
-                    .select('id, titulo, descricao, thumbnail, preco, total_aulas, duracao_total, total_alunos, avaliacao, ordem, ativo, gratuito')
-                    .eq('ativo', true)
-                    .order('ordem', { ascending: true });
-
-                if (!error && cursos && cursos.length > 0) {
-                    renderCursos(cursos);
-                    console.log('[SCHEILA] Cursos carregados do Supabase:', cursos.length);
-                    return;
-                }
-
-                console.log('[SCHEILA] Usando cursos hardcoded como fallback');
-                renderCursos(CURSOS_HARDCODED);
-
-            } catch (e) {
-                console.error('[SCHEILA] Erro ao carregar cursos:', e);
-                renderCursos(CURSOS_HARDCODED);
-            }
-        }
-
-        function renderCursos(cursos) {
-            const grid = document.getElementById('cursos-grid');
-
-            grid.innerHTML = cursos.map(curso => {
-                const isFree = curso.gratuito === true || curso.gratuito === 'true' || curso.preco === 0 || curso.preco === '0';
-
-                return `
-                    <div class="curso-card" onclick="location.href='pages/cadastro.html?plano=individual&curso=${curso.id}'">
-                        <div class="curso-thumb">
-                            <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy" onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
-                            <div class="curso-play">
-                                <div class="play-btn">▶</div>
-                            </div>
-                            ${isFree ? `
-                                <div class="curso-free-badge">🎁 GRATUITO</div>
-                            ` : `
-                                <div class="curso-badge">${curso.total_aulas || 0} aulas</div>
-                            `}
-                        </div>
-                        <div class="curso-info">
-                            <h3>${curso.titulo}</h3>
-                            <p>${curso.descricao || 'Curso completo com aulas gravadas em vídeo.'}</p>
-                            <div class="curso-meta">
-                                <span>⏱️ ${curso.duracao_total || '0h'} total</span>
-                                <span>👥 ${curso.total_alunos || 0} alunos</span>
-                                <span>⭐ ${curso.avaliacao || '5.0'}</span>
-                            </div>
-                            <div class="curso-footer">
-                                ${isFree ? `
-                                    <span class="curso-price" style="color:var(--success)">🎁 GRATUITO</span>
-                                ` : `
-                                    <span class="curso-price">R$ ${curso.preco ? parseFloat(curso.preco).toFixed(2).replace('.', ',') : '49,90'}</span>
-                                `}
-                                <button class="btn-curso">${isFree ? 'Assistir Agora' : 'Ver Curso'}</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
         async function loadPrecosCursos() {
             const grid = document.getElementById('cursos-grid');
             if (!grid) return;
@@ -1032,7 +771,6 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
-                loadCursosLanding();
                 loadPrecosCursos();
             });
         });
