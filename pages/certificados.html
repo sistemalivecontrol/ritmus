@@ -4,337 +4,315 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Meus Certificados - Scheila Almeida</title>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Certificados - Scheila Almeida</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
     <style>
-        .certificados-page {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 100%);
-            padding: 40px 20px;
-        }
-        .certificados-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .certificados-header {
-            text-align: center;
+        /* ===== CERTIFICADOS PAGE STYLES ===== */
+        .cert-section {
             margin-bottom: 40px;
         }
-        .certificados-header h1 {
-            font-size: 32px;
+
+        .cert-section-title {
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .certificados-header p {
-            color: var(--text-muted);
-            font-size: 16px;
-        }
-        .certificados-grid {
+
+        .cert-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 24px;
         }
-        .certificado-card {
+
+        .cert-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            overflow: hidden;
             transition: var(--transition);
+            position: relative;
         }
-        .certificado-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+
+        .cert-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 107, 53, 0.3);
+            box-shadow: var(--shadow-lg);
         }
-        .certificado-preview {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            border-radius: var(--radius);
+
+        .cert-card.locked {
+            opacity: 0.7;
+        }
+
+        .cert-card.locked:hover {
+            transform: none;
+            border-color: var(--border);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .cert-header {
+            padding: 24px 24px 0;
             display: flex;
-            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .cert-badge {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 16px;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid rgba(255, 107, 53, 0.3);
+            font-size: 28px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
         }
-        .certificado-preview::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+
+        .cert-badge.locked {
+            background: linear-gradient(135deg, var(--bg-input) 0%, var(--text-dark) 100%);
+            box-shadow: none;
+            opacity: 0.5;
         }
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+
+        .cert-info {
+            flex: 1;
         }
-        .certificado-icon {
-            font-size: 48px;
-            margin-bottom: 8px;
-            z-index: 1;
+
+        .cert-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.3;
         }
-        .certificado-title {
-            font-size: 14px;
+
+        .cert-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .cert-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 11px;
             font-weight: 600;
-            color: var(--primary);
-            text-align: center;
-            z-index: 1;
-            padding: 0 16px;
+            margin-top: 8px;
         }
-        .certificado-info h3 {
+
+        .cert-status.completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .cert-status.in-progress {
+            background: rgba(247, 201, 72, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(247, 201, 72, 0.3);
+        }
+
+        .cert-status.locked {
+            background: rgba(107, 107, 123, 0.15);
+            color: var(--text-dark);
+            border: 1px solid rgba(107, 107, 123, 0.3);
+        }
+
+        .cert-body {
+            padding: 16px 24px 0;
+        }
+
+        .cert-progress-area {
+            margin-bottom: 16px;
+        }
+
+        .cert-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cert-progress-text {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .cert-progress-text strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .cert-progress-bar {
+            height: 8px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cert-progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            position: relative;
+        }
+
+        .cert-progress-fill.completed {
+            background: linear-gradient(90deg, var(--success), #059669);
+        }
+
+        .cert-progress-fill.in-progress {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .cert-progress-fill.locked {
+            background: var(--text-dark);
+        }
+
+        .cert-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .cert-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .cert-btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .cert-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .cert-btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .cert-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .cert-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cert-empty {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .cert-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .cert-empty h3 {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 8px;
         }
-        .certificado-info p {
-            font-size: 14px;
+
+        .cert-empty p {
             color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-        .certificado-progress {
-            margin: 16px 0;
-        }
-        .progress-bar-cert {
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-fill-cert {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-        .progress-text-cert {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            text-align: right;
-        }
-        .btn-certificado {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-family: var(--font);
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
-            text-decoration: none;
-            margin-top: 12px;
-        }
-        .btn-certificado:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-        }
-        .btn-certificado:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-certificado-secondary {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            border-radius: var(--radius);
-            font-family: var(--font);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
-            text-decoration: none;
-            margin-top: 8px;
-        }
-        .btn-certificado-secondary:hover {
-            background: rgba(255, 107, 53, 0.1);
-        }
-        .certificado-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .certificado-modal.active {
-            display: flex;
-        }
-        .certificado-content {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            border: 3px solid rgba(255, 107, 53, 0.5);
-            border-radius: 16px;
-            padding: 60px 80px;
-            max-width: 900px;
-            width: 100%;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-        .certificado-content::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
-            border: 1px solid rgba(255, 107, 53, 0.2);
-            border-radius: 12px;
-            pointer-events: none;
-        }
-        .certificado-logo {
-            font-size: 48px;
             margin-bottom: 20px;
         }
-        .certificado-titulo {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .certificado-subtitulo {
-            font-size: 16px;
-            color: var(--text-muted);
-            margin-bottom: 40px;
-        }
-        .certificado-nome {
-            font-size: 32px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 8px;
-            font-family: 'Georgia', serif;
-        }
-        .certificado-curso {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 40px;
-        }
-        .certificado-detalhes {
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 88px;
+            right: 24px;
+            z-index: 9999;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
             align-items: center;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 107, 53, 0.3);
-        }
-        .certificado-data, .certificado-codigo {
-            text-align: center;
-        }
-        .certificado-data-label, .certificado-codigo-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-        .certificado-data-value, .certificado-codigo-value {
-            font-size: 14px;
-            color: white;
-            font-weight: 500;
-        }
-        .certificado-assinatura {
-            text-align: center;
-        }
-        .certificado-assinatura-linha {
-            width: 150px;
-            height: 1px;
-            background: rgba(255, 107, 53, 0.5);
-            margin: 0 auto 8px;
-        }
-        .certificado-assinatura-nome {
-            font-size: 14px;
-            color: white;
-            font-weight: 600;
-        }
-        .certificado-assinatura-cargo {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-        .certificado-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 24px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .certificado-close:hover {
-            color: white;
-        }
-        .certificado-actions {
-            display: flex;
             gap: 12px;
-            margin-top: 24px;
-            justify-content: center;
+            min-width: 300px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
         }
-        .sem-certificados {
-            text-align: center;
-            padding: 60px 20px;
+
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+
+        .toast-icon { font-size: 20px; }
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+        .toast-message { font-size: 13px; color: var(--text-muted); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        .sem-certificados-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
-        .sem-certificados h3 {
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-        .sem-certificados p {
-            color: var(--text-muted);
-            margin-bottom: 24px;
-        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .certificado-content {
-                padding: 40px 30px;
+            .cert-grid {
+                grid-template-columns: 1fr;
             }
-            .certificado-nome {
-                font-size: 24px;
-            }
-            .certificado-curso {
-                font-size: 18px;
-            }
-            .certificado-detalhes {
+            .cert-footer {
                 flex-direction: column;
-                gap: 20px;
-            }
-        }
-        @media print {
-            .certificado-modal {
-                background: white;
-                padding: 0;
-            }
-            .certificado-content {
-                box-shadow: none;
-                border: 2px solid #333;
-            }
-            .certificado-close, .certificado-actions {
-                display: none;
             }
         }
     </style>
@@ -359,65 +337,43 @@
         </div>
     </nav>
 
-    <div class="certificados-page">
-        <div class="certificados-container">
-            <div class="certificados-header">
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
                 <h1>🏆 Meus Certificados</h1>
                 <p>Visualize e baixe seus certificados de conclusão</p>
             </div>
 
-            <div id="certificados-container">
-                <!-- Certificados preenchidos via JS -->
+            <div class="dashboard-grid">
+                <aside class="sidebar">
+                    <div class="sidebar-user">
+                        <div class="sidebar-avatar" id="user-avatar">👤</div>
+                        <div>
+                            <div class="sidebar-name" id="sidebar-name">Carregando...</div>
+                            <div class="sidebar-email" id="sidebar-email">...</div>
+                        </div>
+                    </div>
+                    <ul class="sidebar-menu">
+                        <li><a href="dashboard.html"><span class="menu-icon">📊</span> Meu Painel</a></li>
+                        <li><a href="cursos.html"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
+                        <li><a href="certificados.html" class="active"><span class="menu-icon">🏆</span> Certificados</a></li>
+                        <li><a href="#" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
+                    </ul>
+                </aside>
+
+                <main class="main-content" id="main-content">
+                    <!-- Conteúdo carregado via JS -->
+                </main>
             </div>
         </div>
     </div>
 
-    <!-- Modal do Certificado -->
-    <div class="certificado-modal" id="certificado-modal">
-        <div class="certificado-content" id="certificado-print-area">
-            <button class="certificado-close" onclick="fecharCertificado()">×</button>
-            <div class="certificado-logo">🏋️‍♀️</div>
-            <div class="certificado-titulo">Certificado de Conclusão</div>
-            <div class="certificado-subtitulo">Scheila Almeida - Plataforma de Cursos Fitness</div>
-
-            <div style="margin: 30px 0;">
-                <p style="font-size: 16px; color: var(--text-muted); margin-bottom: 16px;">Certificamos que</p>
-                <div class="certificado-nome" id="cert-nome">Nome do Aluno</div>
-                <p style="font-size: 16px; color: var(--text-muted); margin-top: 16px;">concluiu com êxito o curso</p>
-                <div class="certificado-curso" id="cert-curso">Nome do Curso</div>
-            </div>
-
-            <div class="certificado-detalhes">
-                <div class="certificado-data">
-                    <div class="certificado-data-label">Data de Conclusão</div>
-                    <div class="certificado-data-value" id="cert-data">01/01/2024</div>
-                </div>
-                <div class="certificado-assinatura">
-                    <div class="certificado-assinatura-linha"></div>
-                    <div class="certificado-assinatura-nome">Scheila Almeida</div>
-                    <div class="certificado-assinatura-cargo">Instrutora e Fundadora</div>
-                </div>
-                <div class="certificado-codigo">
-                    <div class="certificado-codigo-label">Código do Certificado</div>
-                    <div class="certificado-codigo-value" id="cert-codigo">SC-2024-001</div>
-                </div>
-            </div>
-        </div>
-        <div class="certificado-actions">
-            <button class="btn-certificado" onclick="imprimirCertificado()">
-                🖨️ Imprimir / Salvar PDF
-            </button>
-            <button class="btn-certificado-secondary" onclick="fecharCertificado()">
-                ✕ Fechar
-            </button>
-        </div>
-    </div>
+    <div class="toast-container" id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
         let currentUser = null;
-        let certificadosData = [];
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -426,210 +382,298 @@
         });
 
         async function initCertificados() {
-            const auth = await requireAuth();
-            if (!auth) return;
+            const auth = await checkAuth();
+            if (auth) {
+                currentUser = auth.user;
+                document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
+                document.getElementById('sidebar-email').textContent = auth.user.email;
+                document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+            } else {
+                document.getElementById('sidebar-name').textContent = 'Visitante';
+                document.getElementById('sidebar-email').textContent = 'Faça login para mais recursos';
+                document.getElementById('user-avatar').textContent = '👤';
+            }
 
-            currentUser = auth.user;
             await loadCertificados();
         }
 
         async function loadCertificados() {
-            const container = document.getElementById('certificados-container');
+            const container = document.getElementById('main-content');
+
+            if (!currentUser) {
+                container.innerHTML = `
+                    <div class="cert-empty">
+                        <div class="cert-empty-icon">🔒</div>
+                        <h3>Faça Login</h3>
+                        <p>Entre na sua conta para visualizar seus certificados.</p>
+                        <a href="../index.html" class="btn-curso">Entrar</a>
+                    </div>
+                `;
+                return;
+            }
 
             try {
-                // Buscar cursos comprados (status = pago)
-                const { data: compras, error: comprasError } = await supabaseClient
-                    .from('compras_cursos')
-                    .select('curso_id, data_pagamento, created_at')
-                    .eq('usuario_id', currentUser.id)
-                    .eq('status', 'pago');
+                // Buscar todos os cursos do usuário (comprados + gratuitos)
+                let cursos = [];
 
-                if (comprasError) throw comprasError;
+                // Cursos comprados
+                try {
+                    const { data: compras } = await supabaseClient
+                        .from('compras_cursos')
+                        .select('curso_id')
+                        .eq('usuario_id', currentUser.id)
+                        .eq('status', 'pago');
 
-                if (!compras || compras.length === 0) {
+                    if (compras && compras.length > 0) {
+                        const cursoIds = compras.map(c => c.curso_id);
+                        const { data: cursosData } = await supabaseClient
+                            .from('cursos')
+                            .select('*')
+                            .in('id', cursoIds)
+                            .eq('ativo', true);
+                        cursos = cursosData || [];
+                    }
+                } catch (e) {
+                    console.log('[CERTIFICADOS] Erro ao buscar cursos comprados:', e.message);
+                }
+
+                // Cursos gratuitos
+                try {
+                    const { data: cursosFree } = await supabaseClient
+                        .from('cursos')
+                        .select('*')
+                        .eq('ativo', true)
+                        .eq('gratuito', true);
+
+                    if (cursosFree && cursosFree.length > 0) {
+                        const existingIds = cursos.map(c => c.id);
+                        cursosFree.forEach(cf => {
+                            if (!existingIds.includes(cf.id)) {
+                                cursos.push(cf);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.log('[CERTIFICADOS] Erro ao buscar cursos gratuitos:', e.message);
+                }
+
+                if (cursos.length === 0) {
                     container.innerHTML = `
-                        <div class="sem-certificados">
-                            <div class="sem-certificados-icon">🏆</div>
-                            <h3>Nenhum Certificado Disponível</h3>
-                            <p>Você ainda não concluiu nenhum curso. Assista às aulas e marque-as como concluídas para gerar seu certificado!</p>
-                            <a href="cursos.html" class="btn-certificado" style="display:inline-block;width:auto;padding:12px 32px">Ver Meus Cursos</a>
+                        <div class="cert-empty">
+                            <div class="cert-empty-icon">📚</div>
+                            <h3>Nenhum Curso Encontrado</h3>
+                            <p>Você ainda não possui cursos. Explore nossa lista e comece a treinar!</p>
+                            <a href="cursos.html" class="btn-curso">Ver Cursos</a>
                         </div>
                     `;
                     return;
                 }
 
-                // Buscar dados dos cursos
-                const cursoIds = compras.map(c => c.curso_id);
-                const { data: cursos } = await supabaseClient
-                    .from('cursos')
-                    .select('*')
-                    .in('id', cursoIds);
+                // Buscar progresso do usuário
+                let progressoMap = {};
+                let aulasPorCurso = {};
 
-                // Buscar progresso das aulas
-                const { data: progressos } = await supabaseClient
-                    .from('progresso_aulas')
-                    .select('curso_id, aula_id, concluida')
-                    .eq('usuario_id', currentUser.id)
-                    .eq('concluida', true);
+                try {
+                    const { data: progressos } = await supabaseClient
+                        .from('progresso_aulas')
+                        .select('aula_id, concluida')
+                        .eq('usuario_id', currentUser.id)
+                        .eq('concluida', true);
 
-                // Buscar total de aulas por curso
-                const { data: aulas } = await supabaseClient
-                    .from('aulas')
-                    .select('curso_id, id')
-                    .eq('ativo', true)
-                    .in('curso_id', cursoIds);
+                    (progressos || []).forEach(p => {
+                        progressoMap[p.aula_id] = true;
+                    });
+                } catch (e) {
+                    console.log('[CERTIFICADOS] Erro ao buscar progresso:', e.message);
+                }
 
-                const aulasPorCurso = {};
-                (aulas || []).forEach(a => {
-                    if (!aulasPorCurso[a.curso_id]) aulasPorCurso[a.curso_id] = 0;
-                    aulasPorCurso[a.curso_id]++;
-                });
+                // Buscar aulas por curso
+                try {
+                    const { data: aulas } = await supabaseClient
+                        .from('aulas')
+                        .select('id, curso_id, ativo')
+                        .eq('ativo', true);
 
-                const progressoPorCurso = {};
-                (progressos || []).forEach(p => {
-                    if (!progressoPorCurso[p.curso_id]) progressoPorCurso[p.curso_id] = 0;
-                    progressoPorCurso[p.curso_id]++;
-                });
+                    (aulas || []).forEach(a => {
+                        if (!aulasPorCurso[a.curso_id]) aulasPorCurso[a.curso_id] = [];
+                        aulasPorCurso[a.curso_id].push(a.id);
+                    });
+                } catch (e) {
+                    console.log('[CERTIFICADOS] Erro ao buscar aulas:', e.message);
+                }
 
-                // Montar dados dos certificados
-                certificadosData = (cursos || []).map(curso => {
-                    const compra = compras.find(c => c.curso_id === curso.id);
-                    const totalAulas = aulasPorCurso[curso.id] || 1;
-                    const aulasConcluidas = progressoPorCurso[curso.id] || 0;
-                    const percentual = Math.round((aulasConcluidas / totalAulas) * 100);
-                    const concluido = percentual >= 100;
+                // Calcular status de cada curso
+                const cursosComStatus = cursos.map(curso => {
+                    const todasAulas = aulasPorCurso[curso.id] || [];
+                    const totalAulas = todasAulas.length || curso.total_aulas || 0;
+                    const aulasConcluidas = todasAulas.filter(aulaId => progressoMap[aulaId]).length;
+                    const percentual = totalAulas > 0 ? Math.round((aulasConcluidas / totalAulas) * 100) : 0;
+                    const concluido = percentual >= 100 && totalAulas > 0;
+                    const emAndamento = percentual > 0 && percentual < 100;
 
                     return {
-                        curso,
-                        compra,
+                        ...curso,
                         totalAulas,
                         aulasConcluidas,
                         percentual,
                         concluido,
-                        codigo: `SC-${curso.id.substring(0,8).toUpperCase()}-${new Date(compra?.data_pagamento || compra?.created_at).getFullYear()}`
+                        emAndamento
                     };
                 });
 
-                renderCertificados();
+                const concluidos = cursosComStatus.filter(c => c.concluido);
+                const emAndamento = cursosComStatus.filter(c => c.emAndamento);
+                const bloqueados = cursosComStatus.filter(c => !c.concluido && !c.emAndamento);
+
+                let html = '';
+
+                // Seção: Concluídos
+                if (concluidos.length > 0) {
+                    html += `
+                        <div class="cert-section">
+                            <h2 class="cert-section-title">✅ Concluídos</h2>
+                            <div class="cert-grid">
+                                ${concluidos.map(curso => renderCertCard(curso, 'completed')).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Seção: Em Andamento
+                if (emAndamento.length > 0) {
+                    html += `
+                        <div class="cert-section">
+                            <h2 class="cert-section-title">📚 Em Andamento</h2>
+                            <div class="cert-grid">
+                                ${emAndamento.map(curso => renderCertCard(curso, 'in-progress')).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Seção: Bloqueados (0%)
+                if (bloqueados.length > 0) {
+                    html += `
+                        <div class="cert-section">
+                            <h2 class="cert-section-title">🔒 Não Iniciados</h2>
+                            <div class="cert-grid">
+                                ${bloqueados.map(curso => renderCertCard(curso, 'locked')).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
 
             } catch (e) {
                 console.error('[CERTIFICADOS] Erro:', e);
-                container.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar certificados.</p>';
-            }
-        }
-
-        function renderCertificados() {
-            const container = document.getElementById('certificados-container');
-
-            const concluidos = certificadosData.filter(c => c.concluido);
-            const emAndamento = certificadosData.filter(c => !c.concluido);
-
-            let html = '';
-
-            if (concluidos.length > 0) {
-                html += `<h2 style="font-size:20px;font-weight:700;margin-bottom:20px">✅ Cursos Concluídos</h2>`;
-                html += `<div class="certificados-grid">`;
-                html += concluidos.map(cert => `
-                    <div class="certificado-card">
-                        <div class="certificado-preview">
-                            <div class="certificado-icon">🏆</div>
-                            <div class="certificado-title">Certificado de Conclusão</div>
-                        </div>
-                        <div class="certificado-info">
-                            <h3>${cert.curso.titulo}</h3>
-                            <p>Concluído em ${new Date(cert.compra?.data_pagamento || cert.compra?.created_at).toLocaleDateString('pt-BR')}</p>
-                            <p style="font-size:12px;color:var(--text-muted)">Código: ${cert.codigo}</p>
-                        </div>
-                        <div class="certificado-progress">
-                            <div class="progress-bar-cert">
-                                <div class="progress-fill-cert" style="width:100%"></div>
-                            </div>
-                            <div class="progress-text-cert">100% concluído (${cert.aulasConcluidas}/${cert.totalAulas} aulas)</div>
-                        </div>
-                        <button class="btn-certificado" onclick="abrirCertificado('${cert.curso.id}')">
-                            📜 Visualizar Certificado
-                        </button>
-                    </div>
-                `).join('');
-                html += `</div>`;
-            }
-
-            if (emAndamento.length > 0) {
-                html += `<h2 style="font-size:20px;font-weight:700;margin:40px 0 20px">📚 Em Andamento</h2>`;
-                html += `<div class="certificados-grid">`;
-                html += emAndamento.map(cert => `
-                    <div class="certificado-card">
-                        <div class="certificado-preview" style="opacity:0.6">
-                            <div class="certificado-icon">📖</div>
-                            <div class="certificado-title">Em Andamento</div>
-                        </div>
-                        <div class="certificado-info">
-                            <h3>${cert.curso.titulo}</h3>
-                            <p>Continue assistindo as aulas para obter seu certificado</p>
-                        </div>
-                        <div class="certificado-progress">
-                            <div class="progress-bar-cert">
-                                <div class="progress-fill-cert" style="width:${cert.percentual}%"></div>
-                            </div>
-                            <div class="progress-text-cert">${cert.percentual}% concluído (${cert.aulasConcluidas}/${cert.totalAulas} aulas)</div>
-                        </div>
-                        <a href="aula.html?curso=${cert.curso.id}" class="btn-certificado-secondary">
-                            ▶️ Continuar Curso
-                        </a>
-                    </div>
-                `).join('');
-                html += `</div>`;
-            }
-
-            if (concluidos.length === 0 && emAndamento.length === 0) {
-                html = `
-                    <div class="sem-certificados">
-                        <div class="sem-certificados-icon">🏆</div>
-                        <h3>Nenhum Certificado Disponível</h3>
-                        <p>Você ainda não possui cursos comprados. Adquira um curso e complete todas as aulas para obter seu certificado!</p>
-                        <a href="cursos.html" class="btn-certificado" style="display:inline-block;width:auto;padding:12px 32px">Explorar Cursos</a>
+                container.innerHTML = `
+                    <div class="cert-empty">
+                        <div class="cert-empty-icon">⚠️</div>
+                        <h3>Erro ao Carregar</h3>
+                        <p>Não foi possível carregar seus certificados. Tente novamente.</p>
+                        <button onclick="location.reload()" class="btn-curso">🔄 Recarregar</button>
                     </div>
                 `;
             }
-
-            container.innerHTML = html;
         }
 
-        function abrirCertificado(cursoId) {
-            const cert = certificadosData.find(c => c.curso.id === cursoId);
-            if (!cert) return;
+        function renderCertCard(curso, status) {
+            const isCompleted = status === 'completed';
+            const isInProgress = status === 'in-progress';
+            const isLocked = status === 'locked';
 
-            document.getElementById('cert-nome').textContent = currentUser.nome || currentUser.email;
-            document.getElementById('cert-curso').textContent = cert.curso.titulo;
-            document.getElementById('cert-data').textContent = new Date(cert.compra?.data_pagamento || cert.compra?.created_at).toLocaleDateString('pt-BR');
-            document.getElementById('cert-codigo').textContent = cert.codigo;
+            const badgeIcon = isCompleted ? '🏆' : (isInProgress ? '📖' : '🔒');
+            const statusText = isCompleted ? 'Concluído' : (isInProgress ? 'Em Andamento' : 'Não Iniciado');
+            const statusClass = status;
 
-            document.getElementById('certificado-modal').classList.add('active');
-            document.body.style.overflow = 'hidden';
+            const btnPrimaryText = isCompleted ? '📥 Baixar Certificado' : (isInProgress ? '▶️ Continuar Curso' : '🔓 Iniciar Curso');
+            const btnPrimaryAction = isCompleted 
+                ? `onclick="downloadCertificado('${curso.id}', '${curso.titulo}')"` 
+                : `onclick="location.href='aula.html?curso=${curso.id}'"`;
+
+            return `
+                <div class="cert-card ${isLocked ? 'locked' : ''}">
+                    <div class="cert-header">
+                        <div class="cert-badge ${isLocked ? 'locked' : ''}">
+                            ${badgeIcon}
+                        </div>
+                        <div class="cert-info">
+                            <h3>${curso.titulo}</h3>
+                            <p>${curso.descricao || 'Curso completo com aulas gravadas.'}</p>
+                            <span class="cert-status ${statusClass}">
+                                ${isCompleted ? '✅' : (isInProgress ? '⏳' : '🔒')} ${statusText}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="cert-body">
+                        <div class="cert-progress-area">
+                            <div class="cert-progress-header">
+                                <span class="cert-progress-text">
+                                    <strong>${curso.percentual}%</strong> concluído 
+                                    <span style="color:var(--text-dark)">(${curso.aulasConcluidas}/${curso.totalAulas} aulas)</span>
+                                </span>
+                            </div>
+                            <div class="cert-progress-bar">
+                                <div class="cert-progress-fill ${statusClass}" style="width:${curso.percentual}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cert-footer">
+                        <button class="cert-btn cert-btn-primary" ${btnPrimaryAction} ${isLocked ? 'disabled' : ''}>
+                            ${btnPrimaryText}
+                        </button>
+                        ${!isLocked ? `
+                            <a href="aula.html?curso=${curso.id}" class="cert-btn cert-btn-secondary">
+                                📺 Aulas
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
         }
 
-        function fecharCertificado() {
-            document.getElementById('certificado-modal').classList.remove('active');
-            document.body.style.overflow = '';
+        async function downloadCertificado(cursoId, titulo) {
+            showToast('Gerando...', 'Preparando seu certificado de conclusão.', 'warning');
+
+            // Simular geração de certificado (substituir por lógica real)
+            setTimeout(() => {
+                showToast('Pronto!', `Certificado de "${titulo}" gerado com sucesso!`, 'success');
+
+                // Aqui você pode implementar:
+                // 1. Gerar PDF do certificado
+                // 2. Abrir em nova aba
+                // 3. Fazer download automático
+
+                // Exemplo: abrir página de certificado
+                // window.open(`certificado-view.html?curso=${cursoId}`, '_blank');
+            }, 1500);
         }
 
-        function imprimirCertificado() {
-            window.print();
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : 'ℹ️'));
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
-
-        // Fechar modal ao clicar fora
-        document.getElementById('certificado-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                fecharCertificado();
-            }
-        });
-
-        // Fechar com ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                fecharCertificado();
-            }
-        });
     </script>
 </body>
 </html>
