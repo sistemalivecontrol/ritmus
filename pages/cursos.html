@@ -117,6 +117,7 @@
         }
     </style>
 
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -128,6 +129,8 @@
             <div class="nav-links">
                 <a href="dashboard.html">Meu Painel</a>
                 <a href="cursos.html" class="active">Cursos</a>
+                <a href="certificados.html">Certificados</a>
+                <a href="admin.html" id="nav-admin" style="display:none">⚙️ Admin</a>
                 <a href="#" onclick="logout();return false">Sair</a>
             </div>
             <button class="menu-toggle" onclick="toggleMenu()">
@@ -155,6 +158,8 @@
                     <ul class="sidebar-menu">
                         <li><a href="dashboard.html"><span class="menu-icon">📊</span> Meu Painel</a></li>
                         <li><a href="cursos.html" class="active"><span class="menu-icon">🎬</span> Meus Cursos</a></li>
+                        <li><a href="certificados.html"><span class="menu-icon">🏆</span> Certificados</a></li>
+                        <li id="sidebar-admin" style="display:none"><a href="admin.html"><span class="menu-icon">⚙️</span> Admin</a></li>
                         <li><a href="#" onclick="logout();return false"><span class="menu-icon">🚪</span> Sair</a></li>
                     </ul>
                 </aside>
@@ -204,6 +209,20 @@
                 document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
                 document.getElementById('sidebar-email').textContent = auth.user.email;
                 document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
+
+                // Verificar se é admin
+                try {
+                    const isAdmin = await checkAdmin();
+                    if (isAdmin) {
+                        const navAdmin = document.getElementById('nav-admin');
+                        const sidebarAdmin = document.getElementById('sidebar-admin');
+                        if (navAdmin) navAdmin.style.display = 'inline-flex';
+                        if (sidebarAdmin) sidebarAdmin.style.display = 'block';
+                        console.log('[SCHEILA] Usuário é admin - menu exibido');
+                    }
+                } catch (e) {
+                    console.log('[SCHEILA] Erro ao verificar admin:', e.message);
+                }
 
                 iniciarRealtime();
                 iniciarAutoRefresh();
