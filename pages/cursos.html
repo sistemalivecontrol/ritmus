@@ -64,7 +64,7 @@
     <script src="../js/config.js"></script>
     <script>
         let currentUser = null;
-        let currentAuthId = null; // auth.uid() do Supabase
+        let currentAuthId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             waitForSupabase(() => {
@@ -76,11 +76,13 @@
             const auth = await checkAuth();
             if (auth) {
                 currentUser = auth.user;
-                currentAuthId = auth.user.id; // Este é o auth.uid()
+                currentAuthId = auth.user.id;
+                console.log('[CURSOS] Usuário logado:', auth.user.email, '| auth_id:', currentAuthId);
                 document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
                 document.getElementById('sidebar-email').textContent = auth.user.email;
                 document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
             } else {
+                console.log('[CURSOS] Usuário NÃO logado');
                 document.getElementById('sidebar-name').textContent = 'Visitante';
                 document.getElementById('sidebar-email').textContent = 'Faça login para mais recursos';
                 document.getElementById('user-avatar').textContent = '👤';
@@ -100,7 +102,12 @@
                     .eq('ativo', true)
                     .order('ordem', { ascending: true });
 
-                if (error) throw error;
+                if (error) {
+                    console.error('[CURSOS] Erro ao buscar cursos:', error);
+                    throw error;
+                }
+
+                console.log('[CURSOS] Cursos encontrados:', cursos?.length || 0);
 
                 if (!cursos || cursos.length === 0) {
                     container.innerHTML = `
@@ -113,23 +120,26 @@
                     return;
                 }
 
-                // Buscar cursos comprados pelo usuario_id (que é o auth_id no Supabase)
+                // Buscar cursos comprados pelo usuario_id (auth_id)
                 let cursosComprados = [];
                 if (currentAuthId) {
-                    console.log('[RITMUS] Buscando compras para usuario_id:', currentAuthId);
+                    console.log('[CURSOS] Buscando compras para auth_id:', currentAuthId);
 
                     const { data: compras, error: comprasError } = await supabaseClient
                         .from('compras_cursos')
                         .select('curso_id, status')
                         .eq('usuario_id', currentAuthId)
-                        .in('status', ['pago', 'pendente']); // Inclui pendente também (enquanto webhook não funciona)
+                        .in('status', ['pago', 'pendente']);
 
                     if (comprasError) {
-                        console.error('[RITMUS] Erro ao buscar compras:', comprasError);
+                        console.error('[CURSOS] Erro ao buscar compras:', comprasError);
                     } else {
-                        console.log('[RITMUS] Compras encontradas:', compras);
-                        cursosComprados = (compras || []).map(c => c.curso_id);
+                        console.log('[CURSOS] Compras encontradas:', compras);
+                        cursosComprados = (compras || []).map(c => ({ curso_id: c.curso_id, status: c.status }));
+                        console.log('[CURSOS] Cursos comprados:', cursosComprados.map(c => c.curso_id));
                     }
+                } else {
+                    console.log('[CURSOS] Sem auth_id, não busca compras');
                 }
 
                 // Buscar aulas gratuitas por curso
@@ -149,7 +159,9 @@
                     <div class="cursos-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
                         ${cursos.map(curso => {
                             // VERIFICAÇÃO DE ACESSO
-                            const temAcessoCompra = cursosComprados.includes(curso.id);
+                            const compra = cursosComprados.find(c => c.curso_id === curso.id);
+                            const temAcessoCompra = !!compra;
+                            const compraStatus = compra?.status || '';
                             const temAulasFree = aulasFreeMap[curso.id] || false;
 
                             // VERIFICAR SE CURSO É GRATUITO
@@ -163,7 +175,7 @@
 
                             const podeAssistir = temAcessoCompra || temAulasFree || isCursoFree;
 
-                            console.log('[RITMUS] Curso:', curso.titulo, '| comprado:', temAcessoCompra, '| gratuito:', isCursoFree, '| podeAssistir:', podeAssistir);
+                            console.log('[CURSOS] Curso:', curso.titulo, '| id:', curso.id, '| comprado:', temAcessoCompra, '| status:', compraStatus, '| gratuito:', isCursoFree, '| podeAssistir:', podeAssistir);
 
                             return `
                                 <div class="curso-card" style="cursor:${podeAssistir ? 'pointer' : 'default'}">
@@ -201,7 +213,7 @@
                                         ${podeAssistir ? `
                                             <div style="margin-top:16px">
                                                 <a href="aula.html?curso=${curso.id}" class="btn-curso" style="display:block;text-align:center">
-                                                    ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcessoCompra ? '🎁 Assistir Aulas Free' : (temAcessoCompra ? '▶️ Assistir Aulas' : '▶️ Assistir Aulas'))}
+                                                    ${isCursoFree ? '🎁 Curso Gratuito' : (temAulasFree && !temAcessoCompra ? '🎁 Assistir Aulas Free' : '▶️ Assistir Aulas')}
                                                 </a>
                                             </div>
                                         ` : `
@@ -218,7 +230,7 @@
                 `;
 
             } catch (e) {
-                console.error('Erro:', e);
+                console.error('[CURSOS] Erro geral:', e);
                 container.innerHTML = '<p style="color:var(--text-muted);text-align:center">Erro ao carregar cursos.</p>';
             }
         }
