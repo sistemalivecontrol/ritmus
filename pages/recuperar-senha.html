@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - Scheila Almeida</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+<base target="_blank">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></a>
+        </div>
+    </nav>
+
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></div>
+                    <h1>🔑 Recuperar Senha</h1>
+                    <p>Digite seu e-mail para receber o link de redefinição</p>
+                </div>
+
+                <!-- Alertas -->
+                <div id="alert-success" style="display:none;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);color:#27ae60;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px"></div>
+                <div id="alert-error" style="display:none;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px"></div>
+
+                <form id="form-recuperar">
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" required placeholder="seu@email.com">
+                    </div>
+                    <button type="submit" class="btn-submit" id="btn-recuperar">
+                        Enviar Link de Recuperação
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <a href="login.html">← Voltar para o Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                document.getElementById('form-recuperar').addEventListener('submit', handleRecuperar);
+            });
+        });
+
+        async function handleRecuperar(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-recuperar');
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const alertSuccess = document.getElementById('alert-success');
+            const alertError = document.getElementById('alert-error');
+
+            // Esconder alertas anteriores
+            alertSuccess.style.display = 'none';
+            alertError.style.display = 'none';
+
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            try {
+                console.log('[SCHEILA] Enviando email de recuperação para:', email);
+
+                const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: 'https://scheilaalmeida.com.br/pages/redefinir-senha.html'
+                });
+
+                if (error) {
+                    console.error('[SCHEILA] Erro ao enviar recuperação:', error);
+
+                    if (error.message && error.message.includes('rate limit')) {
+                        alertError.textContent = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+                    } else if (error.message && error.message.includes('not found')) {
+                        // Por segurança, não revelar se email existe ou não
+                        alertSuccess.textContent = '✅ Se o e-mail estiver cadastrado, você receberá o link de recuperação em breve.';
+                        alertSuccess.style.display = 'block';
+                        btn.textContent = 'Enviar Link de Recuperação';
+                        btn.disabled = false;
+                        document.getElementById('email').value = '';
+                        return;
+                    } else {
+                        alertError.textContent = 'Erro: ' + error.message;
+                    }
+
+                    alertError.style.display = 'block';
+                    btn.textContent = 'Enviar Link de Recuperação';
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Sucesso
+                alertSuccess.textContent = '✅ Link de recuperação enviado! Verifique sua caixa de entrada (e spam). O link expira em 1 hora.';
+                alertSuccess.style.display = 'block';
+                btn.textContent = 'Enviar Link de Recuperação';
+                btn.disabled = false;
+                document.getElementById('email').value = '';
+
+                console.log('[SCHEILA] Email de recuperação enviado com sucesso');
+
+            } catch (e) {
+                console.error('[SCHEILA] Erro inesperado:', e);
+                alertError.textContent = 'Erro inesperado. Tente novamente.';
+                alertError.style.display = 'block';
+                btn.textContent = 'Enviar Link de Recuperação';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
