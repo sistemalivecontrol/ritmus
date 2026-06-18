@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha - Scheila Almeida</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+<base target="_blank">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></a>
+        </div>
+    </nav>
+
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="logo"><span class="logo-icon">🏋️‍♀️</span><span class="logo-text">Scheila Almeida</span></div>
+                    <h1>🔐 Nova Senha</h1>
+                    <p>Crie uma nova senha para sua conta</p>
+                </div>
+
+                <!-- Alertas -->
+                <div id="alert-success" style="display:none;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);color:#27ae60;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px"></div>
+                <div id="alert-error" style="display:none;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px"></div>
+
+                <form id="form-redefinir">
+                    <div class="form-group">
+                        <label for="nova-senha">Nova Senha</label>
+                        <input type="password" id="nova-senha" required placeholder="Mínimo 6 caracteres" minlength="6">
+                        <ul style="font-size:12px;color:var(--text-muted);margin-top:4px;padding-left:16px">
+                            <li id="req-length">Mínimo 6 caracteres</li>
+                            <li id="req-upper">Pelo menos 1 letra maiúscula</li>
+                            <li id="req-number">Pelo menos 1 número</li>
+                        </ul>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmar-senha">Confirmar Nova Senha</label>
+                        <input type="password" id="confirmar-senha" required placeholder="Confirme a nova senha" minlength="6">
+                    </div>
+                    <button type="submit" class="btn-submit" id="btn-redefinir">
+                        Redefinir Senha
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <a href="login.html">← Voltar para o Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        let accessToken = null;
+        let type = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            waitForSupabase(() => {
+                initRedefinir();
+            });
+        });
+
+        function initRedefinir() {
+            // Verificar se veio com token na URL (Supabase envia #access_token=...&type=recovery)
+            const hash = window.location.hash;
+            const params = new URLSearchParams(hash.substring(1));
+
+            accessToken = params.get('access_token');
+            type = params.get('type');
+
+            console.log('[SCHEILA] Token presente:', !!accessToken, 'Type:', type);
+
+            if (!accessToken || type !== 'recovery') {
+                document.getElementById('alert-error').textContent = '❌ Link inválido ou expirado. Solicite um novo link de recuperação.';
+                document.getElementById('alert-error').style.display = 'block';
+                document.getElementById('form-redefinir').style.display = 'none';
+                return;
+            }
+
+            // Trocar a sessão para o token de recuperação
+            supabaseClient.auth.setSession({
+                access_token: accessToken,
+                refresh_token: params.get('refresh_token') || ''
+            }).then(({ error }) => {
+                if (error) {
+                    console.error('[SCHEILA] Erro ao setar sessão:', error);
+                    document.getElementById('alert-error').textContent = '❌ Link inválido ou expirado. Solicite um novo link.';
+                    document.getElementById('alert-error').style.display = 'block';
+                    document.getElementById('form-redefinir').style.display = 'none';
+                    return;
+                }
+                console.log('[SCHEILA] Sessão de recuperação ativada');
+            });
+
+            // Validação em tempo real
+            document.getElementById('nova-senha').addEventListener('input', validarRequisitos);
+            document.getElementById('form-redefinir').addEventListener('submit', handleRedefinir);
+        }
+
+        function validarRequisitos() {
+            const senha = document.getElementById('nova-senha').value;
+            document.getElementById('req-length').style.color = senha.length >= 6 ? '#27ae60' : '';
+            document.getElementById('req-upper').style.color = /[A-Z]/.test(senha) ? '#27ae60' : '';
+            document.getElementById('req-number').style.color = /[0-9]/.test(senha) ? '#27ae60' : '';
+        }
+
+        async function handleRedefinir(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-redefinir');
+            const novaSenha = document.getElementById('nova-senha').value.trim();
+            const confirmarSenha = document.getElementById('confirmar-senha').value.trim();
+            const alertSuccess = document.getElementById('alert-success');
+            const alertError = document.getElementById('alert-error');
+
+            alertSuccess.style.display = 'none';
+            alertError.style.display = 'none';
+
+            // Validações
+            if (novaSenha.length < 6) {
+                alertError.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+                alertError.style.display = 'block';
+                return;
+            }
+
+            if (novaSenha !== confirmarSenha) {
+                alertError.textContent = 'As senhas não conferem.';
+                alertError.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Redefinindo...';
+
+            try {
+                console.log('[SCHEILA] Redefinindo senha...');
+
+                const { data, error } = await supabaseClient.auth.updateUser({
+                    password: novaSenha
+                });
+
+                if (error) {
+                    console.error('[SCHEILA] Erro ao redefinir:', error);
+                    alertError.textContent = 'Erro: ' + error.message;
+                    alertError.style.display = 'block';
+                    btn.textContent = 'Redefinir Senha';
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Sucesso
+                alertSuccess.textContent = '✅ Senha redefinida com sucesso! Faça login com sua nova senha.';
+                alertSuccess.style.display = 'block';
+                document.getElementById('form-redefinir').style.display = 'none';
+
+                console.log('[SCHEILA] Senha redefinida com sucesso');
+
+                // Redirecionar para login após 3 segundos
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+
+            } catch (e) {
+                console.error('[SCHEILA] Erro inesperado:', e);
+                alertError.textContent = 'Erro inesperado. Tente novamente.';
+                alertError.style.display = 'block';
+                btn.textContent = 'Redefinir Senha';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
