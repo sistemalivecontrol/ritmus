@@ -233,6 +233,7 @@
             font-size: 12px;
             color: var(--text-muted);
             margin-top: 4px;
+            padding-left: 16px;
         }
         .password-requirements li {
             margin-bottom: 2px;
@@ -398,57 +399,121 @@
         });
 
         async function initMinhaConta() {
-            const auth = await requireAuth();
-            if (!auth) return;
-
-            currentUser = auth.user;
-            currentSession = auth.session;
-
-            // Preencher dados do usuário
-            document.getElementById('user-name').textContent = auth.user.nome || 'Aluno';
-            document.getElementById('sidebar-name').textContent = auth.user.nome || 'Aluno';
-            document.getElementById('sidebar-email').textContent = auth.user.email;
-            document.getElementById('user-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
-
-            document.getElementById('info-name').textContent = auth.user.nome || 'Aluno';
-            document.getElementById('info-email').textContent = auth.user.email;
-            document.getElementById('info-avatar').textContent = (auth.user.nome || 'A').charAt(0).toUpperCase();
-
-            // Verificar admin
             try {
-                const isAdmin = await checkAdmin();
-                if (isAdmin) {
-                    const navAdmin = document.getElementById('nav-admin');
-                    const sidebarAdmin = document.getElementById('sidebar-admin');
-                    if (navAdmin) navAdmin.style.display = 'inline-flex';
-                    if (sidebarAdmin) sidebarAdmin.style.display = 'block';
-                }
-            } catch (e) {
-                console.log('[SCHEILA] Erro ao verificar admin:', e.message);
-            }
+                // Verificar sessão do Supabase
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
 
-            // Validação em tempo real da senha
-            document.getElementById('nova-senha').addEventListener('input', validarRequisitosSenha);
+                if (sessionError || !session) {
+                    console.log('[SCHEILA] Sem sessão, redirecionando para login...');
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                currentSession = session;
+
+                // Buscar dados do usuário na tabela usuarios
+                const { data: userData, error: userError } = await supabaseClient
+                    .from('usuarios')
+                    .select('*')
+                    .eq('auth_id', session.user.id)
+                    .single();
+
+                if (userError || !userData) {
+                    console.log('[SCHEILA] Usuário não encontrado na tabela usuarios');
+                    // Usar dados do Auth como fallback
+                    currentUser = {
+                        id: session.user.id,
+                        nome: session.user.user_metadata?.nome || session.user.email?.split('@')[0] || 'Aluno',
+                        email: session.user.email,
+                        auth_id: session.user.id
+                    };
+                } else {
+                    currentUser = userData;
+                    currentUser.auth_id = session.user.id;
+                }
+
+                // Preencher dados na interface
+                const nome = currentUser.nome || 'Aluno';
+                const email = currentUser.email || session.user.email || '...';
+                const inicial = nome.charAt(0).toUpperCase();
+
+                // Header
+                const headerName = document.getElementById('user-name');
+                if (headerName) headerName.textContent = nome;
+
+                // Sidebar
+                const sidebarName = document.getElementById('sidebar-name');
+                const sidebarEmail = document.getElementById('sidebar-email');
+                const userAvatar = document.getElementById('user-avatar');
+
+                if (sidebarName) sidebarName.textContent = nome;
+                if (sidebarEmail) sidebarEmail.textContent = email;
+                if (userAvatar) userAvatar.textContent = inicial;
+
+                // Info card
+                const infoName = document.getElementById('info-name');
+                const infoEmail = document.getElementById('info-email');
+                const infoAvatar = document.getElementById('info-avatar');
+
+                if (infoName) infoName.textContent = nome;
+                if (infoEmail) infoEmail.textContent = email;
+                if (infoAvatar) infoAvatar.textContent = inicial;
+
+                // Verificar admin
+                try {
+                    const isAdmin = await checkAdmin();
+                    if (isAdmin) {
+                        const navAdmin = document.getElementById('nav-admin');
+                        const sidebarAdmin = document.getElementById('sidebar-admin');
+                        if (navAdmin) navAdmin.style.display = 'inline-flex';
+                        if (sidebarAdmin) sidebarAdmin.style.display = 'block';
+                        console.log('[SCHEILA] Usuário é admin - menu exibido');
+                    }
+                } catch (e) {
+                    console.log('[SCHEILA] Erro ao verificar admin:', e.message);
+                }
+
+                // Validação em tempo real da senha
+                const novaSenhaInput = document.getElementById('nova-senha');
+                if (novaSenhaInput) {
+                    novaSenhaInput.addEventListener('input', validarRequisitosSenha);
+                }
+
+                console.log('[SCHEILA] Minha Conta inicializada com sucesso');
+
+            } catch (e) {
+                console.error('[SCHEILA] Erro ao inicializar Minha Conta:', e);
+                showAlert('error', 'Erro ao carregar dados da conta. Recarregue a página.');
+            }
         }
 
         function validarRequisitosSenha() {
             const senha = document.getElementById('nova-senha').value;
-            document.getElementById('req-length').className = senha.length >= 6 ? 'valid' : '';
-            document.getElementById('req-upper').className = /[A-Z]/.test(senha) ? 'valid' : '';
-            document.getElementById('req-number').className = /[0-9]/.test(senha) ? 'valid' : '';
+            const reqLength = document.getElementById('req-length');
+            const reqUpper = document.getElementById('req-upper');
+            const reqNumber = document.getElementById('req-number');
+
+            if (reqLength) reqLength.className = senha.length >= 6 ? 'valid' : '';
+            if (reqUpper) reqUpper.className = /[A-Z]/.test(senha) ? 'valid' : '';
+            if (reqNumber) reqNumber.className = /[0-9]/.test(senha) ? 'valid' : '';
         }
 
         function showAlert(type, message) {
             const el = document.getElementById('alert-' + type);
-            el.textContent = message;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 5000);
+            if (el) {
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => { el.style.display = 'none'; }, 5000);
+            }
         }
 
         function hideAlerts() {
-            document.getElementById('alert-success').style.display = 'none';
-            document.getElementById('alert-error').style.display = 'none';
-            document.getElementById('alert-info').style.display = 'none';
+            const success = document.getElementById('alert-success');
+            const error = document.getElementById('alert-error');
+            const info = document.getElementById('alert-info');
+            if (success) success.style.display = 'none';
+            if (error) error.style.display = 'none';
+            if (info) info.style.display = 'none';
         }
 
         async function alterarSenha() {
@@ -480,7 +545,7 @@
             }
 
             const btnText = document.getElementById('btn-senha-text');
-            btnText.textContent = 'Atualizando...';
+            if (btnText) btnText.textContent = 'Atualizando...';
 
             try {
                 // 1. Reautenticar com senha atual
@@ -491,7 +556,7 @@
 
                 if (signInError) {
                     showAlert('error', 'Senha atual incorreta. Tente novamente.');
-                    btnText.textContent = 'Atualizar Senha';
+                    if (btnText) btnText.textContent = 'Atualizar Senha';
                     return;
                 }
 
@@ -502,7 +567,7 @@
 
                 if (updateError) {
                     showAlert('error', 'Erro ao atualizar senha: ' + updateError.message);
-                    btnText.textContent = 'Atualizar Senha';
+                    if (btnText) btnText.textContent = 'Atualizar Senha';
                     return;
                 }
 
@@ -510,38 +575,52 @@
                 document.getElementById('senha-atual').value = '';
                 document.getElementById('nova-senha').value = '';
                 document.getElementById('confirmar-senha').value = '';
-                document.getElementById('req-length').className = '';
-                document.getElementById('req-upper').className = '';
-                document.getElementById('req-number').className = '';
+
+                const reqLength = document.getElementById('req-length');
+                const reqUpper = document.getElementById('req-upper');
+                const reqNumber = document.getElementById('req-number');
+                if (reqLength) reqLength.className = '';
+                if (reqUpper) reqUpper.className = '';
+                if (reqNumber) reqNumber.className = '';
 
                 showAlert('success', '✅ Senha atualizada com sucesso!');
-                btnText.textContent = 'Atualizar Senha';
+                if (btnText) btnText.textContent = 'Atualizar Senha';
 
             } catch (e) {
                 console.error('[SCHEILA] Erro ao alterar senha:', e);
                 showAlert('error', 'Erro inesperado. Tente novamente.');
-                btnText.textContent = 'Atualizar Senha';
+                if (btnText) btnText.textContent = 'Atualizar Senha';
             }
         }
 
         function abrirModalExcluir() {
-            document.getElementById('modal-excluir').classList.add('active');
-            document.getElementById('senha-excluir').value = '';
-            document.getElementById('senha-excluir').focus();
+            const modal = document.getElementById('modal-excluir');
+            const senhaInput = document.getElementById('senha-excluir');
+            if (modal) modal.classList.add('active');
+            if (senhaInput) {
+                senhaInput.value = '';
+                setTimeout(() => senhaInput.focus(), 100);
+            }
         }
 
         function fecharModalExcluir() {
-            document.getElementById('modal-excluir').classList.remove('active');
+            const modal = document.getElementById('modal-excluir');
+            if (modal) modal.classList.remove('active');
         }
 
         function abrirModalSucesso(titulo, msg) {
-            document.getElementById('modal-sucesso-titulo').textContent = titulo;
-            document.getElementById('modal-sucesso-msg').textContent = msg;
-            document.getElementById('modal-sucesso').classList.add('active');
+            const tituloEl = document.getElementById('modal-sucesso-titulo');
+            const msgEl = document.getElementById('modal-sucesso-msg');
+            const modal = document.getElementById('modal-sucesso');
+
+            if (tituloEl) tituloEl.textContent = titulo;
+            if (msgEl) msgEl.textContent = msg;
+            if (modal) modal.classList.add('active');
         }
 
         function fecharModalSucesso() {
-            document.getElementById('modal-sucesso').classList.remove('active');
+            const modal = document.getElementById('modal-sucesso');
+            if (modal) modal.classList.remove('active');
         }
 
         async function excluirConta() {
@@ -553,7 +632,7 @@
             }
 
             const btnText = document.getElementById('btn-excluir-text');
-            btnText.textContent = 'Excluindo...';
+            if (btnText) btnText.textContent = 'Excluindo...';
 
             try {
                 // 1. Verificar senha
@@ -564,7 +643,7 @@
 
                 if (signInError) {
                     showAlert('error', 'Senha incorreta. Não foi possível excluir a conta.');
-                    btnText.textContent = 'Sim, Excluir Conta';
+                    if (btnText) btnText.textContent = 'Sim, Excluir Conta';
                     return;
                 }
 
@@ -582,11 +661,7 @@
                     await supabaseClient.from('usuarios').delete().eq('id', currentUser.id);
                 } catch (e) { console.log('[SCHEILA] Usuário tabela já removido ou erro:', e.message); }
 
-                // 4. Excluir usuário do Auth (requer service_role - fazemos via Edge Function)
-                // Como não temos service_role no frontend, vamos apenas deslogar e redirecionar
-                // A exclusão real do auth deve ser feita via admin/Edge Function
-
-                // Deslogar
+                // 4. Deslogar
                 await supabaseClient.auth.signOut();
 
                 fecharModalExcluir();
@@ -600,22 +675,32 @@
             } catch (e) {
                 console.error('[SCHEILA] Erro ao excluir conta:', e);
                 showAlert('error', 'Erro ao excluir conta. Entre em contato com o suporte.');
-                btnText.textContent = 'Sim, Excluir Conta';
+                if (btnText) btnText.textContent = 'Sim, Excluir Conta';
             }
         }
 
         // Fechar modal ao clicar fora
-        document.getElementById('modal-excluir').addEventListener('click', function(e) {
-            if (e.target === this) fecharModalExcluir();
-        });
-        document.getElementById('modal-sucesso').addEventListener('click', function(e) {
-            if (e.target === this) fecharModalSucesso();
-        });
+        const modalExcluir = document.getElementById('modal-excluir');
+        const modalSucesso = document.getElementById('modal-sucesso');
+
+        if (modalExcluir) {
+            modalExcluir.addEventListener('click', function(e) {
+                if (e.target === this) fecharModalExcluir();
+            });
+        }
+        if (modalSucesso) {
+            modalSucesso.addEventListener('click', function(e) {
+                if (e.target === this) fecharModalSucesso();
+            });
+        }
 
         // Enter no modal de senha
-        document.getElementById('senha-excluir').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') excluirConta();
-        });
+        const senhaExcluirInput = document.getElementById('senha-excluir');
+        if (senhaExcluirInput) {
+            senhaExcluirInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') excluirConta();
+            });
+        }
     </script>
 </body>
 </html>
