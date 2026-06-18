@@ -66,9 +66,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
-        // ============================================
-        // CONFIGURAÇÃO INTERNA - ISOLADA DO config.js
-        // ============================================
         (function() {
             var RITMUS_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
             var RITMUS_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTk0MDEsImV4cCI6MjA5MTgzNTQwMX0.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
@@ -101,9 +98,6 @@
                 document.getElementById('form-cadastro').addEventListener('submit', handleCadastro);
             }
 
-            // ============================================
-            // ENVIAR E-MAIL DE BOAS-VINDAS
-            // ============================================
             async function enviarEmailBoasVindas(nome, email, senha) {
                 try {
                     console.log('[RITMUS] Enviando e-mail de boas-vindas...');
@@ -224,24 +218,23 @@
                         return;
                     }
 
-                    // 4. Guardar senha no sessionStorage para envio do e-mail
-                    //    (a senha será enviada no e-mail de boas-vindas)
+                    // 4. Guardar senha no sessionStorage e enviar e-mail
                     sessionStorage.setItem('cadastro_senha_temp', senha);
                     sessionStorage.setItem('cadastro_nome', nome);
                     sessionStorage.setItem('cadastro_email', email);
-                    console.log('[RITMUS] Senha guardada no sessionStorage para envio de e-mail');
+                    console.log('[RITMUS] Senha guardada no sessionStorage para envio do e-mail');
 
-                    // 5. Enviar e-mail de boas-vindas (não bloqueia o fluxo)
+                    // 5. Enviar e-mail de boas-vindas
                     console.log('[RITMUS] Enviando e-mail de boas-vindas...');
                     const emailResult = await enviarEmailBoasVindas(nome, email, senha);
 
                     if (emailResult.success) {
-                        console.log('[RITMUS] ✅ E-mail de boas-vindas enviado!');
+                        console.log('[RITMUS] ✅ E-mail de boas-vindas enviado com sucesso!');
                     } else {
                         console.warn('[RITMUS] ⚠️ E-mail não enviado:', emailResult.error);
                     }
 
-                    // 6. Limpar senha do sessionStorage após envio
+                    // 6. Limpar senha do sessionStorage
                     sessionStorage.removeItem('cadastro_senha_temp');
                     console.log('[RITMUS] Senha removida do sessionStorage');
 
