@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+    <base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -65,10 +66,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
+        // ============================================
+        // CONFIGURAÇÃO
+        // ============================================
+        const SUPABASE_URL = 'https://aqrvozmxlcgrllclceke.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxcnZvem14bGNncmxsY2xjZWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTk0MDEsImV4cCI6MjA5MTgzNTQwMX0.6CL3-1dU6WUT4EbJ0UfvmLFj6jGPnT9Avc743WrNiCA';
+        const EDGE_FUNCTION_URL = 'https://aqrvozmxlcgrllclceke.supabase.co/functions/v1/enviar-email-boas-vindas';
+
+        let supabaseClient = null;
+
         document.addEventListener('DOMContentLoaded', function() {
-            waitForSupabase(() => {
-                initCadastro();
-            });
+            // Inicializar Supabase
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('[SCHEILA] Supabase inicializado');
+
+            initCadastro();
         });
 
         function initCadastro() {
@@ -79,6 +91,43 @@
                 e.target.value = v;
             });
             document.getElementById('form-cadastro').addEventListener('submit', handleCadastro);
+        }
+
+        // ============================================
+        // ENVIAR E-MAIL DE BOAS-VINDAS VIA EDGE FUNCTION
+        // ============================================
+        async function enviarEmailBoasVindas(nome, email, senha) {
+            try {
+                console.log('[SCHEILA] Enviando e-mail de boas-vindas via Edge Function...');
+
+                const response = await fetch(EDGE_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
+                        nome: nome,
+                        email: email,
+                        senha: senha,
+                        login_url: 'https://scheilaalmeida.com.br/pages/login.html'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('[SCHEILA] Erro na Edge Function:', errorData);
+                    return { success: false, error: errorData.error || 'Erro ao enviar e-mail' };
+                }
+
+                const result = await response.json();
+                console.log('[SCHEILA] ✅ E-mail de boas-vindas enviado:', result);
+                return { success: true, data: result };
+
+            } catch (error) {
+                console.error('[SCHEILA] ❌ Erro ao enviar e-mail:', error);
+                return { success: false, error: error.message };
+            }
         }
 
         async function handleCadastro(e) {
@@ -136,8 +185,6 @@
 
                 if (insertError) {
                     console.error('[SCHEILA] Erro ao inserir na tabela usuarios:', insertError);
-                    // Não falhar o cadastro se a tabela usuarios der erro
-                    // O usuário já foi criado no Auth, então fazemos login
                 } else {
                     console.log('[SCHEILA] Usuário inserido na tabela usuarios com sucesso');
                 }
@@ -158,8 +205,17 @@
                     return;
                 }
 
+                // 4. Enviar e-mail de boas-vindas via Edge Function (não bloqueia o fluxo)
+                const emailResult = await enviarEmailBoasVindas(nome, email, senha);
+
+                if (emailResult.success) {
+                    console.log('[SCHEILA] E-mail de boas-vindas enviado com sucesso!');
+                } else {
+                    console.warn('[SCHEILA] E-mail não enviado (não crítico):', emailResult.error);
+                }
+
                 hideLoading();
-                showToast('Bem-vindo!', 'Conta criada com sucesso! Explore nossos cursos.', 'success');
+                showToast('Bem-vindo!', 'Conta criada com sucesso! Verifique seu e-mail.', 'success');
 
                 // Redirecionar para cursos após 2 segundos
                 setTimeout(() => {
