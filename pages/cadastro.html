@@ -67,18 +67,18 @@
     <script src="../js/config.js"></script>
     <script>
         // ============================================
-        // CONFIGURAÇÃO
+        // CONFIGURAÇÃO - PROJETO RITMUS
         // ============================================
-        const SUPABASE_URL = 'https://aqrvozmxlcgrllclceke.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxcnZvem14bGNncmxsY2xjZWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTk0MDEsImV4cCI6MjA5MTgzNTQwMX0.6CL3-1dU6WUT4EbJ0UfvmLFj6jGPnT9Avc743WrNiCA';
-        const EDGE_FUNCTION_URL = 'https://aqrvozmxlcgrllclceke.supabase.co/functions/v1/enviar-email-boas-vindas';
+        const SUPABASE_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTk0MDEsImV4cCI6MjA5MTgzNTQwMX0.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
+        const EDGE_FUNCTION_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co/functions/v1/enviar-email-boas-vindas';
 
         let supabaseClient = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             // Inicializar Supabase
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('[SCHEILA] Supabase inicializado');
+            console.log('[RITMUS] Supabase inicializado');
 
             initCadastro();
         });
@@ -98,7 +98,8 @@
         // ============================================
         async function enviarEmailBoasVindas(nome, email, senha) {
             try {
-                console.log('[SCHEILA] Enviando e-mail de boas-vindas via Edge Function...');
+                console.log('[RITMUS] Enviando e-mail de boas-vindas via Edge Function...');
+                console.log('[RITMUS] URL:', EDGE_FUNCTION_URL);
 
                 const response = await fetch(EDGE_FUNCTION_URL, {
                     method: 'POST',
@@ -114,18 +115,28 @@
                     })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error('[SCHEILA] Erro na Edge Function:', errorData);
-                    return { success: false, error: errorData.error || 'Erro ao enviar e-mail' };
+                console.log('[RITMUS] Response status:', response.status);
+
+                const responseText = await response.text();
+                console.log('[RITMUS] Response raw:', responseText);
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    result = { raw: responseText };
                 }
 
-                const result = await response.json();
-                console.log('[SCHEILA] ✅ E-mail de boas-vindas enviado:', result);
+                if (!response.ok) {
+                    console.error('[RITMUS] ❌ Erro na Edge Function:', result);
+                    return { success: false, error: result.error || 'Erro ao enviar e-mail', status: response.status };
+                }
+
+                console.log('[RITMUS] ✅ E-mail de boas-vindas enviado:', result);
                 return { success: true, data: result };
 
             } catch (error) {
-                console.error('[SCHEILA] ❌ Erro ao enviar e-mail:', error);
+                console.error('[RITMUS] ❌ Erro ao enviar e-mail:', error);
                 return { success: false, error: error.message };
             }
         }
@@ -135,7 +146,7 @@
             const btn = document.getElementById('btn-cadastrar');
             btn.disabled = true;
             btn.textContent = 'Criando conta...';
-            showLoading('Criando sua conta...');
+            if (typeof showLoading === 'function') showLoading('Criando sua conta...');
 
             try {
                 const nome = document.getElementById('nome').value.trim();
@@ -143,7 +154,7 @@
                 const telefone = document.getElementById('telefone').value.replace(/\D/g, '');
                 const senha = document.getElementById('senha').value;
 
-                console.log('[SCHEILA] Iniciando cadastro via Supabase Auth...');
+                console.log('[RITMUS] Iniciando cadastro via Supabase Auth...');
 
                 // 1. Criar usuário no Supabase Auth
                 const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -158,7 +169,7 @@
                 });
 
                 if (authError) {
-                    console.error('[SCHEILA] Erro Auth:', authError);
+                    console.error('[RITMUS] Erro Auth:', authError);
                     throw new Error(authError.message === 'User already registered' 
                         ? 'Este e-mail já está cadastrado. Faça login.' 
                         : 'Erro ao criar conta: ' + authError.message);
@@ -168,7 +179,7 @@
                     throw new Error('Erro ao criar usuário. Tente novamente.');
                 }
 
-                console.log('[SCHEILA] Auth criado com sucesso. ID:', authData.user.id);
+                console.log('[RITMUS] Auth criado com sucesso. ID:', authData.user.id);
 
                 // 2. Inserir na tabela usuarios
                 const { error: insertError } = await supabaseClient
@@ -184,9 +195,9 @@
                     });
 
                 if (insertError) {
-                    console.error('[SCHEILA] Erro ao inserir na tabela usuarios:', insertError);
+                    console.error('[RITMUS] Erro ao inserir na tabela usuarios:', insertError);
                 } else {
-                    console.log('[SCHEILA] Usuário inserido na tabela usuarios com sucesso');
+                    console.log('[RITMUS] Usuário inserido na tabela usuarios com sucesso');
                 }
 
                 // 3. Login automático após cadastro
@@ -196,9 +207,9 @@
                 });
 
                 if (loginError) {
-                    console.error('[SCHEILA] Erro login automático:', loginError);
-                    hideLoading();
-                    showToast('Conta criada!', 'Sua conta foi criada! Faça login para continuar.', 'success');
+                    console.error('[RITMUS] Erro login automático:', loginError);
+                    if (typeof hideLoading === 'function') hideLoading();
+                    if (typeof showToast === 'function') showToast('Conta criada!', 'Sua conta foi criada! Faça login para continuar.', 'success');
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 2000);
@@ -206,16 +217,17 @@
                 }
 
                 // 4. Enviar e-mail de boas-vindas via Edge Function (não bloqueia o fluxo)
+                console.log('[RITMUS] Iniciando envio de e-mail de boas-vindas...');
                 const emailResult = await enviarEmailBoasVindas(nome, email, senha);
 
                 if (emailResult.success) {
-                    console.log('[SCHEILA] E-mail de boas-vindas enviado com sucesso!');
+                    console.log('[RITMUS] ✅ E-mail de boas-vindas enviado com sucesso!');
                 } else {
-                    console.warn('[SCHEILA] E-mail não enviado (não crítico):', emailResult.error);
+                    console.warn('[RITMUS] ⚠️ E-mail não enviado (não crítico):', emailResult.error);
                 }
 
-                hideLoading();
-                showToast('Bem-vindo!', 'Conta criada com sucesso! Verifique seu e-mail.', 'success');
+                if (typeof hideLoading === 'function') hideLoading();
+                if (typeof showToast === 'function') showToast('Bem-vindo!', 'Conta criada com sucesso! Verifique seu e-mail.', 'success');
 
                 // Redirecionar para cursos após 2 segundos
                 setTimeout(() => {
@@ -223,11 +235,11 @@
                 }, 2000);
 
             } catch (error) {
-                hideLoading();
+                if (typeof hideLoading === 'function') hideLoading();
                 btn.disabled = false;
                 btn.textContent = 'Criar Conta Grátis';
-                console.error('[SCHEILA] Erro cadastro:', error);
-                showToast('Erro', error.message || 'Erro ao criar conta. Tente novamente.', 'error');
+                console.error('[RITMUS] Erro cadastro:', error);
+                if (typeof showToast === 'function') showToast('Erro', error.message || 'Erro ao criar conta. Tente novamente.', 'error');
             }
         }
     </script>
