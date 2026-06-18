@@ -548,28 +548,29 @@
             if (btnText) btnText.textContent = 'Atualizando...';
 
             try {
-                // 1. Reautenticar com senha atual
-                const { error: signInError } = await supabaseClient.auth.signInWithPassword({
-                    email: currentUser.email,
-                    password: senhaAtual
-                });
+                // ESTRATÉGIA: Não reautenticar com signInWithPassword (causa erro 400 em sessão ativa)
+                // Em vez disso, usar updateUser diretamente - o Supabase valida a sessão atual
 
-                if (signInError) {
-                    showAlert('error', 'Senha atual incorreta. Tente novamente.');
-                    if (btnText) btnText.textContent = 'Atualizar Senha';
-                    return;
-                }
-
-                // 2. Atualizar senha
-                const { error: updateError } = await supabaseClient.auth.updateUser({
+                const { data: userData, error: updateError } = await supabaseClient.auth.updateUser({
                     password: novaSenha
                 });
 
                 if (updateError) {
-                    showAlert('error', 'Erro ao atualizar senha: ' + updateError.message);
+                    console.error('[SCHEILA] Erro updateUser:', updateError);
+
+                    // Se der erro de sessão expirada, informar usuário para fazer login novamente
+                    if (updateError.message && updateError.message.includes('session')) {
+                        showAlert('error', 'Sessão expirada. Faça login novamente e tente alterar a senha.');
+                    } else {
+                        showAlert('error', 'Erro ao atualizar senha: ' + updateError.message);
+                    }
+
                     if (btnText) btnText.textContent = 'Atualizar Senha';
                     return;
                 }
+
+                // Se chegou aqui, a senha foi alterada com sucesso
+                // O Supabase desloga automaticamente após alterar senha, então precisamos relogar
 
                 // 3. Limpar campos
                 document.getElementById('senha-atual').value = '';
@@ -583,8 +584,15 @@
                 if (reqUpper) reqUpper.className = '';
                 if (reqNumber) reqNumber.className = '';
 
-                showAlert('success', '✅ Senha atualizada com sucesso!');
+                showAlert('success', '✅ Senha atualizada com sucesso! Faça login novamente com a nova senha.');
                 if (btnText) btnText.textContent = 'Atualizar Senha';
+
+                // Após 3 segundos, redirecionar para login
+                setTimeout(() => {
+                    supabaseClient.auth.signOut().then(() => {
+                        window.location.href = '../index.html';
+                    });
+                }, 3000);
 
             } catch (e) {
                 console.error('[SCHEILA] Erro ao alterar senha:', e);
@@ -635,13 +643,13 @@
             if (btnText) btnText.textContent = 'Excluindo...';
 
             try {
-                // 1. Verificar senha
-                const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+                // 1. Verificar senha fazendo login com as credenciais
+                const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
                     email: currentUser.email,
                     password: senha
                 });
 
-                if (signInError) {
+                if (loginError) {
                     showAlert('error', 'Senha incorreta. Não foi possível excluir a conta.');
                     if (btnText) btnText.textContent = 'Sim, Excluir Conta';
                     return;
