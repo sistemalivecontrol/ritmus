@@ -67,16 +67,15 @@
     <script src="../js/config.js"></script>
     <script>
         // ============================================
-        // CONFIGURAÇÃO - PROJETO RITMUS
+        // CONFIGURAÇÃO - USA VARIÁVEIS DO config.js
+        // NÃO declarar SUPABASE_URL ou SUPABASE_ANON_KEY aqui!
         // ============================================
-        const SUPABASE_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTk0MDEsImV4cCI6MjA5MTgzNTQwMX0.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
         const EDGE_FUNCTION_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co/functions/v1/enviar-email-boas-vindas';
 
         let supabaseClient = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Supabase
+            // Inicializar Supabase usando as variáveis do config.js
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log('[RITMUS] Supabase inicializado');
 
