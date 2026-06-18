@@ -69,7 +69,8 @@
         (function() {
             var RITMUS_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co';
             var RITMUS_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdmtoemRlemxyY3NkZnRobHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNTk0MDEsImV4cCI6MjA5MTgzNTQwMX0.BGEmwtd0CzvwUYW-ts3lrBGmVeiRdKzkTXVuuHhOK_0';
-            var EDGE_FUNCTION_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co/functions/v1/enviar-email-boas-vindas';
+            // FUNÇÃO RENOMEADA: boas-vindas (sem 'enviar-email')
+            var EDGE_FUNCTION_URL = 'https://fcvkhzdezlrcsdfthluh.supabase.co/functions/v1/boas-vindas';
 
             var supabaseClient = null;
 
@@ -101,7 +102,8 @@
             async function enviarEmailBoasVindas(nome, email, senha) {
                 try {
                     console.log('[RITMUS] Enviando e-mail de boas-vindas...');
-                    var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : RITMUS_ANON_KEY;
+                    // SEMPRE usar o token do Ritmus
+                    var key = RITMUS_ANON_KEY;
 
                     const response = await fetch(EDGE_FUNCTION_URL, {
                         method: 'POST',
