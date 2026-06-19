@@ -208,7 +208,6 @@
         }
     </style>
 
-<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -763,6 +762,38 @@
                         if (err9) throw err9;
                         return { success: true, data: comprasList };
 
+                    case 'check_compra': {
+                        const { data: checkData, error: errCheck } = await supabaseClient
+                            .from('compras_cursos')
+                            .select('id, status')
+                            .eq('usuario_id', data.usuario_id)
+                            .eq('curso_id', data.curso_id)
+                            .maybeSingle();
+                        if (errCheck) throw errCheck;
+                        return { success: true, data: checkData };
+                    }
+
+                    case 'insert_compra': {
+                        const { data: newCompra, error: errInsert } = await supabaseClient
+                            .from('compras_cursos')
+                            .insert([data])
+                            .select()
+                            .single();
+                        if (errInsert) throw errInsert;
+                        return { success: true, data: newCompra };
+                    }
+
+                    case 'update_compra': {
+                        const { data: updCompra, error: errUpdate } = await supabaseClient
+                            .from('compras_cursos')
+                            .update(data)
+                            .eq('id', id)
+                            .select()
+                            .single();
+                        if (errUpdate) throw errUpdate;
+                        return { success: true, data: updCompra };
+                    }
+
                     default:
                         throw new Error('Ação não reconhecida: ' + action);
                 }
@@ -1111,7 +1142,7 @@
         // ========== LIBERAR CURSO (CORTESIA) ==========
         async function loadAlunosSelect() {
             try {
-                // Usar Edge Function para bypass RLS e listar todos os alunos ativos
+                // Usar Edge Function para bypass RLS e listar TODOS os alunos (ativos e pendentes)
                 let alunos = [];
                 try {
                     const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
@@ -1125,7 +1156,8 @@
 
                     if (response.ok) {
                         const result = await response.json();
-                        alunos = (result.data || []).filter(a => a.status === 'ativo');
+                        // Mostrar todos os alunos, exceto o admin logado
+                        alunos = (result.data || []).filter(a => a.id !== currentUser?.id);
                     } else {
                         console.warn('[ADMIN] Edge Function retornou erro ' + response.status);
                     }
@@ -1137,11 +1169,11 @@
                 if (alunos.length === 0) {
                     const { data: alunosDirect, error } = await supabaseClient
                         .from('usuarios')
-                        .select('id, nome, email, status')
-                        .eq('status', 'ativo')
+                        .select('id, nome, email, status, nivel_acesso')
                         .order('nome', { ascending: true });
                     if (error) throw error;
-                    alunos = alunosDirect || [];
+                    // Excluir o admin logado da lista
+                    alunos = (alunosDirect || []).filter(a => a.id !== currentUser?.id && a.nivel_acesso !== 'admin');
                 }
 
                 const select = document.getElementById('liberar-aluno');
@@ -1150,7 +1182,8 @@
                     select.innerHTML += '<option value="" disabled>Nenhum aluno encontrado</option>';
                 } else {
                     (alunos || []).forEach(a => {
-                        select.innerHTML += `<option value="${a.id}">${a.nome} (${a.email})</option>`;
+                        const statusLabel = a.status === 'ativo' ? '✅' : (a.status === 'pendente' ? '⏳' : '❌');
+                        select.innerHTML += `<option value="${a.id}">${statusLabel} ${a.nome} (${a.email}) [${a.status || 'ativo'}]</option>`;
                     });
                 }
             } catch (e) {
@@ -1242,15 +1275,38 @@
             showLoading('Liberando curso...');
 
             try {
-                // Verificar se já existe compra/liberação para este aluno/curso
-                const { data: existente, error: errCheck } = await supabaseClient
-                    .from('compras_cursos')
-                    .select('id, status')
-                    .eq('usuario_id', alunoId)
-                    .eq('curso_id', cursoId)
-                    .maybeSingle();
+                // Verificar se já existe compra/liberação para este aluno/curso (via Edge Function para bypass RLS)
+                let existente = null;
+                try {
+                    const checkResponse = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify({ 
+                            action: 'check_compra', 
+                            data: { usuario_id: alunoId, curso_id: cursoId }
+                        })
+                    });
+                    if (checkResponse.ok) {
+                        const checkResult = await checkResponse.json();
+                        existente = checkResult.data || null;
+                    }
+                } catch (edgeErr) {
+                    console.warn('[ADMIN] Edge Function check indisponível, usando fallback direto');
+                }
 
-                if (errCheck) throw errCheck;
+                // Fallback direto para verificação (RLS pode limitar)
+                if (!existente) {
+                    const { data: existenteDirect, error: errCheck } = await supabaseClient
+                        .from('compras_cursos')
+                        .select('id, status')
+                        .eq('usuario_id', alunoId)
+                        .eq('curso_id', cursoId)
+                        .maybeSingle();
+                    if (!errCheck) existente = existenteDirect;
+                }
 
                 if (existente && existente.status === 'pago') {
                     hideLoading();
@@ -1261,35 +1317,48 @@
                 const curso = cursosCache.find(c => c.id === cursoId);
                 const valor = curso ? curso.preco : 0;
 
-                if (existente) {
-                    // Atualizar registro existente
-                    const { error: errUpdate } = await supabaseClient
-                        .from('compras_cursos')
-                        .update({
-                            status: 'pago',
-                            data_pagamento: new Date().toISOString(),
-                            valor: valor,
-                            observacao: observacao || 'Cortesia liberada pelo admin',
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', existente.id);
+                // Usar Edge Function para bypass RLS no INSERT/UPDATE
+                const compraData = {
+                    usuario_id: alunoId,
+                    curso_id: cursoId,
+                    status: 'pago',
+                    data_pagamento: new Date().toISOString(),
+                    valor: valor,
+                    observacao: observacao || 'Cortesia liberada pelo admin',
+                    created_at: new Date().toISOString()
+                };
 
-                    if (errUpdate) throw errUpdate;
-                } else {
-                    // Criar novo registro de compra/liberação
-                    const { error: errInsert } = await supabaseClient
-                        .from('compras_cursos')
-                        .insert([{
-                            usuario_id: alunoId,
-                            curso_id: cursoId,
-                            status: 'pago',
-                            data_pagamento: new Date().toISOString(),
-                            valor: valor,
-                            observacao: observacao || 'Cortesia liberada pelo admin',
-                            created_at: new Date().toISOString()
-                        }]);
+                let result = null;
+                try {
+                    result = await callEdgeFunction(
+                        existente ? 'update_compra' : 'insert_compra',
+                        compraData,
+                        existente ? existente.id : null
+                    );
+                } catch (edgeErr) {
+                    console.warn('[ADMIN] Edge Function falhou, tentando fallback direto:', edgeErr.message);
+                }
 
-                    if (errInsert) throw errInsert;
+                // Fallback direto se Edge Function falhou
+                if (!result || !result.success) {
+                    if (existente) {
+                        const { error: errUpdate } = await supabaseClient
+                            .from('compras_cursos')
+                            .update({
+                                status: 'pago',
+                                data_pagamento: new Date().toISOString(),
+                                valor: valor,
+                                observacao: observacao || 'Cortesia liberada pelo admin',
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', existente.id);
+                        if (errUpdate) throw errUpdate;
+                    } else {
+                        const { error: errInsert } = await supabaseClient
+                            .from('compras_cursos')
+                            .insert([compraData]);
+                        if (errInsert) throw errInsert;
+                    }
                 }
 
                 hideLoading();
@@ -1302,6 +1371,7 @@
             } catch (e) {
                 hideLoading();
                 showToast('Erro', e.message || 'Erro ao liberar curso', 'error');
+                console.error('[ADMIN] Erro completo ao liberar curso:', e);
             }
         });
 
