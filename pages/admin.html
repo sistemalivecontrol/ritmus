@@ -282,6 +282,7 @@
                         <button class="admin-tab" onclick="showTab('aulas')">🎬 Aulas</button>
                         <button class="admin-tab" onclick="showTab('alunos')">👥 Alunos</button>
                         <button class="admin-tab" onclick="showTab('compras')">🛒 Compras</button>
+                        <button class="admin-tab" onclick="showTab('liberar')">🎁 Liberar Curso</button>
                     </div>
 
                     <!-- TAB: CURSOS -->
@@ -336,6 +337,49 @@
                                     <tr><th>Aluno</th><th>Curso</th><th>Valor</th><th>Status</th><th>Data Pagamento</th><th>Ações</th></tr>
                                 </thead>
                                 <tbody id="compras-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- TAB: LIBERAR CURSO (CORTESIA) -->
+                    <div id="tab-liberar" class="admin-section">
+                        <div style="background: rgba(255,107,53,0.05); border: 1px solid rgba(255,107,53,0.2); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px;">
+                            <h3 style="margin: 0 0 8px 0; color: var(--primary);">🎁 Liberar Curso como Cortesia</h3>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 14px;">Conceda acesso gratuito a um aluno sem necessidade de pagamento. O curso será liberado imediatamente.</p>
+                        </div>
+
+                        <form id="form-liberar-curso" style="max-width: 600px;">
+                            <div class="form-group">
+                                <label>Aluno *</label>
+                                <select id="liberar-aluno" required style="width: 100%; padding: 12px 16px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 14px;">
+                                    <option value="">Selecione o aluno</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Curso *</label>
+                                <select id="liberar-curso" required style="width: 100%; padding: 12px 16px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 14px;">
+                                    <option value="">Selecione o curso</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Observação (opcional)</label>
+                                <textarea id="liberar-observacao" rows="2" placeholder="Ex: Cortesia para parceiro, brinde, etc." style="width: 100%; padding: 12px 16px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 14px; resize: vertical;"></textarea>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                                <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, var(--success), #059669);">🎁 Liberar Acesso</button>
+                                <button type="button" class="btn-ghost" onclick="document.getElementById('form-liberar-curso').reset()">Limpar</button>
+                            </div>
+                        </form>
+
+                        <div id="liberar-historico" style="margin-top: 40px;">
+                            <h3 style="margin-bottom: 16px; font-size: 18px;">📋 Histórico de Cortesias</h3>
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>Aluno</th><th>Curso</th><th>Data</th><th>Observação</th><th>Status</th></tr>
+                                </thead>
+                                <tbody id="liberar-historico-tbody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -605,6 +649,11 @@
 
             if (tab === 'aulas') loadAulasAdmin();
             if (tab === 'compras') loadComprasAdmin();
+            if (tab === 'liberar') {
+                loadAlunosSelect();
+                loadCursosSelect();
+                loadHistoricoCortesias();
+            }
         }
 
         function openModal(tipo) {
