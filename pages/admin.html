@@ -1585,13 +1585,21 @@
         let alunosCache = [];
 
         function abrirEditarAluno(id) {
+            console.log('[ADMIN] Abrindo editar aluno, ID:', id);
+            console.log('[ADMIN] alunosCache length:', alunosCache.length);
+            console.log('[ADMIN] alunosCache IDs:', alunosCache.map(a => a.id));
+
             // Buscar do cache (evita problema de RLS com .single())
             const aluno = alunosCache.find(a => a.id === id);
 
             if (!aluno) {
+                console.error('[ADMIN] Aluno não encontrado no cache. ID buscado:', id);
+                console.error('[ADMIN] Cache disponível:', alunosCache);
                 showToast('Erro', 'Aluno não encontrado no cache. Recarregue a página e tente novamente.', 'error');
                 return;
             }
+
+            console.log('[ADMIN] Aluno encontrado:', aluno.nome);
 
             document.getElementById('edit-aluno-id').value = aluno.id;
             document.getElementById('edit-aluno-nome').value = aluno.nome || '';
