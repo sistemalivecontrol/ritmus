@@ -724,7 +724,10 @@
         // ========== FALLBACK: Usa supabaseClient direto (sem CORS) ==========
         async function callEdgeFunction(action, data, id) {
             try {
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
+                const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
+            const isAlunosAction = alunosActions.includes(action);
+            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1221,7 +1224,10 @@
                 // Usar Edge Function para bypass RLS e listar TODOS os alunos (ativos e pendentes)
                 let alunos = [];
                 try {
-                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
+                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
+            const isAlunosAction = alunosActions.includes(action);
+            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1293,7 +1299,10 @@
                 // Tentar Edge Function primeiro
                 let compras = [];
                 try {
-                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
+                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
+            const isAlunosAction = alunosActions.includes(action);
+            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1459,7 +1468,10 @@
                 // Usar Edge Function para bypass RLS e listar todos os alunos
                 let alunos = [];
                 try {
-                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
+                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
+            const isAlunosAction = alunosActions.includes(action);
+            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1522,56 +1534,40 @@
             try {
                 showLoading('Alterando permissão...');
 
-                // Buscar dados do usuário com tratamento de erro
-                let user = null;
-                try {
-                    const { data: userData, error: userError } = await supabaseClient
-                        .from('usuarios')
-                        .select('nivel_acesso, nome')
-                        .eq('id', userId)
-                        .maybeSingle();
+                // Buscar dados do usuário do cache (evita problema de RLS)
+                const user = alunosCache.find(a => a.id === userId);
+                const novoNivel = user ? ((user.nivel_acesso || 'usuario') === 'admin' ? 'usuario' : 'admin') : 'admin';
+                const nomeUser = user ? user.nome : 'Usuário';
 
-                    if (userError) {
-                        console.error('[ADMIN] Erro ao buscar usuário:', userError);
-                        // Tentar buscar do cache
-                        user = alunosCache.find(a => a.id === userId);
-                        if (!user) {
-                            throw new Error('Erro ao buscar dados do usuário: ' + userError.message);
-                        }
+                // Tentar via RPC (bypass RLS) - PRIMEIRA OPÇÃO
+                let success = false;
+                try {
+                    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('admin_update_usuario', {
+                        p_user_id: userId,
+                        p_nivel_acesso: novoNivel
+                    });
+
+                    if (rpcError) {
+                        console.warn('[ADMIN] RPC falhou:', rpcError);
                     } else {
-                        user = userData;
+                        success = rpcData === true;
                     }
-                } catch (fetchErr) {
-                    // Fallback: buscar do cache
-                    user = alunosCache.find(a => a.id === userId);
-                    if (!user) throw new Error('Usuário não encontrado no banco nem no cache.');
+                } catch (rpcErr) {
+                    console.warn('[ADMIN] RPC indisponível:', rpcErr);
                 }
 
-                if (!user) {
-                    throw new Error('Usuário não encontrado. Pode ser um problema de permissão (RLS).');
-                }
-
-                const novoNivel = (user.nivel_acesso || 'usuario') === 'admin' ? 'usuario' : 'admin';
-                const nomeUser = user.nome || 'Usuário';
-
-                // Tentar via Edge Function primeiro
-                let result = null;
-                try {
-                    result = await callEdgeFunction('update_usuario', {
-                        nivel_acesso: novoNivel
-                    }, userId);
-                } catch (edgeErr) {
-                    console.warn('[ADMIN] Edge Function falhou, usando fallback direto:', edgeErr.message);
-                }
-
-                // Fallback direto
-                if (!result || !result.success) {
+                // Fallback direto se RPC falhou - SEM .single()!
+                if (!success) {
+                    console.log('[ADMIN] Tentando update direto...');
                     const { error: updateError } = await supabaseClient
                         .from('usuarios')
                         .update({ nivel_acesso: novoNivel })
                         .eq('id', userId);
 
-                    if (updateError) throw updateError;
+                    if (updateError) {
+                        console.error('[ADMIN] Update direto falhou:', updateError);
+                        throw updateError;
+                    }
                 }
 
                 hideLoading();
@@ -1588,31 +1584,12 @@
         // ========== EDITAR ALUNO ==========
         let alunosCache = [];
 
-        async function abrirEditarAluno(id) {
-            let aluno = alunosCache.find(a => a.id === id);
-
-            // Se não encontrar no cache, tentar buscar direto
-            if (!aluno) {
-                console.warn('[ADMIN] Aluno não encontrado no cache, buscando direto...');
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('usuarios')
-                        .select('*')
-                        .eq('id', id)
-                        .maybeSingle();
-
-                    if (error) {
-                        console.error('[ADMIN] Erro ao buscar aluno:', error);
-                    } else if (data) {
-                        aluno = data;
-                    }
-                } catch (e) {
-                    console.error('[ADMIN] Falha ao buscar aluno direto:', e);
-                }
-            }
+        function abrirEditarAluno(id) {
+            // Buscar do cache (evita problema de RLS com .single())
+            const aluno = alunosCache.find(a => a.id === id);
 
             if (!aluno) {
-                showToast('Erro', 'Aluno não encontrado. Tente recarregar a página.', 'error');
+                showToast('Erro', 'Aluno não encontrado no cache. Recarregue a página e tente novamente.', 'error');
                 return;
             }
 
@@ -1633,28 +1610,40 @@
 
             try {
                 const id = document.getElementById('edit-aluno-id').value;
-                const updateData = {
-                    nome: document.getElementById('edit-aluno-nome').value,
-                    email: document.getElementById('edit-aluno-email').value,
-                    telefone: document.getElementById('edit-aluno-telefone').value,
-                    plano: document.getElementById('edit-aluno-plano').value,
-                    status: document.getElementById('edit-aluno-status').value,
-                    nivel_acesso: document.getElementById('edit-aluno-nivel').value
-                };
+                const nome = document.getElementById('edit-aluno-nome').value;
+                const email = document.getElementById('edit-aluno-email').value;
+                const telefone = document.getElementById('edit-aluno-telefone').value;
+                const plano = document.getElementById('edit-aluno-plano').value;
+                const status = document.getElementById('edit-aluno-status').value;
+                const nivel_acesso = document.getElementById('edit-aluno-nivel').value;
 
-                // Tentar via Edge Function primeiro
-                let result = null;
+                // Tentar via RPC (bypass RLS)
+                let success = false;
                 try {
-                    result = await callEdgeFunction('update_usuario_completo', updateData, id);
-                } catch (edgeErr) {
-                    console.warn('[ADMIN] Edge Function falhou, usando fallback direto:', edgeErr.message);
+                    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('admin_update_usuario', {
+                        p_user_id: id,
+                        p_nome: nome,
+                        p_email: email,
+                        p_telefone: telefone,
+                        p_plano: plano,
+                        p_status: status,
+                        p_nivel_acesso: nivel_acesso
+                    });
+
+                    if (rpcError) {
+                        console.warn('[ADMIN] RPC falhou:', rpcError);
+                    } else {
+                        success = rpcData === true;
+                    }
+                } catch (rpcErr) {
+                    console.warn('[ADMIN] RPC indisponível:', rpcErr);
                 }
 
-                // Fallback direto
-                if (!result || !result.success) {
+                // Fallback direto se RPC falhou
+                if (!success) {
                     const { error: updateError } = await supabaseClient
                         .from('usuarios')
-                        .update(updateData)
+                        .update({ nome, email, telefone, plano, status, nivel_acesso })
                         .eq('id', id);
 
                     if (updateError) throw updateError;
@@ -1662,7 +1651,7 @@
 
                 hideLoading();
                 closeModal('editar-aluno');
-                showToast('Sucesso!', 'Aluno atualizado com sucesso!', 'success');
+                showToast('Sucesso!', `${nome} atualizado com sucesso!`, 'success');
                 await loadAlunosAdmin();
                 await loadStatsAdmin();
 
@@ -1690,24 +1679,35 @@
             try {
                 showLoading('Atualizando status...');
 
-                // Tentar via Edge Function primeiro
-                let result = null;
+                // Tentar via RPC (bypass RLS) - PRIMEIRA OPÇÃO
+                let success = false;
                 try {
-                    result = await callEdgeFunction('update_usuario', {
-                        status: novoStatus
-                    }, userId);
-                } catch (edgeErr) {
-                    console.warn('[ADMIN] Edge Function falhou, usando fallback direto:', edgeErr.message);
+                    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('admin_update_usuario', {
+                        p_user_id: userId,
+                        p_status: novoStatus
+                    });
+
+                    if (rpcError) {
+                        console.warn('[ADMIN] RPC falhou:', rpcError);
+                    } else {
+                        success = rpcData === true;
+                    }
+                } catch (rpcErr) {
+                    console.warn('[ADMIN] RPC indisponível:', rpcErr);
                 }
 
-                // Fallback direto
-                if (!result || !result.success) {
+                // Fallback direto se RPC falhou - SEM .single()!
+                if (!success) {
+                    console.log('[ADMIN] Tentando update direto...');
                     const { error: updateError } = await supabaseClient
                         .from('usuarios')
                         .update({ status: novoStatus })
                         .eq('id', userId);
 
-                    if (updateError) throw updateError;
+                    if (updateError) {
+                        console.error('[ADMIN] Update direto falhou:', updateError);
+                        throw updateError;
+                    }
                 }
 
                 hideLoading();
@@ -1748,29 +1748,38 @@ Clique em OK para confirmar.`)) return;
             try {
                 showLoading('Excluindo aluno...');
 
-                // Delete related records first (progress, compras) - with error handling
+                // Tentar via RPC (bypass RLS) - deleta tudo de uma vez
+                let success = false;
                 try {
-                    await supabaseClient.from('progresso_aulas').delete().eq('usuario_id', userId);
-                } catch (err1) {
-                    console.warn('[ADMIN] Erro ao excluir progresso:', err1);
+                    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('admin_delete_usuario', {
+                        p_user_id: userId
+                    });
+
+                    if (rpcError) {
+                        console.warn('[ADMIN] RPC falhou:', rpcError);
+                    } else {
+                        success = rpcData === true;
+                    }
+                } catch (rpcErr) {
+                    console.warn('[ADMIN] RPC indisponível:', rpcErr);
                 }
 
-                try {
-                    await supabaseClient.from('compras_cursos').delete().eq('usuario_id', userId);
-                } catch (err2) {
-                    console.warn('[ADMIN] Erro ao excluir compras:', err2);
-                }
+                // Fallback manual se RPC falhou
+                if (!success) {
+                    // Delete related records first
+                    try {
+                        await supabaseClient.from('progresso_aulas').delete().eq('usuario_id', userId);
+                    } catch (err1) {
+                        console.warn('[ADMIN] Erro ao excluir progresso:', err1);
+                    }
 
-                // Delete user - try Edge Function first
-                let result = null;
-                try {
-                    result = await callEdgeFunction('delete_usuario', {}, userId);
-                } catch (edgeErr) {
-                    console.warn('[ADMIN] Edge Function falhou, usando fallback direto:', edgeErr.message);
-                }
+                    try {
+                        await supabaseClient.from('compras_cursos').delete().eq('usuario_id', userId);
+                    } catch (err2) {
+                        console.warn('[ADMIN] Erro ao excluir compras:', err2);
+                    }
 
-                // Fallback direto
-                if (!result || !result.success) {
+                    // Delete user
                     const { error: deleteError } = await supabaseClient
                         .from('usuarios')
                         .delete()
@@ -1797,7 +1806,10 @@ Clique em OK para confirmar.`)) return;
                 // Usar Edge Function para bypass RLS e listar todas as compras
                 let compras = [];
                 try {
-                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-cursos`, {
+                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
+            const isAlunosAction = alunosActions.includes(action);
+            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
