@@ -208,6 +208,7 @@
         }
     </style>
 
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -1556,63 +1557,7 @@
             openModal('editar-aluno');
         }
 
-        document.getElementById('form-editar-aluno').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            showLoading('Atualizando aluno...');
 
-            try {
-                const id = document.getElementById('edit-aluno-id').value;
-                const nome = document.getElementById('edit-aluno-nome').value;
-                const email = document.getElementById('edit-aluno-email').value;
-                const telefone = document.getElementById('edit-aluno-telefone').value;
-                const plano = document.getElementById('edit-aluno-plano').value;
-                const status = document.getElementById('edit-aluno-status').value;
-                const nivel_acesso = document.getElementById('edit-aluno-nivel').value;
-
-                // Tentar via RPC (bypass RLS)
-                let success = false;
-                try {
-                    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('admin_update_usuario', {
-                        p_user_id: id,
-                        p_nome: nome,
-                        p_email: email,
-                        p_telefone: telefone,
-                        p_plano: plano,
-                        p_status: status,
-                        p_nivel_acesso: nivel_acesso
-                    });
-
-                    if (rpcError) {
-                        console.warn('[ADMIN] RPC falhou:', rpcError);
-                    } else {
-                        success = rpcData === true;
-                    }
-                } catch (rpcErr) {
-                    console.warn('[ADMIN] RPC indisponível:', rpcErr);
-                }
-
-                // Fallback direto se RPC falhou
-                if (!success) {
-                    const { error: updateError } = await supabaseClient
-                        .from('usuarios')
-                        .update({ nome, email, telefone, plano, status, nivel_acesso })
-                        .eq('id', id);
-
-                    if (updateError) throw updateError;
-                }
-
-                hideLoading();
-                closeModal('editar-aluno');
-                showToast('Sucesso!', `${nome} atualizado com sucesso!`, 'success');
-                await loadAlunosAdmin();
-                await loadStatsAdmin();
-
-            } catch (e) {
-                hideLoading();
-                console.error('[ADMIN] Erro ao atualizar aluno:', e);
-                showToast('Erro', e.message || 'Erro ao atualizar aluno', 'error');
-            }
-        });
 
         // ========== MUDAR STATUS ALUNO ==========
         async function mudarStatusAluno(userId, statusAtual) {
@@ -1922,5 +1867,66 @@ Clique em OK para confirmar.`)) return;
 
     
 
+
+    <script>
+        // Event listener para editar aluno - adicionado após modal estar no DOM
+        document.getElementById('form-editar-aluno').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showLoading('Atualizando aluno...');
+
+            try {
+                const id = document.getElementById('edit-aluno-id').value;
+                const nome = document.getElementById('edit-aluno-nome').value;
+                const email = document.getElementById('edit-aluno-email').value;
+                const telefone = document.getElementById('edit-aluno-telefone').value;
+                const plano = document.getElementById('edit-aluno-plano').value;
+                const status = document.getElementById('edit-aluno-status').value;
+                const nivel_acesso = document.getElementById('edit-aluno-nivel').value;
+
+                // Tentar via RPC (bypass RLS)
+                let success = false;
+                try {
+                    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('admin_update_usuario', {
+                        p_user_id: id,
+                        p_nome: nome,
+                        p_email: email,
+                        p_telefone: telefone,
+                        p_plano: plano,
+                        p_status: status,
+                        p_nivel_acesso: nivel_acesso
+                    });
+
+                    if (rpcError) {
+                        console.warn('[ADMIN] RPC falhou:', rpcError);
+                    } else {
+                        success = rpcData === true;
+                    }
+                } catch (rpcErr) {
+                    console.warn('[ADMIN] RPC indisponível:', rpcErr);
+                }
+
+                // Fallback direto se RPC falhou
+                if (!success) {
+                    const { error: updateError } = await supabaseClient
+                        .from('usuarios')
+                        .update({ nome, email, telefone, plano, status, nivel_acesso })
+                        .eq('id', id);
+
+                    if (updateError) throw updateError;
+                }
+
+                hideLoading();
+                closeModal('editar-aluno');
+                showToast('Sucesso!', `${nome} atualizado com sucesso!`, 'success');
+                await loadAlunosAdmin();
+                await loadStatsAdmin();
+
+            } catch (e) {
+                hideLoading();
+                console.error('[ADMIN] Erro ao atualizar aluno:', e);
+                showToast('Erro', e.message || 'Erro ao atualizar aluno', 'error');
+            }
+        });
+    </script>
 </body>
 </html>
