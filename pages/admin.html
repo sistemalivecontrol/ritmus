@@ -1488,6 +1488,9 @@
                     alunos = alunosDirect || [];
                 }
 
+                // Store in cache for edit/delete operations
+                alunosCache = alunos || [];
+
                 const tbody = document.getElementById('alunos-tbody');
                 if (alunos.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum aluno encontrado. Verifique se a Edge Function está configurada.</td></tr>';
