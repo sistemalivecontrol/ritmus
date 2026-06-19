@@ -250,6 +250,7 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -547,9 +548,7 @@
             if (btnText) btnText.textContent = 'Atualizando...';
 
             try {
-                // ESTRATÉGIA: Não reautenticar com signInWithPassword (causa erro 400 em sessão ativa)
-                // Em vez disso, usar updateUser diretamente - o Supabase valida a sessão atual
-
+                // Usar updateUser diretamente - o Supabase valida a sessão atual
                 const { data: userData, error: updateError } = await supabaseClient.auth.updateUser({
                     password: novaSenha
                 });
@@ -557,7 +556,6 @@
                 if (updateError) {
                     console.error('[SCHEILA] Erro updateUser:', updateError);
 
-                    // Se der erro de sessão expirada, informar usuário para fazer login novamente
                     if (updateError.message && updateError.message.includes('session')) {
                         showAlert('error', 'Sessão expirada. Faça login novamente e tente alterar a senha.');
                     } else {
@@ -568,10 +566,7 @@
                     return;
                 }
 
-                // Se chegou aqui, a senha foi alterada com sucesso
-                // O Supabase desloga automaticamente após alterar senha, então precisamos relogar
-
-                // 3. Limpar campos
+                // Limpar campos
                 document.getElementById('senha-atual').value = '';
                 document.getElementById('nova-senha').value = '';
                 document.getElementById('confirmar-senha').value = '';
@@ -668,7 +663,20 @@
                     await supabaseClient.from('usuarios').delete().eq('id', currentUser.id);
                 } catch (e) { console.log('[SCHEILA] Usuário tabela já removido ou erro:', e.message); }
 
-                // 4. Deslogar
+                // 4. Excluir do Authentication do Supabase (e-mail/auth)
+                try {
+                    const { error: authDeleteError } = await supabaseClient.auth.deleteUser();
+                    if (authDeleteError) {
+                        console.error('[SCHEILA] Erro ao excluir do Auth:', authDeleteError);
+                        showAlert('error', 'Conta excluída do banco, mas houve erro ao remover do Auth: ' + authDeleteError.message);
+                    } else {
+                        console.log('[SCHEILA] Usuário excluído do Auth com sucesso');
+                    }
+                } catch (e) {
+                    console.log('[SCHEILA] Erro ao excluir do Auth:', e.message);
+                }
+
+                // 5. Deslogar (limpar sessão local)
                 await supabaseClient.auth.signOut();
 
                 fecharModalExcluir();
