@@ -314,29 +314,10 @@
                 if (currentAuthId) {
                     console.log('[CURSOS] Buscando compras para auth_id:', currentAuthId);
 
-                    // Primeiro, buscar o usuario_id correspondente ao auth_id
-                    let usuarioId = currentAuthId;
-                    try {
-                        const { data: usuarioData, error: usuarioError } = await supabaseClient
-                            .from('usuarios')
-                            .select('id')
-                            .eq('auth_id', currentAuthId)
-                            .single();
-
-                        if (usuarioError) {
-                            console.warn('[CURSOS] Erro ao buscar usuario_id pelo auth_id:', usuarioError);
-                        } else if (usuarioData) {
-                            usuarioId = usuarioData.id;
-                            console.log('[CURSOS] usuario_id encontrado:', usuarioId);
-                        }
-                    } catch (e) {
-                        console.warn('[CURSOS] Falha ao buscar usuario_id:', e);
-                    }
-
                     const { data: compras, error: comprasError } = await supabaseClient
                         .from('compras_cursos')
                         .select('curso_id, status, asaas_invoice_url, asaas_payment_id')
-                        .eq('usuario_id', usuarioId)
+                        .eq('usuario_id', currentAuthId)
                         .in('status', ['pago', 'pendente']);
 
                     if (comprasError) {
