@@ -1493,17 +1493,20 @@
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum aluno encontrado. Verifique se a Edge Function está configurada.</td></tr>';
                 } else {
                     tbody.innerHTML = (alunos || []).map(a => `
-                        <tr>
-                            <td><strong>${a.nome}</strong></td>
-                            <td>${a.email}</td>
-                            <td><span style="color:var(--primary);font-weight:500">${a.plano || '-'}</span></td>
-                            <td><span style="color:${a.status === 'ativo' ? 'var(--success)' : 'var(--warning)'};font-weight:500">${a.status || 'ativo'}</span></td>
-                            <td>${a.created_at ? new Date(a.created_at).toLocaleDateString('pt-BR') : '-'}</td>
-                            <td>
-                                <button class="btn-small btn-edit" onclick="tornarAdmin('${a.id}')">${a.nivel_acesso === 'admin' ? 'Remover Admin' : 'Tornar Admin'}</button>
-                            </td>
-                        </tr>
-                    `).join('');
+                    <tr>
+                        <td><strong>${a.nome}</strong></td>
+                        <td>${a.email}</td>
+                        <td><span style="color:var(--primary);font-weight:500">${a.plano || '-'}</span></td>
+                        <td><span style="color:${a.status === 'ativo' ? 'var(--success)' : (a.status === 'pendente' ? 'var(--warning)' : 'var(--danger)')};font-weight:500">${a.status || 'ativo'}</span></td>
+                        <td>${a.created_at ? new Date(a.created_at).toLocaleDateString('pt-BR') : '-'}</td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="abrirEditarAluno('${a.id}')">✏️ Editar</button>
+                            <button class="btn-small btn-edit" onclick="tornarAdmin('${a.id}')">${a.nivel_acesso === 'admin' ? '👤 Remover Admin' : '👑 Tornar Admin'}</button>
+                            <button class="btn-small btn-edit" onclick="mudarStatusAluno('${a.id}', '${a.status}')" style="background:${a.status === 'ativo' ? '#F59E0B' : '#10B981'};color:white">${a.status === 'ativo' ? '⏳ Desativar' : '✅ Ativar'}</button>
+                            <button class="btn-small btn-delete" onclick="excluirAluno('${a.id}')">🗑️ Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
                 }
 
             } catch (e) {
