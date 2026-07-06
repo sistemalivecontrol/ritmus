@@ -116,6 +116,7 @@
             to { transform: translateX(100%); opacity: 0; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -382,7 +383,7 @@
                         // Construir URL de pagamento: preferir invoice_url, senão usar payment_id
                         let paymentUrl = asaasInvoiceUrl;
                         if (!paymentUrl && asaasPaymentId) {
-                            paymentUrl = `https://sandbox.asaas.com/i/${asaasPaymentId}`;
+                            paymentUrl = `https://www.asaas.com/i/${asaasPaymentId}`;
                         }
                         const hasPaymentUrl = !!paymentUrl;
 
