@@ -250,6 +250,7 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -308,6 +309,7 @@
                             <div class="info">
                                 <h3 id="info-name">Carregando...</h3>
                                 <p id="info-email">...</p>
+                                <p id="info-cpf" style="font-size:13px;color:var(--text-muted);margin-top:4px">CPF: ...</p>
                             </div>
                         </div>
                     </div>
@@ -397,6 +399,12 @@
             });
         });
 
+        function formatarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11) return cpf;
+            return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+        }
+
         async function initMinhaConta() {
             try {
                 // Verificar sessão do Supabase
@@ -448,10 +456,12 @@
 
                 const infoName = document.getElementById('info-name');
                 const infoEmail = document.getElementById('info-email');
+                const infoCpf = document.getElementById('info-cpf');
                 const infoAvatar = document.getElementById('info-avatar');
 
                 if (infoName) infoName.textContent = nome;
                 if (infoEmail) infoEmail.textContent = email;
+                if (infoCpf) infoCpf.textContent = 'CPF: ' + (currentUser.cpf ? formatarCPF(currentUser.cpf) : 'Não informado');
                 if (infoAvatar) infoAvatar.textContent = inicial;
 
                 try {
