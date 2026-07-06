@@ -12,13 +12,13 @@
             --primary: #FF6B35;
             --primary-light: #FF8C5A;
             --primary-dark: #E55A2B;
-            --secondary: #1A1A2E;
-            --bg-dark: #0F0F1A;
-            --bg-card: #1A1A2E;
-            --bg-card-hover: #252540;
+            --secondary: #111111;
+            --bg-dark: #0A0A0A;
+            --bg-card: #111111;
+            --bg-card-hover: #1A1A1A;
             --text: #FFFFFF;
-            --text-muted: #A0A0B8;
-            --text-light: #E0E0E8;
+            --text-muted: #A0A0A8;
+            --text-light: #E0E0E0;
             --border: rgba(255,255,255,0.08);
             --success: #10B981;
             --warning: #F7C948;
@@ -43,7 +43,7 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 1000;
-            background: rgba(15, 15, 26, 0.85);
+            background: rgba(10, 10, 10, 0.9);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             transition: all 0.3s ease;
@@ -168,10 +168,10 @@
         .hero-bg {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                radial-gradient(ellipse at 20% 50%, rgba(255,107,53,0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(247,201,72,0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(255,107,53,0.08) 0%, transparent 50%);
+            background:
+                radial-gradient(ellipse at 15% 40%, rgba(255,107,53,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 15%, rgba(247,201,72,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(255,107,53,0.06) 0%, transparent 50%);
             z-index: 0;
         }
 
@@ -891,10 +891,10 @@
     <script>
         // CURSOS HARDCODED (fallback)
         const CURSOS_HARDCODED = [
-            { id: 'jump-fitness', titulo: 'Jump Fitness', descricao: 'Curso completo de jump com técnicas avançadas, coreografias e treinos de resistência. Queime calorias se divertindo!', preco: 49.90, total_aulas: 12, duracao_total: '8h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Jump+Fitness' },
-            { id: 'danca-fitness', titulo: 'Dança Fitness', descricao: 'Aulas de dança para queimar calorias e se divertir. Samba, funk, salsa e muito mais!', preco: 49.90, total_aulas: 15, duracao_total: '10h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Danca+Fitness' },
-            { id: 'empina-bumbum', titulo: 'Empina Bumbum', descricao: 'Treinos específicos para fortalecimento e hipertrofia dos glúteos. Resultados em 30 dias!', preco: 49.90, total_aulas: 10, duracao_total: '6h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Empina+Bumbum' },
-            { id: 'funcional-total', titulo: 'Funcional Total', descricao: 'Treinamento funcional para todo o corpo, sem equipamentos. Fortaleça e defina!', preco: 39.90, total_aulas: 8, duracao_total: '5h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Funcional+Total' }
+            { id: 'jump-fitness', titulo: 'Jump Fitness', descricao: 'Curso completo de jump com técnicas avançadas, coreografias e treinos de resistência. Queime calorias se divertindo!', preco: 49.90, total_aulas: 12, duracao_total: '8h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Jump+Fitness' },
+            { id: 'danca-fitness', titulo: 'Dança Fitness', descricao: 'Aulas de dança para queimar calorias e se divertir. Samba, funk, salsa e muito mais!', preco: 49.90, total_aulas: 15, duracao_total: '10h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Danca+Fitness' },
+            { id: 'empina-bumbum', titulo: 'Empina Bumbum', descricao: 'Treinos específicos para fortalecimento e hipertrofia dos glúteos. Resultados em 30 dias!', preco: 49.90, total_aulas: 10, duracao_total: '6h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Empina+Bumbum' },
+            { id: 'funcional-total', titulo: 'Funcional Total', descricao: 'Treinamento funcional para todo o corpo, sem equipamentos. Fortaleça e defina!', preco: 39.90, total_aulas: 8, duracao_total: '5h', total_alunos: 0, avaliacao: 5.0, thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Funcional+Total' }
         ];
 
         async function loadCursosLanding() {
@@ -934,7 +934,7 @@
                 return `
                     <div class="curso-card" onclick="location.href='pages/cadastro.html?plano=individual&curso=${curso.id}'">
                         <div class="curso-thumb">
-                            <img src="${curso.thumbnail || 'https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy" onerror="this.src='https://placehold.co/600x400/1A1A2E/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
+                            <img src="${curso.thumbnail || 'https://placehold.co/600x400/111111/FF6B35?text=' + encodeURIComponent(curso.titulo)}" alt="${curso.titulo}" loading="lazy" onerror="this.src='https://placehold.co/600x400/111111/FF6B35?text=' + encodeURIComponent('${curso.titulo}')">
                             <div class="curso-play">
                                 <div class="play-btn">▶</div>
                             </div>
@@ -979,10 +979,10 @@
 
                 if (error || !cursos || cursos.length === 0) {
                     const cursosFallback = [
-                        { id: 'jump-fitness', titulo: 'Jump Fitness', descricao: 'Curso completo de jump com técnicas avançadas.', preco: 49.90, total_aulas: 12, duracao_total: '8h', thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Jump+Fitness', gratuito: false },
-                        { id: 'danca-fitness', titulo: 'Dança Fitness', descricao: 'Aulas de dança para queimar calorias e se divertir.', preco: 49.90, total_aulas: 15, duracao_total: '10h', thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Danca+Fitness', gratuito: false },
-                        { id: 'empina-bumbum', titulo: 'Empina Bumbum', descricao: 'Treinos específicos para fortalecimento dos glúteos.', preco: 49.90, total_aulas: 10, duracao_total: '6h', thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Empina+Bumbum', gratuito: false },
-                        { id: 'funcional-total', titulo: 'Funcional Total', descricao: 'Treinamento funcional para todo o corpo.', preco: 39.90, total_aulas: 8, duracao_total: '5h', thumbnail: 'https://placehold.co/600x400/1A1A2E/FF6B35?text=Funcional+Total', gratuito: false }
+                        { id: 'jump-fitness', titulo: 'Jump Fitness', descricao: 'Curso completo de jump com técnicas avançadas.', preco: 49.90, total_aulas: 12, duracao_total: '8h', thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Jump+Fitness', gratuito: false },
+                        { id: 'danca-fitness', titulo: 'Dança Fitness', descricao: 'Aulas de dança para queimar calorias e se divertir.', preco: 49.90, total_aulas: 15, duracao_total: '10h', thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Danca+Fitness', gratuito: false },
+                        { id: 'empina-bumbum', titulo: 'Empina Bumbum', descricao: 'Treinos específicos para fortalecimento dos glúteos.', preco: 49.90, total_aulas: 10, duracao_total: '6h', thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Empina+Bumbum', gratuito: false },
+                        { id: 'funcional-total', titulo: 'Funcional Total', descricao: 'Treinamento funcional para todo o corpo.', preco: 39.90, total_aulas: 8, duracao_total: '5h', thumbnail: 'https://placehold.co/600x400/111111/FF6B35?text=Funcional+Total', gratuito: false }
                     ];
                     renderPrecosCursos(cursosFallback);
                     return;
