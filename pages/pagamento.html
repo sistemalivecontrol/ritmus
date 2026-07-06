@@ -199,6 +199,7 @@
     </style>
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -211,7 +212,6 @@
         <div class="payment-container">
             <!-- Resumo do Curso -->
             <div class="payment-summary">
-                <div class="test-badge">🧪 Ambiente de Teste (Sandbox)</div>
                 <h2>📚 Resumo da Compra</h2>
 
                 <div class="course-preview" id="course-preview">
@@ -402,35 +402,7 @@
             }
         }
 
-        // Gerar CPF válido para testes (sandbox)
-        function gerarCPFTeste() {
-            // Gerar 9 dígitos aleatórios (inteiros, sem decimais)
-            let n = '';
-            for (let i = 0; i < 9; i++) {
-                n += Math.floor(Math.random() * 10).toString();
-            }
-
-            let d1 = 0, d2 = 0;
-            for (let i = 0; i < 9; i++) {
-                d1 += parseInt(n.charAt(i)) * (10 - i);
-                d2 += parseInt(n.charAt(i)) * (11 - i);
-            }
-            d1 = 11 - (d1 % 11);
-            if (d1 >= 10) d1 = 0;
-            d2 += d1 * 2;
-            d2 = 11 - (d2 % 11);
-            if (d2 >= 10) d2 = 0;
-            return n + d1 + d2;
-        }
-
-        // Validar CPF básico
-        function validarCPF(cpf) {
-            if (!cpf || cpf.length !== 11) return false;
-            if (/^(\d)\1{10}$/.test(cpf)) return false; // Todos iguais
-            return true;
-        }
-
-        async function iniciarPagamento() {
+                        async function iniciarPagamento() {
             if (!cursoData || !currentUser) return;
 
             const btn = document.getElementById('btn-pagar');
@@ -440,13 +412,17 @@
             try {
                 console.log('[SCHEILA] Criando cobrança no Asaas...');
 
-                // Verificar/gerar CPF
+                // Usar CPF do usuário (obrigatório em produção)
                 let cpf = currentUser.cpf || '';
-                if (!cpf || !validarCPF(cpf.replace(/\D/g, ''))) {
-                    console.log('[SCHEILA] CPF inválido ou vazio, gerando CPF de teste para sandbox...');
-                    cpf = gerarCPFTeste();
-                    showToast('ℹ️ CPF de Teste', 'Usando CPF gerado para ambiente sandbox: ' + cpf, 'warning');
+                cpf = cpf.replace(/\D/g, '');
+                if (cpf.length !== 11) {
+                    hideLoading();
+                    btn.disabled = false;
+                    btn.innerHTML = '💳 Pagar Agora';
+                    showToast('Erro', 'CPF inválido. Atualize seu CPF em Minha Conta.', 'error');
+                    return;
                 }
+                console.log('[SCHEILA] CPF do usuário:', cpf);
 
                 // Limpar CPF (apenas números)
                 cpf = cpf.replace(/\D/g, '');
