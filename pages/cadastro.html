@@ -165,20 +165,21 @@
                 btn.textContent = 'Criando conta...';
                 if (typeof showLoading === 'function') showLoading('Criando sua conta...');
 
-                // Validar CPF
-                if (cpf.length !== 11) {
-                    btn.disabled = false;
-                    btn.textContent = 'Criar Conta Grátis';
-                    if (typeof hideLoading === 'function') hideLoading();
-                    if (typeof showToast === 'function') showToast('Erro', 'CPF inválido. Digite um CPF válido.', 'error');
-                    return;
-                }
-
                 try {
+                    // Validar CPF
+                    var cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+                    if (cpf.length !== 11) {
+                        btn.disabled = false;
+                        btn.textContent = 'Criar Conta Grátis';
+                        if (typeof hideLoading === 'function') hideLoading();
+                        if (typeof showToast === 'function') showToast('Erro', 'CPF inválido. Digite um CPF válido.', 'error');
+                        return;
+                    }
+
                     var nome = document.getElementById('nome').value.trim();
                     var email = document.getElementById('email').value.trim().toLowerCase();
                     var telefone = document.getElementById('telefone').value.replace(/\D/g, '');
-                    var cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+                    // cpf já foi validado acima
                     var senha = document.getElementById('senha').value;
 
                     console.log('[RITMUS] Iniciando cadastro...');
