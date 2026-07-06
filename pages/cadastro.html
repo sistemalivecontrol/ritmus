@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/svg+xml" href="../images/favicon-scheila.png">
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -37,6 +38,10 @@
                     <div class="form-group">
                         <label for="telefone">WhatsApp</label>
                         <input type="tel" id="telefone" required placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="cpf" required placeholder="000.000.000-00" maxlength="14">
                     </div>
                     <div class="form-group">
                         <label for="senha">Senha</label>
@@ -88,10 +93,20 @@
             });
 
             function initCadastro() {
+                // Máscara telefone
                 document.getElementById('telefone').addEventListener('input', function(e) {
                     var v = e.target.value.replace(/\D/g, '');
                     v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
                     v = v.replace(/(\d{5})(\d)/, '$1-$2');
+                    e.target.value = v;
+                });
+                // Máscara CPF
+                document.getElementById('cpf').addEventListener('input', function(e) {
+                    var v = e.target.value.replace(/\D/g, '');
+                    if (v.length > 11) v = v.substring(0, 11);
+                    v = v.replace(/^(\d{3})(\d)/, '$1.$2');
+                    v = v.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+                    v = v.replace(/\.(\d{3})(\d)/, '.$1-$2');
                     e.target.value = v;
                 });
                 document.getElementById('form-cadastro').addEventListener('submit', handleCadastro);
@@ -150,10 +165,20 @@
                 btn.textContent = 'Criando conta...';
                 if (typeof showLoading === 'function') showLoading('Criando sua conta...');
 
+                // Validar CPF
+                if (cpf.length !== 11) {
+                    btn.disabled = false;
+                    btn.textContent = 'Criar Conta Grátis';
+                    if (typeof hideLoading === 'function') hideLoading();
+                    if (typeof showToast === 'function') showToast('Erro', 'CPF inválido. Digite um CPF válido.', 'error');
+                    return;
+                }
+
                 try {
                     var nome = document.getElementById('nome').value.trim();
                     var email = document.getElementById('email').value.trim().toLowerCase();
                     var telefone = document.getElementById('telefone').value.replace(/\D/g, '');
+                    var cpf = document.getElementById('cpf').value.replace(/\D/g, '');
                     var senha = document.getElementById('senha').value;
 
                     console.log('[RITMUS] Iniciando cadastro...');
@@ -191,6 +216,7 @@
                             nome: nome,
                             email: email,
                             telefone: telefone,
+                            cpf: cpf,
                             plano: 'teste',
                             status: 'ativo',
                             nivel_acesso: 'usuario'
