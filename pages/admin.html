@@ -1507,10 +1507,7 @@
                 // Usar Edge Function para bypass RLS e listar TODOS os alunos (ativos e pendentes)
                 let alunos = [];
                 try {
-                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
-            const isAlunosAction = alunosActions.includes(action);
-            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-alunos`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1582,10 +1579,7 @@
                 // Tentar Edge Function primeiro
                 let compras = [];
                 try {
-                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
-            const isAlunosAction = alunosActions.includes(action);
-            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-alunos`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1751,10 +1745,7 @@
                 // Usar Edge Function para bypass RLS e listar todos os alunos
                 let alunos = [];
                 try {
-                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
-            const isAlunosAction = alunosActions.includes(action);
-            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-alunos`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2041,10 +2032,7 @@ Clique em OK para confirmar.`)) return;
                 // Usar Edge Function para bypass RLS e listar todas as compras
                 let compras = [];
                 try {
-                    const alunosActions = ['list_alunos', 'update_usuario', 'update_usuario_completo', 'delete_usuario', 'list_compras', 'check_compra', 'insert_compra', 'update_compra'];
-            const isAlunosAction = alunosActions.includes(action);
-            const functionName = isAlunosAction ? 'scheilaalmeida-admin-alunos' : 'scheilaalmeida-admin-cursos';
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-admin-alunos`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
