@@ -207,7 +207,6 @@
             border-radius: var(--radius-sm);
         }
     </style>
-
 </head>
 <body>
     <nav class="navbar">
@@ -580,6 +579,16 @@
                         <input type="number" id="edit-curso-ordem">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duração Total</label>
+                        <input type="text" id="edit-curso-duracao" placeholder="Ex: 8h">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Aulas (estimado)</label>
+                        <input type="number" id="edit-curso-total-aulas" value="0">
+                    </div>
+                </div>
                 <div class="form-group">
                     <label>Thumbnail (URL)</label>
                     <input type="url" id="edit-curso-thumbnail">
@@ -950,6 +959,8 @@
             document.getElementById('edit-curso-descricao').value = curso.descricao || '';
             document.getElementById('edit-curso-preco').value = curso.preco;
             document.getElementById('edit-curso-ordem').value = curso.ordem || 0;
+            document.getElementById('edit-curso-duracao').value = curso.duracao_total || '';
+            document.getElementById('edit-curso-total-aulas').value = curso.total_aulas || 0;
             document.getElementById('edit-curso-thumbnail').value = curso.thumbnail || '';
             document.getElementById('edit-curso-ativo').checked = curso.ativo;
             document.getElementById('edit-curso-gratuito').checked = curso.gratuito || false;
@@ -969,6 +980,8 @@
                     descricao: document.getElementById('edit-curso-descricao').value,
                     preco: parseFloat(document.getElementById('edit-curso-preco').value),
                     ordem: parseInt(document.getElementById('edit-curso-ordem').value) || 0,
+                    duracao_total: document.getElementById('edit-curso-duracao').value,
+                    total_aulas: parseInt(document.getElementById('edit-curso-total-aulas').value) || 0,
                     thumbnail: document.getElementById('edit-curso-thumbnail').value,
                     ativo: document.getElementById('edit-curso-ativo').checked,
                     gratuito: document.getElementById('edit-curso-gratuito').checked
