@@ -206,7 +206,224 @@
             border: none;
             border-radius: var(--radius-sm);
         }
-    </style>
+    
+        /* ===== IMAGE PICKER / GALLERY ===== */
+        .image-picker-container {
+            position: relative;
+        }
+        .image-picker-preview {
+            width: 100%;
+            height: 160px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-input);
+            overflow: hidden;
+            position: relative;
+        }
+        .image-picker-preview:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.05);
+        }
+        .image-picker-preview.has-image {
+            border-style: solid;
+            border-color: var(--primary);
+        }
+        .image-picker-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .image-picker-preview .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            z-index: 1;
+        }
+        .image-picker-preview .placeholder .icon {
+            font-size: 32px;
+        }
+        .image-picker-preview .placeholder span {
+            font-size: 13px;
+        }
+        .image-picker-preview .change-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2;
+        }
+        .image-picker-preview:hover .change-overlay {
+            opacity: 1;
+        }
+        .image-picker-preview .change-overlay span {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .image-picker-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .image-picker-actions button {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .image-picker-actions button:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .image-picker-actions button.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .image-picker-actions button.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== IMAGE GALLERY MODAL ===== */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        @media(max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 16/9;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .gallery-item:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+        .gallery-item.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.3);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .gallery-item .check {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .gallery-item.selected .check {
+            opacity: 1;
+        }
+        .gallery-item .delete-btn {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            background: var(--danger);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .gallery-item:hover .delete-btn {
+            opacity: 1;
+        }
+        .gallery-item .delete-btn:hover {
+            background: #DC2626;
+        }
+        .gallery-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        .gallery-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 16px;
+        }
+        .gallery-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.05);
+        }
+        .gallery-upload-area .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .gallery-upload-area p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .gallery-upload-area input[type="file"] {
+            display: none;
+        }
+        .gallery-loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+</style>
+
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -422,8 +639,25 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Thumbnail (URL da imagem)</label>
-                    <input type="url" id="curso-thumbnail" placeholder="https://...">
+                    <label>Thumbnail</label>
+                    <div class="image-picker-container">
+                        <div class="image-picker-preview" id="curso-image-preview" onclick="openImageGallery('curso')">
+                            <div class="placeholder" id="curso-image-placeholder">
+                                <span class="icon">🖼️</span>
+                                <span>Clique para selecionar uma imagem</span>
+                            </div>
+                            <img id="curso-image-img" style="display:none">
+                            <div class="change-overlay" id="curso-image-overlay" style="display:none">
+                                <span>🖼️ Trocar Imagem</span>
+                            </div>
+                        </div>
+                        <div class="image-picker-actions">
+                            <button type="button" onclick="event.stopPropagation(); openImageGallery('curso')">📁 Galeria</button>
+                            <button type="button" class="primary" onclick="event.stopPropagation(); document.getElementById('curso-file-input').click()">📤 Upload</button>
+                        </div>
+                        <input type="file" id="curso-file-input" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'curso')">
+                        <input type="hidden" id="curso-thumbnail" value="">
+                    </div>
                 </div>
                 <div style="display:flex;gap:24px;margin-bottom:16px">
                     <div style="display:flex;align-items:center;gap:8px">
@@ -590,8 +824,25 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Thumbnail (URL)</label>
-                    <input type="url" id="edit-curso-thumbnail">
+                    <label>Thumbnail</label>
+                    <div class="image-picker-container">
+                        <div class="image-picker-preview" id="edit-curso-image-preview" onclick="openImageGallery('edit-curso')">
+                            <div class="placeholder" id="edit-curso-image-placeholder">
+                                <span class="icon">🖼️</span>
+                                <span>Clique para selecionar uma imagem</span>
+                            </div>
+                            <img id="edit-curso-image-img" style="display:none">
+                            <div class="change-overlay" id="edit-curso-image-overlay" style="display:none">
+                                <span>🖼️ Trocar Imagem</span>
+                            </div>
+                        </div>
+                        <div class="image-picker-actions">
+                            <button type="button" onclick="event.stopPropagation(); openImageGallery('edit-curso')">📁 Galeria</button>
+                            <button type="button" class="primary" onclick="event.stopPropagation(); document.getElementById('edit-curso-file-input').click()">📤 Upload</button>
+                        </div>
+                        <input type="file" id="edit-curso-file-input" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'edit-curso')">
+                        <input type="hidden" id="edit-curso-thumbnail" value="">
+                    </div>
                 </div>
                 <div style="display:flex;gap:24px;margin-bottom:16px">
                     <div style="display:flex;align-items:center;gap:8px">
@@ -672,6 +923,10 @@
 
         function closeModal(tipo) {
             document.getElementById('modal-' + tipo).classList.remove('active');
+            // Reset image preview when closing edit modal without saving
+            if (tipo === 'editar-curso') {
+                setTimeout(() => updateImagePreview('edit-curso', ''), 300);
+            }
         }
 
         // ========== FALLBACK: Usa supabaseClient direto (sem CORS) ==========
@@ -941,6 +1196,7 @@
                 closeModal('curso');
                 showToast('Sucesso!', 'Curso cadastrado com sucesso!', 'success');
                 this.reset();
+                updateImagePreview('curso', '');
                 await loadCursosAdmin();
                 await loadStatsAdmin();
 
@@ -961,9 +1217,11 @@
             document.getElementById('edit-curso-ordem').value = curso.ordem || 0;
             document.getElementById('edit-curso-duracao').value = curso.duracao_total || '';
             document.getElementById('edit-curso-total-aulas').value = curso.total_aulas || 0;
-            document.getElementById('edit-curso-thumbnail').value = curso.thumbnail || '';
             document.getElementById('edit-curso-ativo').checked = curso.ativo;
             document.getElementById('edit-curso-gratuito').checked = curso.gratuito || false;
+
+            // Set image preview
+            updateImagePreview('edit-curso', curso.thumbnail || '');
 
             openModal('editar-curso');
         }
@@ -1820,6 +2078,253 @@ Clique em OK para confirmar.`)) return;
                 showToast('Erro', e.message || 'Erro ao cancelar', 'error');
             }
         }
+
+        // ============================================================
+        // IMAGE PICKER / GALLERY SYSTEM
+        // ============================================================
+        let galeriaImagens = [];
+        let imagemSelecionada = null;
+        let galeriaTarget = ''; // 'curso' ou 'edit-curso'
+
+        // Storage bucket config
+        const STORAGE_BUCKET = 'cursos-thumbnails';
+
+        function updateImagePreview(target, url) {
+            const preview = document.getElementById(target + '-image-preview');
+            const placeholder = document.getElementById(target + '-image-placeholder');
+            const img = document.getElementById(target + '-image-img');
+            const overlay = document.getElementById(target + '-image-overlay');
+            const input = document.getElementById(target === 'curso' ? 'curso-thumbnail' : 'edit-curso-thumbnail');
+
+            if (url) {
+                img.src = url;
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+                overlay.style.display = 'flex';
+                preview.classList.add('has-image');
+                input.value = url;
+            } else {
+                img.src = '';
+                img.style.display = 'none';
+                placeholder.style.display = 'flex';
+                overlay.style.display = 'none';
+                preview.classList.remove('has-image');
+                input.value = '';
+            }
+        }
+
+        async function openImageGallery(target) {
+            galeriaTarget = target;
+            imagemSelecionada = null;
+            openModal('galeria');
+            await carregarGaleria();
+        }
+
+        async function carregarGaleria() {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = '<div class="gallery-loading">📂 Carregando imagens...</div>';
+
+            try {
+                // Try Edge Function first
+                let imagens = [];
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-storage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify({ action: 'list_images' })
+                    });
+                    if (response.ok) {
+                        const result = await response.json();
+                        imagens = result.data || [];
+                    }
+                } catch (edgeErr) {
+                    console.warn('[GALERIA] Edge Function indisponível, usando fallback direto:', edgeErr.message);
+                }
+
+                // Fallback: list directly from Supabase Storage
+                if (imagens.length === 0) {
+                    const { data: files, error } = await supabaseClient
+                        .storage
+                        .from(STORAGE_BUCKET)
+                        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+
+                    if (error) throw error;
+
+                    imagens = (files || [])
+                        .filter(f => f.name && !f.name.endsWith('/'))
+                        .map(file => {
+                            const { data: { publicUrl } } = supabaseClient
+                                .storage
+                                .from(STORAGE_BUCKET)
+                                .getPublicUrl(file.name);
+                            return {
+                                name: file.name,
+                                url: publicUrl,
+                                created_at: file.created_at
+                            };
+                        });
+                }
+
+                galeriaImagens = imagens;
+
+                if (imagens.length === 0) {
+                    grid.innerHTML = `
+                        <div class="gallery-empty">
+                            <div style="font-size:32px;margin-bottom:8px">📭</div>
+                            <p>Nenhuma imagem na galeria ainda.</p>
+                            <p style="font-size:12px;margin-top:8px">Faça upload da primeira imagem acima ☝️</p>
+                        </div>`;
+                    return;
+                }
+
+                grid.innerHTML = imagens.map((img, idx) => `
+                    <div class="gallery-item" data-idx="${idx}" data-url="${img.url}" onclick="selecionarImagem(${idx}, '${img.url}')">
+                        <img src="${img.url}" alt="${img.name}" loading="lazy">
+                        <div class="check">✓</div>
+                        <button type="button" class="delete-btn" onclick="event.stopPropagation(); deletarImagem('${img.name}', ${idx})" title="Deletar">🗑️</button>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error('[GALERIA] Erro ao carregar:', e);
+                grid.innerHTML = `
+                    <div class="gallery-empty">
+                        <div style="font-size:32px;margin-bottom:8px">⚠️</div>
+                        <p>Erro ao carregar imagens</p>
+                        <p style="font-size:12px;margin-top:8px">${e.message}</p>
+                    </div>`;
+            }
+        }
+
+        function selecionarImagem(idx, url) {
+            imagemSelecionada = url;
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`.gallery-item[data-idx="${idx}"]`).classList.add('selected');
+        }
+
+        function confirmarSelecaoImagem() {
+            if (!imagemSelecionada) {
+                showToast('Aviso', 'Selecione uma imagem primeiro', 'warning');
+                return;
+            }
+            updateImagePreview(galeriaTarget, imagemSelecionada);
+            closeModal('galeria');
+        }
+
+        async function handleImageUpload(input, target) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Erro', 'Imagem muito grande. Máximo 5MB.', 'error');
+                return;
+            }
+
+            showLoading('Fazendo upload da imagem...');
+
+            try {
+                const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${file.name.split('.').pop()}`;
+
+                // Upload directly to Supabase Storage
+                const { data, error } = await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .upload(filename, file, {
+                        contentType: file.type,
+                        upsert: true
+                    });
+
+                if (error) throw error;
+
+                // Get public URL
+                const { data: { publicUrl } } = supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .getPublicUrl(filename);
+
+                updateImagePreview(target, publicUrl);
+                hideLoading();
+                showToast('Sucesso!', 'Imagem enviada com sucesso!', 'success');
+
+            } catch (e) {
+                hideLoading();
+                console.error('[UPLOAD] Erro:', e);
+                showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
+            }
+
+            input.value = '';
+        }
+
+        async function handleGalleryUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Erro', 'Imagem muito grande. Máximo 5MB.', 'error');
+                return;
+            }
+
+            showLoading('Fazendo upload...');
+
+            try {
+                const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${file.name.split('.').pop()}`;
+
+                const { data, error } = await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .upload(filename, file, {
+                        contentType: file.type,
+                        upsert: true
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .getPublicUrl(filename);
+
+                hideLoading();
+                showToast('Sucesso!', 'Imagem enviada!', 'success');
+                await carregarGaleria();
+
+                // Auto-select the newly uploaded image
+                selecionarImagem(galeriaImagens.length, publicUrl);
+
+            } catch (e) {
+                hideLoading();
+                showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
+            }
+
+            input.value = '';
+        }
+
+        async function deletarImagem(filename, idx) {
+            if (!confirm('Tem certeza que deseja deletar esta imagem?')) return;
+
+            showLoading('Deletando...');
+            try {
+                const { error } = await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .remove([filename]);
+
+                if (error) throw error;
+
+                hideLoading();
+                showToast('Sucesso!', 'Imagem deletada', 'success');
+                await carregarGaleria();
+            } catch (e) {
+                hideLoading();
+                showToast('Erro', e.message || 'Erro ao deletar', 'error');
+            }
+        }
+
     </script>
 <!-- MODAL EDITAR ALUNO -->
     <div class="modal-overlay" id="modal-editar-aluno">
@@ -1940,5 +2445,30 @@ Clique em OK para confirmar.`)) return;
             }
         });
     </script>
+
+    <!-- MODAL GALERIA DE IMAGENS -->
+    <div class="modal-overlay" id="modal-galeria">
+        <div class="modal" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeModal('galeria')">×</button>
+            <h2>🖼️ Galeria de Imagens</h2>
+
+            <div class="gallery-upload-area" onclick="document.getElementById('gallery-file-input').click()">
+                <div class="icon">📤</div>
+                <p>Clique para fazer upload de uma nova imagem</p>
+                <p style="font-size:11px;color:var(--text-muted)">JPG, PNG, WEBP até 5MB</p>
+                <input type="file" id="gallery-file-input" accept="image/*" onchange="handleGalleryUpload(this)">
+            </div>
+
+            <div id="gallery-grid" class="gallery-grid">
+                <div class="gallery-loading">📂 Carregando imagens...</div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end">
+                <button type="button" class="btn-ghost" onclick="closeModal('galeria')">Cancelar</button>
+                <button type="button" class="btn-submit" onclick="confirmarSelecaoImagem()">✅ Selecionar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
