@@ -865,6 +865,76 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="../js/config.js"></script>
     <script>
+        // ===== FALLBACK LOADING FUNCTIONS (Ritmus) =====
+        function showLoading(msg) {
+            // Try to find existing loading overlay or create one
+            let overlay = document.getElementById('loading-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'loading-overlay';
+                overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+                overlay.innerHTML = `
+                    <div style="background:var(--bg-card,#1a1a2e);border:1px solid var(--border,#333);border-radius:12px;padding:32px;text-align:center;max-width:300px;">
+                        <div style="width:40px;height:40px;border:3px solid rgba(255,107,53,0.2);border-top-color:#FF6B35;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
+                        <p style="margin:0;color:var(--text,#fff);font-size:14px;">${msg || 'Carregando...'}</p>
+                    </div>
+                `;
+                // Add spin animation if not present
+                if (!document.getElementById('spin-anim')) {
+                    const style = document.createElement('style');
+                    style.id = 'spin-anim';
+                    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+                    document.head.appendChild(style);
+                }
+                document.body.appendChild(overlay);
+            } else {
+                overlay.style.display = 'flex';
+                const p = overlay.querySelector('p');
+                if (p) p.textContent = msg || 'Carregando...';
+            }
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        // ===== FALLBACK TOAST FUNCTION (Ritmus) =====
+        function showToast(title, message, type) {
+            // Remove existing toasts
+            const existing = document.querySelectorAll('.ritmus-toast');
+            existing.forEach(t => t.remove());
+
+            const toast = document.createElement('div');
+            toast.className = 'ritmus-toast';
+            const colors = {
+                success: '#10B981',
+                error: '#EF4444',
+                warning: '#F59E0B',
+                info: '#3B82F6'
+            };
+            const color = colors[type] || colors.info;
+            toast.style.cssText = `position:fixed;top:20px;right:20px;z-index:999999;background:var(--bg-card,#1a1a2e);border:1px solid ${color};border-radius:12px;padding:16px 20px;min-width:280px;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.3);animation:slideIn 0.3s ease;`;
+            toast.innerHTML = `
+                <div style="display:flex;align-items:flex-start;gap:12px;">
+                    <span style="font-size:20px;">${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;color:${color};font-size:14px;margin-bottom:4px;">${title}</div>
+                        <div style="color:var(--text-muted,#888);font-size:13px;line-height:1.4;">${message}</div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;line-height:1;">×</button>
+                </div>
+            `;
+            if (!document.getElementById('toast-anim')) {
+                const style = document.createElement('style');
+                style.id = 'toast-anim';
+                style.textContent = '@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }';
+                document.head.appendChild(style);
+            }
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
         let currentUser = null;
         let cursosCache = [];
         let aulasCache = [];
