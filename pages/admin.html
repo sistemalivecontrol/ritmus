@@ -423,7 +423,6 @@
         }
 </style>
 
-<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -2183,27 +2182,51 @@ Clique em OK para confirmar.`)) return;
             grid.innerHTML = '<div class="gallery-loading">📂 Carregando imagens...</div>';
 
             try {
-                // List directly from Supabase Storage (no Edge Function needed for listing)
-                const { data: files, error } = await supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+                let imagens = [];
 
-                if (error) throw error;
-
-                const imagens = (files || [])
-                    .filter(f => f.name && !f.name.endsWith('/'))
-                    .map(file => {
-                        const { data: { publicUrl } } = supabaseClient
-                            .storage
-                            .from(STORAGE_BUCKET)
-                            .getPublicUrl(file.name);
-                        return {
-                            name: file.name,
-                            url: publicUrl,
-                            created_at: file.created_at
-                        };
+                // Try Edge Function first (service role key, bypass RLS)
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-storage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify({ action: 'list_images' })
                     });
+                    if (response.ok) {
+                        const result = await response.json();
+                        imagens = result.data || [];
+                        console.log('[GALERIA] Loaded via Edge Function:', imagens.length, 'images');
+                    }
+                } catch (edgeErr) {
+                    console.warn('[GALERIA] Edge Function failed, using direct fallback:', edgeErr.message);
+                }
+
+                // Fallback: list directly from Supabase Storage
+                if (imagens.length === 0) {
+                    const { data: files, error } = await supabaseClient
+                        .storage
+                        .from(STORAGE_BUCKET)
+                        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+
+                    if (error) throw error;
+
+                    imagens = (files || [])
+                        .filter(f => f.name && !f.name.endsWith('/'))
+                        .map(file => {
+                            const { data: { publicUrl } } = supabaseClient
+                                .storage
+                                .from(STORAGE_BUCKET)
+                                .getPublicUrl(file.name);
+                            return {
+                                name: file.name,
+                                url: publicUrl,
+                                created_at: file.created_at
+                            };
+                        });
+                    console.log('[GALERIA] Loaded via direct:', imagens.length, 'images');
+                }
 
                 galeriaImagens = imagens;
 
@@ -2217,13 +2240,17 @@ Clique em OK para confirmar.`)) return;
                     return;
                 }
 
-                grid.innerHTML = imagens.map((img, idx) => `
+                grid.innerHTML = imagens.map((img, idx) => {
+                    // Add cache-busting query param to force fresh image
+                    const cacheBust = `?t=${Date.now()}`;
+                    const imgUrl = img.url.includes("?") ? img.url + `&cb=${Date.now()}` : img.url + cacheBust;
+                    return `
                     <div class="gallery-item" data-idx="${idx}" data-url="${img.url}" onclick="selecionarImagem(${idx}, '${img.url}')">
-                        <img src="${img.url}" alt="${img.name}" loading="lazy">
+                        <img src="${imgUrl}" alt="${img.name}" loading="lazy">
                         <div class="check">✓</div>
                         <button type="button" class="delete-btn" onclick="event.stopPropagation(); deletarImagem('${img.name}', ${idx})" title="Deletar">🗑️</button>
                     </div>
-                `).join('');
+                `}).join('');
 
             } catch (e) {
                 console.error('[GALERIA] Erro ao carregar:', e);
@@ -2365,27 +2392,46 @@ Clique em OK para confirmar.`)) return;
             if (item) item.style.opacity = '0.5';
 
             try {
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .remove([filename]);
+                console.log('[DELETE] Attempting to delete via Edge Function:', filename);
 
-                if (error) {
-                    console.error('[DELETE] Supabase error:', error);
-                    throw new Error(error.message || 'Erro ao deletar no storage');
+                // Use Edge Function with service role key (bypass RLS)
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-storage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({ action: 'delete_image', filename: filename })
+                });
+
+                const result = await response.json();
+                console.log('[DELETE] Edge Function response:', result);
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Erro ao deletar');
                 }
 
-                console.log('[DELETE] Success:', data);
                 showToast('Sucesso!', 'Imagem deletada', 'success');
 
                 // Remove from DOM immediately for better UX
-                if (item) item.remove();
+                if (item) {
+                    item.style.transition = 'all 0.3s';
+                    item.style.transform = 'scale(0)';
+                    item.style.opacity = '0';
+                    setTimeout(() => item.remove(), 300);
+                }
 
                 // Refresh gallery after a short delay
-                setTimeout(() => carregarGaleria(), 500);
+                setTimeout(() => {
+                    galeriaImagens = [];
+                    carregarGaleria();
+                }, 800);
             } catch (e) {
                 console.error('[DELETE] Catch error:', e);
-                if (item) item.style.opacity = '1';
+                if (item) {
+                    item.style.opacity = '1';
+                    item.style.transform = 'scale(1)';
+                }
                 showToast('Erro', e.message || 'Erro ao deletar', 'error');
             }
         }
