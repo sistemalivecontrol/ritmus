@@ -423,6 +423,7 @@
         }
 </style>
 
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -2240,7 +2241,8 @@ Clique em OK para confirmar.`)) return;
             document.querySelectorAll('.gallery-item').forEach(item => {
                 item.classList.remove('selected');
             });
-            document.querySelector(`.gallery-item[data-idx="${idx}"]`).classList.add('selected');
+            const item = document.querySelector(`.gallery-item[data-idx="${idx}"]`);
+            if (item) item.classList.add('selected');
         }
 
         function confirmarSelecaoImagem() {
@@ -2261,12 +2263,15 @@ Clique em OK para confirmar.`)) return;
                 return;
             }
 
+            console.log('[UPLOAD] Starting upload for target:', target, 'file:', file.name, 'size:', file.size);
+
             const btn = input.closest('.image-picker-container')?.querySelector('.btn-submit, .btn-add, button');
             const originalText = btn?.textContent;
             if (btn) btn.textContent = '⏳ Enviando...';
 
             try {
                 const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${file.name.split('.').pop()}`;
+                console.log('[UPLOAD] Filename:', filename);
 
                 // Upload directly to Supabase Storage
                 const { data, error } = await supabaseClient
@@ -2277,7 +2282,12 @@ Clique em OK para confirmar.`)) return;
                         upsert: true
                     });
 
-                if (error) throw error;
+                if (error) {
+                    console.error('[UPLOAD] Supabase error:', error);
+                    throw new Error(error.message || 'Erro no upload');
+                }
+
+                console.log('[UPLOAD] Success:', data);
 
                 // Get public URL
                 const { data: { publicUrl } } = supabaseClient
@@ -2285,11 +2295,12 @@ Clique em OK para confirmar.`)) return;
                     .from(STORAGE_BUCKET)
                     .getPublicUrl(filename);
 
+                console.log('[UPLOAD] Public URL:', publicUrl);
                 updateImagePreview(target, publicUrl);
                 showToast('Sucesso!', 'Imagem enviada com sucesso!', 'success');
 
             } catch (e) {
-                console.error('[UPLOAD] Erro:', e);
+                console.error('[UPLOAD] Catch error:', e);
                 showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
             } finally {
                 if (btn) btn.textContent = originalText || '📤 Upload';
@@ -2332,8 +2343,11 @@ Clique em OK para confirmar.`)) return;
                 showToast('Sucesso!', 'Imagem enviada!', 'success');
                 await carregarGaleria();
 
-                // Auto-select the newly uploaded image
-                selecionarImagem(galeriaImagens.length, publicUrl);
+                // Auto-select the newly uploaded image (last index = length - 1)
+                const lastIdx = galeriaImagens.length - 1;
+                if (lastIdx >= 0) {
+                    selecionarImagem(lastIdx, publicUrl);
+                }
 
             } catch (e) {
                 showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
@@ -2351,16 +2365,26 @@ Clique em OK para confirmar.`)) return;
             if (item) item.style.opacity = '0.5';
 
             try {
-                const { error } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .storage
                     .from(STORAGE_BUCKET)
                     .remove([filename]);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('[DELETE] Supabase error:', error);
+                    throw new Error(error.message || 'Erro ao deletar no storage');
+                }
 
+                console.log('[DELETE] Success:', data);
                 showToast('Sucesso!', 'Imagem deletada', 'success');
-                await carregarGaleria();
+
+                // Remove from DOM immediately for better UX
+                if (item) item.remove();
+
+                // Refresh gallery after a short delay
+                setTimeout(() => carregarGaleria(), 500);
             } catch (e) {
+                console.error('[DELETE] Catch error:', e);
                 if (item) item.style.opacity = '1';
                 showToast('Erro', e.message || 'Erro ao deletar', 'error');
             }
