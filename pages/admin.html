@@ -422,6 +422,7 @@
             color: var(--text-muted);
         }
 </style>
+
 </head>
 <body>
     <nav class="navbar">
@@ -2181,48 +2182,27 @@ Clique em OK para confirmar.`)) return;
             grid.innerHTML = '<div class="gallery-loading">📂 Carregando imagens...</div>';
 
             try {
-                // Try Edge Function first
-                let imagens = [];
-                try {
-                    const response = await fetch(`${SUPABASE_URL}/functions/v1/scheilaalmeida-storage`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                        },
-                        body: JSON.stringify({ action: 'list_images' })
+                // List directly from Supabase Storage (no Edge Function needed for listing)
+                const { data: files, error } = await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+
+                if (error) throw error;
+
+                const imagens = (files || [])
+                    .filter(f => f.name && !f.name.endsWith('/'))
+                    .map(file => {
+                        const { data: { publicUrl } } = supabaseClient
+                            .storage
+                            .from(STORAGE_BUCKET)
+                            .getPublicUrl(file.name);
+                        return {
+                            name: file.name,
+                            url: publicUrl,
+                            created_at: file.created_at
+                        };
                     });
-                    if (response.ok) {
-                        const result = await response.json();
-                        imagens = result.data || [];
-                    }
-                } catch (edgeErr) {
-                    console.warn('[GALERIA] Edge Function indisponível, usando fallback direto:', edgeErr.message);
-                }
-
-                // Fallback: list directly from Supabase Storage
-                if (imagens.length === 0) {
-                    const { data: files, error } = await supabaseClient
-                        .storage
-                        .from(STORAGE_BUCKET)
-                        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
-
-                    if (error) throw error;
-
-                    imagens = (files || [])
-                        .filter(f => f.name && !f.name.endsWith('/'))
-                        .map(file => {
-                            const { data: { publicUrl } } = supabaseClient
-                                .storage
-                                .from(STORAGE_BUCKET)
-                                .getPublicUrl(file.name);
-                            return {
-                                name: file.name,
-                                url: publicUrl,
-                                created_at: file.created_at
-                            };
-                        });
-                }
 
                 galeriaImagens = imagens;
 
@@ -2281,7 +2261,9 @@ Clique em OK para confirmar.`)) return;
                 return;
             }
 
-            showLoading('Fazendo upload da imagem...');
+            const btn = input.closest('.image-picker-container')?.querySelector('.btn-submit, .btn-add, button');
+            const originalText = btn?.textContent;
+            if (btn) btn.textContent = '⏳ Enviando...';
 
             try {
                 const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${file.name.split('.').pop()}`;
@@ -2304,13 +2286,13 @@ Clique em OK para confirmar.`)) return;
                     .getPublicUrl(filename);
 
                 updateImagePreview(target, publicUrl);
-                hideLoading();
                 showToast('Sucesso!', 'Imagem enviada com sucesso!', 'success');
 
             } catch (e) {
-                hideLoading();
                 console.error('[UPLOAD] Erro:', e);
                 showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
+            } finally {
+                if (btn) btn.textContent = originalText || '📤 Upload';
             }
 
             input.value = '';
@@ -2325,7 +2307,9 @@ Clique em OK para confirmar.`)) return;
                 return;
             }
 
-            showLoading('Fazendo upload...');
+            const uploadArea = input.closest('.gallery-upload-area');
+            const originalHTML = uploadArea?.innerHTML;
+            if (uploadArea) uploadArea.innerHTML = '<div style="font-size:28px">⏳</div><p>Enviando...</p>';
 
             try {
                 const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${file.name.split('.').pop()}`;
@@ -2345,7 +2329,6 @@ Clique em OK para confirmar.`)) return;
                     .from(STORAGE_BUCKET)
                     .getPublicUrl(filename);
 
-                hideLoading();
                 showToast('Sucesso!', 'Imagem enviada!', 'success');
                 await carregarGaleria();
 
@@ -2353,8 +2336,9 @@ Clique em OK para confirmar.`)) return;
                 selecionarImagem(galeriaImagens.length, publicUrl);
 
             } catch (e) {
-                hideLoading();
                 showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
+            } finally {
+                if (uploadArea && originalHTML) uploadArea.innerHTML = originalHTML;
             }
 
             input.value = '';
@@ -2363,7 +2347,9 @@ Clique em OK para confirmar.`)) return;
         async function deletarImagem(filename, idx) {
             if (!confirm('Tem certeza que deseja deletar esta imagem?')) return;
 
-            showLoading('Deletando...');
+            const item = document.querySelector(`.gallery-item[data-idx="${idx}"]`);
+            if (item) item.style.opacity = '0.5';
+
             try {
                 const { error } = await supabaseClient
                     .storage
@@ -2372,11 +2358,10 @@ Clique em OK para confirmar.`)) return;
 
                 if (error) throw error;
 
-                hideLoading();
                 showToast('Sucesso!', 'Imagem deletada', 'success');
                 await carregarGaleria();
             } catch (e) {
-                hideLoading();
+                if (item) item.style.opacity = '1';
                 showToast('Erro', e.message || 'Erro ao deletar', 'error');
             }
         }
