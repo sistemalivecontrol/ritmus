@@ -421,8 +421,57 @@
             padding: 40px;
             color: var(--text-muted);
         }
+
+        /* ===== IMAGE CROP MODAL ===== */
+        .crop-container {
+            position: relative;
+            width: 100%;
+            max-height: 400px;
+            overflow: hidden;
+            border-radius: var(--radius-sm);
+            background: #000;
+            margin-bottom: 16px;
+        }
+        .crop-container img {
+            width: 100%;
+            display: block;
+            cursor: grab;
+        }
+        .crop-container img:active {
+            cursor: grabbing;
+        }
+        .crop-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.5);
+        }
+        .crop-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 2px solid #FF6B35;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+        .crop-frame::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px dashed rgba(255,255,255,0.3);
+        }
+        .crop-hint {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
 </style>
 
+<base target="_blank">
 </head>
 <body>
     <nav class="navbar">
@@ -2290,49 +2339,8 @@ Clique em OK para confirmar.`)) return;
                 return;
             }
 
-            console.log('[UPLOAD] Starting upload for target:', target, 'file:', file.name, 'size:', file.size);
-
-            const btn = input.closest('.image-picker-container')?.querySelector('.btn-submit, .btn-add, button');
-            const originalText = btn?.textContent;
-            if (btn) btn.textContent = '⏳ Enviando...';
-
-            try {
-                const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${file.name.split('.').pop()}`;
-                console.log('[UPLOAD] Filename:', filename);
-
-                // Upload directly to Supabase Storage
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .upload(filename, file, {
-                        contentType: file.type,
-                        upsert: true
-                    });
-
-                if (error) {
-                    console.error('[UPLOAD] Supabase error:', error);
-                    throw new Error(error.message || 'Erro no upload');
-                }
-
-                console.log('[UPLOAD] Success:', data);
-
-                // Get public URL
-                const { data: { publicUrl } } = supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .getPublicUrl(filename);
-
-                console.log('[UPLOAD] Public URL:', publicUrl);
-                updateImagePreview(target, publicUrl);
-                showToast('Sucesso!', 'Imagem enviada com sucesso!', 'success');
-
-            } catch (e) {
-                console.error('[UPLOAD] Catch error:', e);
-                showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
-            } finally {
-                if (btn) btn.textContent = originalText || '📤 Upload';
-            }
-
+            // Open crop modal instead of direct upload
+            openCropModal(file, target);
             input.value = '';
         }
 
@@ -2345,43 +2353,10 @@ Clique em OK para confirmar.`)) return;
                 return;
             }
 
-            const uploadArea = input.closest('.gallery-upload-area');
-            const originalHTML = uploadArea?.innerHTML;
-            if (uploadArea) uploadArea.innerHTML = '<div style="font-size:28px">⏳</div><p>Enviando...</p>';
-
-            try {
-                const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${file.name.split('.').pop()}`;
-
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .upload(filename, file, {
-                        contentType: file.type,
-                        upsert: true
-                    });
-
-                if (error) throw error;
-
-                const { data: { publicUrl } } = supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .getPublicUrl(filename);
-
-                showToast('Sucesso!', 'Imagem enviada!', 'success');
-                await carregarGaleria();
-
-                // Auto-select the newly uploaded image (last index = length - 1)
-                const lastIdx = galeriaImagens.length - 1;
-                if (lastIdx >= 0) {
-                    selecionarImagem(lastIdx, publicUrl);
-                }
-
-            } catch (e) {
-                showToast('Erro', 'Erro ao fazer upload: ' + e.message, 'error');
-            } finally {
-                if (uploadArea && originalHTML) uploadArea.innerHTML = originalHTML;
-            }
-
+            // Open crop modal for gallery upload too
+            // After crop, it will upload and then select
+            cropState.galleryUpload = true;
+            openCropModal(file, 'gallery');
             input.value = '';
         }
 
@@ -2433,6 +2408,240 @@ Clique em OK para confirmar.`)) return;
                     item.style.transform = 'scale(1)';
                 }
                 showToast('Erro', e.message || 'Erro ao deletar', 'error');
+            }
+        }
+
+
+        // ============================================================
+        // IMAGE CROP SYSTEM
+        // ============================================================
+        let cropState = {
+            file: null,
+            target: '',
+            img: null,
+            offsetX: 0,
+            offsetY: 0,
+            isDragging: false,
+            startX: 0,
+            startY: 0,
+            naturalWidth: 0,
+            naturalHeight: 0
+        };
+
+        function openCropModal(file, target) {
+            cropState.file = file;
+            cropState.target = target;
+            cropState.offsetX = 0;
+            cropState.offsetY = 0;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('crop-img');
+                img.src = e.target.result;
+                img.onload = function() {
+                    cropState.naturalWidth = img.naturalWidth;
+                    cropState.naturalHeight = img.naturalHeight;
+                    // Center the image initially
+                    const container = document.getElementById('crop-container');
+                    const containerRect = container.getBoundingClientRect();
+                    const containerRatio = containerRect.width / (containerRect.width * 9 / 16);
+                    const imgRatio = cropState.naturalWidth / cropState.naturalHeight;
+
+                    if (imgRatio > 16/9) {
+                        // Image is wider than 16:9, center horizontally
+                        cropState.offsetX = -(cropState.naturalWidth - (cropState.naturalHeight * 16 / 9)) / 2;
+                    } else {
+                        // Image is taller than 16:9, center vertically
+                        cropState.offsetY = -(cropState.naturalHeight - (cropState.naturalWidth * 9 / 16)) / 2;
+                    }
+                    updateCropPosition();
+                    setupCropDrag();
+                };
+            };
+            reader.readAsDataURL(file);
+            openModal('crop');
+        }
+
+        function updateCropPosition() {
+            const img = document.getElementById('crop-img');
+            if (!img) return;
+            img.style.transform = `translate(${cropState.offsetX}px, ${cropState.offsetY}px)`;
+        }
+
+        function setupCropDrag() {
+            const img = document.getElementById('crop-img');
+            const container = document.getElementById('crop-container');
+            if (!img || !container) return;
+
+            // Remove old listeners
+            img.onmousedown = null;
+            img.ontouchstart = null;
+
+            img.onmousedown = function(e) {
+                e.preventDefault();
+                cropState.isDragging = true;
+                cropState.startX = e.clientX - cropState.offsetX;
+                cropState.startY = e.clientY - cropState.offsetY;
+                img.style.cursor = 'grabbing';
+            };
+
+            img.ontouchstart = function(e) {
+                e.preventDefault();
+                cropState.isDragging = true;
+                const touch = e.touches[0];
+                cropState.startX = touch.clientX - cropState.offsetX;
+                cropState.startY = touch.clientY - cropState.offsetY;
+            };
+
+            document.onmousemove = function(e) {
+                if (!cropState.isDragging) return;
+                e.preventDefault();
+                cropState.offsetX = e.clientX - cropState.startX;
+                cropState.offsetY = e.clientY - cropState.startY;
+                constrainCropPosition();
+                updateCropPosition();
+            };
+
+            document.ontouchmove = function(e) {
+                if (!cropState.isDragging) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                cropState.offsetX = touch.clientX - cropState.startX;
+                cropState.offsetY = touch.clientY - cropState.startY;
+                constrainCropPosition();
+                updateCropPosition();
+            };
+
+            document.onmouseup = function() {
+                cropState.isDragging = false;
+                if (img) img.style.cursor = 'grab';
+            };
+
+            document.ontouchend = function() {
+                cropState.isDragging = false;
+            };
+        }
+
+        function constrainCropPosition() {
+            const container = document.getElementById('crop-container');
+            if (!container) return;
+            const containerRect = container.getBoundingClientRect();
+            const containerW = containerRect.width;
+            const containerH = containerW * 9 / 16; // 16:9 frame
+
+            // Calculate displayed image dimensions
+            const imgRatio = cropState.naturalWidth / cropState.naturalHeight;
+            const containerRatio = 16 / 9;
+            let displayW, displayH;
+
+            if (imgRatio > containerRatio) {
+                // Image wider than container, fills height
+                displayH = containerH;
+                displayW = displayH * imgRatio;
+            } else {
+                // Image taller than container, fills width
+                displayW = containerW;
+                displayH = displayW / imgRatio;
+            }
+
+            // Constrain offsets so the frame is always covered
+            const minX = containerW - displayW;
+            const minY = containerH - displayH;
+
+            cropState.offsetX = Math.min(0, Math.max(minX, cropState.offsetX));
+            cropState.offsetY = Math.min(0, Math.max(minY, cropState.offsetY));
+        }
+
+        async function confirmarCrop() {
+            showLoading('Processando imagem...');
+
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Target dimensions: 1280x720 (16:9 HD)
+                const targetW = 1280;
+                const targetH = 720;
+                canvas.width = targetW;
+                canvas.height = targetH;
+
+                const img = document.getElementById('crop-img');
+                const container = document.getElementById('crop-container');
+                const containerRect = container.getBoundingClientRect();
+                const containerW = containerRect.width;
+                const containerH = containerW * 9 / 16;
+
+                // Calculate scale factor between displayed image and natural size
+                const imgRatio = cropState.naturalWidth / cropState.naturalHeight;
+                const containerRatio = 16 / 9;
+                let displayW, displayH, scale;
+
+                if (imgRatio > containerRatio) {
+                    displayH = containerH;
+                    displayW = displayH * imgRatio;
+                    scale = cropState.naturalHeight / displayH;
+                } else {
+                    displayW = containerW;
+                    displayH = displayW / imgRatio;
+                    scale = cropState.naturalWidth / displayW;
+                }
+
+                // Calculate source coordinates
+                const srcX = -cropState.offsetX * scale;
+                const srcY = -cropState.offsetY * scale;
+                const srcW = containerW * scale;
+                const srcH = containerH * scale;
+
+                // Draw cropped image
+                ctx.drawImage(
+                    img,
+                    srcX, srcY, srcW, srcH,
+                    0, 0, targetW, targetH
+                );
+
+                // Convert to blob
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.92);
+                });
+
+                if (!blob) throw new Error('Erro ao processar imagem');
+
+                // Upload the cropped image
+                const filename = `curso_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.jpg`;
+                const { data, error } = await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .upload(filename, blob, {
+                        contentType: 'image/jpeg',
+                        upsert: true
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .getPublicUrl(filename);
+
+                if (cropState.target === 'gallery') {
+                    // Gallery upload: refresh and select
+                    await carregarGaleria();
+                    const lastIdx = galeriaImagens.length - 1;
+                    if (lastIdx >= 0) {
+                        selecionarImagem(lastIdx, publicUrl);
+                    }
+                } else {
+                    // Normal upload: update preview
+                    updateImagePreview(cropState.target, publicUrl);
+                }
+                hideLoading();
+                closeModal('crop');
+                showToast('Sucesso!', 'Imagem cortada e enviada!', 'success');
+
+            } catch (e) {
+                hideLoading();
+                console.error('[CROP] Erro:', e);
+                showToast('Erro', 'Erro ao processar imagem: ' + e.message, 'error');
             }
         }
 
@@ -2577,6 +2786,27 @@ Clique em OK para confirmar.`)) return;
             <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end">
                 <button type="button" class="btn-ghost" onclick="closeModal('galeria')">Cancelar</button>
                 <button type="button" class="btn-submit" onclick="confirmarSelecaoImagem()">✅ Selecionar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL CROP IMAGEM -->
+    <div class="modal-overlay" id="modal-crop">
+        <div class="modal" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeModal('crop')">×</button>
+            <h2>✂️ Ajustar Imagem</h2>
+            <p class="crop-hint">📱 Arraste a imagem para posicionar a área desejada dentro da moldura</p>
+
+            <div class="crop-container" id="crop-container">
+                <img id="crop-img" src="" alt="Preview" draggable="false">
+                <div class="crop-overlay"></div>
+                <div class="crop-frame"></div>
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <button type="button" class="btn-ghost" onclick="closeModal('crop')">Cancelar</button>
+                <button type="button" class="btn-submit" onclick="confirmarCrop()">✅ Cortar e Usar</button>
             </div>
         </div>
     </div>
