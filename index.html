@@ -322,7 +322,7 @@
         .hero-logo-container {
             position: relative;
             width: 100%;
-            max-width: 260px;
+            max-width: 540px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -343,12 +343,13 @@
 
         .hero-logo-img {
             width: 100%;
-            max-width: 240px;
+            max-width: 520px;
             height: auto;
             filter: drop-shadow(0 8px 40px rgba(255,107,53,0.25)) drop-shadow(0 4px 20px rgba(0,0,0,0.3));
             animation: floatLogo 6s ease-in-out infinite;
             position: relative;
             z-index: 2;
+            border-radius: 16px;
         }
 
         @keyframes pulseGlow {
@@ -715,7 +716,7 @@
             .hero-left { display: flex; flex-direction: column; align-items: center; }
             .hero-subtitle { max-width: 100%; }
             .hero-visual { order: -1; min-height: 280px; }
-            .hero-logo-img { max-width: 160px; }
+            .hero-logo-img { max-width: 100%; }
             .steps-grid { grid-template-columns: 1fr; }
             .footer-grid { grid-template-columns: 1fr; gap: 40px; }
         }
@@ -747,9 +748,10 @@
             .btn-hero, .btn-ghost { width: 100%; justify-content: center; }
             .section-header h2 { font-size: 1.8rem; }
 
-            .hero-logo-img { max-width: 130px; }
+            .hero-logo-img { max-width: 100%; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <!-- Navbar -->
@@ -802,7 +804,7 @@
             <div class="hero-visual">
                 <div class="hero-logo-container">
                     <div class="hero-logo-glow"></div>
-                    <img src="logo-scheila.png" class="hero-logo-img" alt="Scheila Almeida">
+                    <img src="images/fotocapa.png" class="hero-logo-img" alt="Scheila Almeida" style="max-width:100%;width:100%;border-radius:16px;">
                 </div>
             </div>
         </div>
