@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0A0A0A">
     <title>Scheila Almeida - Cursos Fitness Online</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -165,15 +166,7 @@
             overflow: hidden;
         }
 
-        .hero-bg {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background:
-                radial-gradient(ellipse at 15% 40%, rgba(255,107,53,0.12) 0%, transparent 55%),
-                radial-gradient(ellipse at 85% 15%, rgba(247,201,72,0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 80%, rgba(255,107,53,0.06) 0%, transparent 50%);
-            z-index: 0;
-        }
+
 
         .hero-content {
             max-width: 1300px;
@@ -365,6 +358,12 @@
             object-fit: cover;
             object-position: center top;
             display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
 
         .hero-fullimage-overlay-bottom {
@@ -372,11 +371,11 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 75%;
+            height: 70%;
             background: linear-gradient(to top, 
-                rgba(10, 10, 10, 1) 0%, 
-                rgba(10, 10, 10, 0.85) 25%, 
-                rgba(10, 10, 10, 0.5) 55%, 
+                rgba(10, 10, 10, 0.98) 0%, 
+                rgba(10, 10, 10, 0.75) 20%, 
+                rgba(10, 10, 10, 0.35) 50%, 
                 transparent 100%);
             pointer-events: none;
         }
@@ -386,10 +385,10 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 180px;
+            height: 120px;
             background: linear-gradient(to bottom, 
-                rgba(10, 10, 10, 0.75) 0%, 
-                rgba(10, 10, 10, 0.3) 50%, 
+                rgba(10, 10, 10, 0.5) 0%, 
+                rgba(10, 10, 10, 0.15) 60%, 
                 transparent 100%);
             pointer-events: none;
         }
@@ -873,6 +872,8 @@
             .section-header h2 { font-size: 1.8rem; }
         }
     </style>
+
+<base target="_blank">
 </head>
 <body>
     <!-- Navbar -->
@@ -897,7 +898,7 @@
     <!-- Hero Section - Full Width Image Background -->
     <section class="hero hero-fullimage">
         <div class="hero-fullimage-bg">
-            <img src="images/foto.png" alt="Scheila Almeida - Escolha seu Ritmo" class="hero-fullimage-img">
+            <img src="images/foto3.png" alt="Scheila Almeida - Escolha seu Ritmo" class="hero-fullimage-img">
             <div class="hero-fullimage-overlay-bottom"></div>
             <div class="hero-fullimage-overlay-top"></div>
         </div>
@@ -1175,7 +1176,7 @@
     <!-- PROTEÇÃO: Garantir que links internos abram na mesma aba -->
     <script>
     (function() {
-        // Remover target="_blank" de todos os links internos do site
+        // Remover de todos os links internos do site
         document.addEventListener('DOMContentLoaded', function() {
             // Função para corrigir links
             function fixLinks() {
@@ -1185,7 +1186,7 @@
                     // Se for link interno (não começa com http ou é do mesmo domínio)
                     if (href && !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
                         link.removeAttribute('target');
-                        // Prevenir que JS externo adicione target="_blank"
+                        // Prevenir que JS externo adicione
                         link.addEventListener('click', function(e) {
                             link.removeAttribute('target');
                         }, true);
